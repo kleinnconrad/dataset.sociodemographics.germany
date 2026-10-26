@@ -40,7 +40,7 @@ from datetime import date, datetime, timezone
 from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar, Optional, Union
 from urllib.parse import urljoin
 
 from collectors.base import Collector, CollectorResult, RunContext
@@ -100,12 +100,33 @@ class GenesisDatabase:
     token_env: str
     password_env: str
 
-    def credentials(self) -> dict[str, str]:
+    def credentials(self) -> dict[str, Union[str, bytes]]:
         """Returns the credential headers, or an empty mapping if no token is set."""
         token = os.getenv(self.token_env, "").strip()
         if not token:
             return {}
-        return {"username": token, "password": os.getenv(self.password_env, "").strip()}
+        return {"username": header_value(token), "password": header_value(os.getenv(self.password_env, "").strip())}
+
+
+def header_value(text: str) -> Union[str, bytes]:
+    """Prepares a text, e.g. a password, for an HTTP header.
+
+    Header values are ASCII. Other characters (e.g. "§" or umlauts in a password) are sent as
+    ISO-8859-1 bytes, the encoding in which Java servers such as the GENESIS web services decode
+    header bytes, or as UTF-8 if the text has characters outside ISO-8859-1.
+
+    Args:
+        text: The text.
+
+    Returns:
+        Union[str, bytes]: The text itself if it is ASCII, else its bytes.
+    """
+    if text.isascii():
+        return text
+    try:
+        return text.encode("iso-8859-1")
+    except UnicodeEncodeError:
+        return text.encode("utf-8")
 
 
 GENESIS_DATABASES: dict[str, GenesisDatabase] = {
@@ -464,7 +485,8 @@ def genesis_table(response: Response) -> str:
 # Fetching
 # ---------------------------------------------------------------------------
 
-def _post_genesis(web: WebClient, url: str, form: dict[str, str], headers: Optional[dict[str, str]]) -> Response:
+def _post_genesis(web: WebClient, url: str, form: dict[str, str],
+                  headers: Optional[dict[str, Union[str, bytes]]]) -> Response:
     """Sends a request to a GENESIS web service; HTTP 401 (no or invalid account) becomes a GenesisError."""
     try:
         return web.post(url, form, headers=headers, timeout_s=REQUEST_TIMEOUT_S)

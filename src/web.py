@@ -26,7 +26,7 @@ import re
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
 import httpx
@@ -361,7 +361,8 @@ class WebClient:
             if remaining > 0:
                 self.sleep(remaining)
 
-    def _send(self, url: str, params: Optional[Mapping[str, Any]], headers: Optional[Mapping[str, str]],
+    def _send(self, url: str, params: Optional[Mapping[str, Any]],
+              headers: Optional[Mapping[str, Union[str, bytes]]],
               timeout_s: Optional[float] = None, data: Optional[Mapping[str, Any]] = None) -> httpx.Response:
         """Sends one request after waiting for the host interval: GET, or POST if form data is given.
 
@@ -517,7 +518,7 @@ class WebClient:
         url: str,
         data: Mapping[str, Any],
         *,
-        headers: Optional[Mapping[str, str]] = None,
+        headers: Optional[Mapping[str, Union[str, bytes]]] = None,
         timeout_s: Optional[float] = None,
     ) -> Response:
         """Sends form data to a documented API with the fetch rules (no robots.txt check).
@@ -541,7 +542,7 @@ class WebClient:
         url: str,
         *,
         params: Optional[Mapping[str, Any]] = None,
-        headers: Optional[Mapping[str, str]] = None,
+        headers: Optional[Mapping[str, Union[str, bytes]]] = None,
         respect_robots: bool = True,
         timeout_s: Optional[float] = None,
         data: Optional[Mapping[str, Any]] = None,

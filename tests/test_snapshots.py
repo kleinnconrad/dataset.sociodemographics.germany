@@ -3,14 +3,17 @@ import io
 import zipfile
 from datetime import date, timedelta
 
+import httpx
 import pytest
 from openpyxl import Workbook
 
 from collectors.snapshots import (
+    GENESIS_DATABASES,
     FilesCollector,
     GenesisCollector,
     GenesisError,
     genesis_table,
+    header_value,
     parse_csv,
     parse_genesis_flat,
     parse_html_table,
@@ -22,7 +25,7 @@ from providers import load_providers
 from schema import SnapshotRecord
 from snapshots import load_snapshot_config, parse_snapshot
 from state import CollectorEntry
-from web import Response
+from web import Response, WebClient
 
 FIXTURE = PROVIDERS_FIXTURE.parent / "snapshots.toml"
 PROVIDERS = {provider.id for provider in load_providers(PROVIDERS_FIXTURE)}
@@ -293,3 +296,20 @@ def test_items_of_a_refusing_source_are_not_requested_again_for_a_while(fake_web
     retry = files_collector().collect(make_ctx(started=RUN_STARTED + timedelta(days=31)),
                                       CollectorEntry(first_run=ctx.today, cursor=first.cursor))
     assert retry.counters["new"] == 1 and retry.cursor["blocked"] == {}
+
+
+def test_credentials_with_characters_outside_ascii_are_sent_as_header_bytes(monkeypatch) -> None:
+    monkeypatch.setenv("REGIONALSTATISTIK_TOKEN", "nutzer")
+    monkeypatch.setenv("REGIONALSTATISTIK_PASSWORD", "pass§wört")
+    headers = GENESIS_DATABASES["regionalstatistik"].credentials()
+    assert headers == {"username": "nutzer", "password": "pass§wört".encode("iso-8859-1")}
+    assert header_value("pass€") == "pass€".encode("utf-8")
+    seen: dict[str, bytes] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["password"] = {name.lower(): value for name, value in request.headers.raw}[b"password"]
+        return httpx.Response(200, json={"Status": {"Code": 0}, "Object": {"Content": "Arbeitslose"}})
+
+    client = WebClient(transport=httpx.MockTransport(handler), sleep=lambda seconds: None)
+    client.post("https://www.regionalstatistik.de/genesisws/rest/2020/metadata/table", {"name": "x"}, headers=headers)
+    assert seen["password"] == b"pass\xa7w\xf6rt"

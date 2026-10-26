@@ -610,7 +610,7 @@ The input `collectors` restricts a manual run to a comma-separated list of colle
 | `FULL_CHECK_DAYS` | 28 | Days after which a catalog entry is downloaded again although Eurostat reports its dataset as unchanged |
 | `COLLECTORS` | all | Comma-separated list of collectors to run |
 
-**Secrets.** The GENESIS databases need free accounts. Set the values as repository secrets under **Settings > Secrets and variables > Actions**; `pipeline.yml` and `source_review.yml` pass them to the collectors. Without them the GENESIS tables are counted as `no_access` and all other sources are collected.
+**Secrets.** The GENESIS databases need free accounts. Set the values as repository secrets under **Settings > Secrets and variables > Actions**; `pipeline.yml` and `source_review.yml` pass them to the collectors. Without them the GENESIS tables are counted as `no_access` and all other sources are collected. The values are sent in the request headers `username` and `password`; characters outside ASCII (e.g. `§` or umlauts in a password) are sent as ISO-8859-1.
 
 | Secret | Account | Content |
 |---|---|---|
