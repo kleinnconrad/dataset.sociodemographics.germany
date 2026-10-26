@@ -1,22 +1,25 @@
 """
-Writes the entries of the series catalog and the region registry to their datasets.
+Writes the entries of the series catalog, the region registry and the snapshot configuration to their datasets.
 
-``config/series.toml`` and ``config/regions.toml`` are the slowly changing dimensions of the
-dataset: every entry is written when it appears and again, with the next revision, when one of
-its fields changes, so that the definition of a concept or region at time t can be
-reconstructed from the data alone. The collectors send no requests.
+``config/series.toml``, ``config/regions.toml`` and ``config/snapshots.toml`` are the slowly
+changing dimensions of the dataset: every entry is written when it appears and again, with
+the next revision, when one of its fields changes, so that the definition of a concept,
+region or snapshot item at time t can be reconstructed from the data alone. The collectors
+send no requests.
 """
 import logging
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from catalog import CONFIG_PATH as CATALOG_PATH
 from catalog import CatalogEntry, load_catalog
 from collectors.base import Collector, CollectorResult, RunContext
 from regions import CONFIG_PATH as REGIONS_PATH
 from regions import Region, load_regions
-from schema import RecordBase, RegionRecord, SeriesCatalogRecord
+from schema import RecordBase, RegionRecord, SeriesCatalogRecord, SnapshotCatalogRecord
+from snapshots import CONFIG_PATH as SNAPSHOTS_PATH
+from snapshots import SnapshotSource, load_snapshot_config
 from state import CollectorEntry, content_hash
 
 logger = logging.getLogger(__name__)
@@ -57,6 +60,23 @@ def region_fields(region: Region) -> dict[str, Any]:
         "geo": region.geo, "name": region.name, "level": region.level, "parent": region.parent,
         "state": region.state, "nuts_versions": list(region.nuts_versions), "added": region.added,
         "removed": region.removed, "removed_reason": region.removed_reason,
+    }
+
+
+def snapshot_fields(source: SnapshotSource) -> dict[str, Any]:
+    """Returns the dataset fields of a snapshot entry.
+
+    Args:
+        source: The snapshot entry.
+
+    Returns:
+        dict: The fields of a ``SnapshotCatalogRecord`` without the common fields.
+    """
+    return {
+        "snapshot_id": source.id, "name": source.name, "topic": source.topic, "provider": source.provider,
+        "format": source.format, "address": source.address, "geo_scheme": source.geo_scheme,
+        "archive": source.archive, "added": source.added, "removed": source.removed,
+        "removed_reason": source.removed_reason,
     }
 
 
@@ -145,3 +165,34 @@ class RegionsCollector(Collector):
         items = [(region.geo, region_fields(region)) for region in load_regions(self._regions_path)]
         return CollectorResult(counters=emit_changes(ctx, "regions", items, RegionRecord,
                                                      REPOSITORY_URL + "config/regions.toml"))
+
+
+class SnapshotCatalogCollector(Collector):
+    """Writes new and changed entries of the snapshot configuration."""
+    name = "snapshot_catalog"
+    datasets = ("snapshot_catalog",)
+
+    def __init__(self, config_path: Path = SNAPSHOTS_PATH, providers: Optional[set[str]] = None) -> None:
+        """Initializes the collector.
+
+        Args:
+            config_path: The snapshot configuration.
+            providers: Provider ids; None reads them from ``config/providers.toml``.
+        """
+        self._config_path = config_path
+        self._providers = providers
+
+    def collect(self, ctx: RunContext, entry: CollectorEntry) -> CollectorResult:
+        """Emits a record for every snapshot entry that is new or changed.
+
+        Args:
+            ctx: The run context.
+            entry: Run history of this collector.
+
+        Returns:
+            CollectorResult: Counters.
+        """
+        sources, _excluded = load_snapshot_config(self._config_path, self._providers)
+        items = [(source.id, snapshot_fields(source)) for source in sources]
+        return CollectorResult(counters=emit_changes(ctx, "snapshot_catalog", items, SnapshotCatalogRecord,
+                                                     REPOSITORY_URL + "config/snapshots.toml"))

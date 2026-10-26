@@ -1,12 +1,13 @@
 # German Sociodemographics Dataset
 [![CI](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml)
 
-A dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs twice a week (Tuesdays and Fridays) for at most 30 minutes. It collects official statistics on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing and the regional labour market, for Germany, its 16 states, 38 government regions and 400 districts. All series are stored as vintages in partitioned JSON files in this repository, so that every past state of a revised series can be reconstructed. A monthly review checks every data source and proposes changes as a pull request.
+A dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs twice a week (Tuesdays and Fridays) for at most 30 minutes. Its main purpose is to persist volatile data: tables and files that their sources overwrite, delete, publish only as the current state or revise without versions, such as the tables of GENESIS-Online, the weekly provisional death counts, the special evaluations of the Zensus 2022 on religious affiliation and the structural data of the Bundestag constituencies. The pipeline stores what such a source published at every observation and thereby builds the history that the source does not keep. The stable backbone are the series of Eurostat and the ECB on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing and the regional labour market, for Germany, its 16 states, 38 government regions and 400 districts; they are stored as vintages, so that every past state of a revised series can be reconstructed. All records are partitioned JSON files in this repository. A monthly review checks every data source and proposes changes as a pull request.
 
 ## Table of Contents
 - [Dataset Overview](#dataset-overview)
 - [Datasets](#datasets)
   - [Statistical Series and Vintages](#statistical-series-and-vintages)
+  - [Snapshots of Volatile Sources](#snapshots-of-volatile-sources)
   - [Regions](#regions)
 - [Variables](#variables)
 - [Correlation with Other Datasets](#correlation-with-other-datasets)
@@ -31,9 +32,13 @@ No run yet. The pipeline writes this overview after its first run.
 
 | Dataset | Content | Source | Kind |
 |---|---|---|---|
-| `sociodemographic_series` | About 34,000 statistical series of 58 concepts: population by age, sex and region, demographic balance, fertility, life expectancy, deaths, migration and citizenship, households, education, income distribution, poverty, wealth shares, housing, regional labour market and regional accounts | Eurostat, ECB | vintage |
+| `sociodemographic_series` | About 34,000 statistical series of 58 concepts: population by age, sex and region, demographic balance, fertility, life expectancy, deaths, migration and citizenship, households, education, income distribution, poverty, wealth shares, housing, regional labour market, regional accounts | Eurostat, ECB | vintage |
+| `source_snapshots` | The published content of 32 volatile items, stored at the first observation and whenever it changes: GENESIS tables (births, deaths, fertility by state and by citizenship, household net income classes, migration background, foreigners and persons seeking protection, police crime statistics, convictions, prisoners, unemployment by district, religion), the weekly report on deaths, the special evaluations of the Zensus 2022 on religious affiliation by municipality and by constituency, the structural data of the constituencies of the Bundestag elections 2017, 2021 and 2025 | Destatis, Statistische Ämter des Bundes und der Länder (Regionaldatenbank, Zensus 2022), Die Bundeswahlleiterin | snapshot |
+| `snapshot_catalog` | The configuration of the snapshot items with provider, format, address and region codes, recorded when an entry appears or changes | `config/snapshots.toml` | change |
 | `series_catalog` | The catalog of the concepts with unit, frequency, provider, key template, regional levels and breakdown codes, recorded when an entry appears or changes | `config/series.toml` | change |
 | `regions` | The registry of the 462 German NUTS regions (Germany, states, government regions, districts) with level, parent region, ISO 3166-2 code of the state and NUTS versions, recorded when an entry appears or changes | `config/regions.toml` | change |
+
+**Kinds of datasets:** a *vintage* dataset stores the complete series at its first observation and afterwards only the changed periods; a *snapshot* dataset stores the complete published content at its first observation and whenever it changes; a *change* dataset stores a configuration entry when it appears and when one of its fields changes.
 
 **Fields of every record:** `record_id`, `revision`, `dataset`, `schema_version`, `observed_at`, `source_id`, `source_url`, `license`, `backfilled`. All other fields are defined with descriptions in [src/schema.py](src/schema.py); the variables, the regional levels and the prediction targets they serve are described in [project_architecture.md](project_architecture.md).
 
@@ -71,6 +76,48 @@ for _, _, values, removed in revisions:
 
 **Periods** are stored as `YYYY` (annual), `YYYY-Qn` (quarterly), `YYYY-MM` (monthly) and `YYYY-Www` (ISO weeks), the formats of dataset.economics.germany. Population stocks refer to 1 January of the year; EU-SILC indicators (income, poverty, housing) refer to the survey year, whose income reference period is the previous calendar year.
 
+### Snapshots of Volatile Sources
+
+Many sociodemographic sources keep no history: GENESIS-Online overwrites its tables with every update, the weekly report on deaths replaces its provisional and estimated figures every week, the special evaluations of the Zensus 2022 are published once and can be replaced or removed, and the files of past elections disappear when a website is rebuilt. `source_snapshots` stores what such a source published at every observation:
+
+- Every item of [config/snapshots.toml](config/snapshots.toml) is fetched at its check interval and normalized to `columns` and `rows` of text, exactly as the source wrote the cells: decimal commas, markers of suppressed values and quality flags are kept, and converting them is part of the analysis.
+- `content_hash` identifies the content. A record is written at the first observation and whenever the hash differs from the previous observation; unchanged content writes no record. Every record holds the complete content, and `previous_hash` links the records of an item.
+- `source_title` is the title of the GENESIS table or the file name and sheet, `source_updated` the last change stated by the source (Last-Modified). A file whose address changes with every edition is found on its page with the pattern `link`.
+- GENESIS tables are read as flat CSV: one row per value with the codes of the time and of every variable; the labels of the codes are in `labels`.
+- An `expect` pattern of every item must match the title of the table or the names of its columns, so that a reused table code or a changed file cannot write other content under the id.
+- PDF documents and items with `archive = true` are stored as files in `data/files/<snapshot_id>/`.
+
+The content of an item at time t is the last record with `observed_at <= t`:
+
+```python
+import duckdb
+
+observed_at, columns, rows = duckdb.sql("""
+    select observed_at, columns, rows
+    from read_json('data/source_snapshots/**/*.json', hive_partitioning=true)
+    where snapshot_id = 'destatis.sterbefaelle_tage' and observed_at <= '2027-03-01'
+    order by observed_at desc
+    limit 1
+""").fetchone()
+```
+
+| Topic | Items | Source | Regions | Check interval |
+|---|---|---|---|---|
+| Religion | Population by religious affiliation per municipality, district and state in the Zensus 2011 and the Zensus 2022; per Bundestag constituency (Zensus 2022); persons by religion (Zensus database, table 1000A-1018) | Zensus 2022 | official keys (AGS), constituencies | 30 days |
+| Births and fertility | Live births by month (12612-0002) and by state and month (12612-0101); total fertility rate by state (12612-0104) and by citizenship of the mother (12612-0010) | Destatis | Germany, states | 7 or 30 days |
+| Mortality | Deaths by month (12613-0006); deaths by day, by calendar week and age group, and by month, state and age group from the weekly report (provisional figures, revised every week) | Destatis | Germany, states | every run to 28 days |
+| Migration and citizenship | Population by migration background (12211-0200); foreigners by citizenship (12521-0002) and by district (12521-0040) and persons seeking protection (12531-0001) from the Central Register of Foreigners; share of foreigners per constituency (Zensus 2022) | Destatis, Zensus 2022 | Germany, districts, constituencies | 30 days |
+| Income and labour market | Private households by monthly net income class (Mikrozensus, 12211-0300); unemployed persons by district (Regionaldatenbank, 13211-02-05-4) | Destatis, Regionaldatenbank | Germany, districts | 30 days |
+| Population and households | German citizens in five age groups and population by marital status per constituency (Zensus 2022) | Zensus 2022 | constituencies | 30 days |
+| Crime and justice | Polizeiliche Kriminalstatistik: offences (24911-0001) and suspects by nationality and sex (24911-0002); convicted persons (24311-0001, 24311-0002); prisoners by sex, age, nationality and type of detention (24321-0001); persons with pre-trial detention by citizenship and state in 2014, 2017 and 2019 (special evaluation) | Destatis | Germany, states | 30 days |
+| Regional structure | Structural data of the constituencies of the Bundestag elections 2017, 2021 and 2025: area, population, citizenship, age groups, migration balance, housing, income, employment, unemployment, education and more | Die Bundeswahlleiterin | constituencies | 30 days |
+
+**Accounts.** The GENESIS tables need free accounts of GENESIS-Online, the Regionaldatenbank and the Zensus database, whose tokens are repository secrets (see [Configuration](#configuration)). Without them the collector `genesis` counts its tables as `no_access`; the other collectors are not affected.
+
+**Religious affiliation.** The census of 2011 and 2022 publish three groups: the Roman Catholic Church and the Protestant churches (EKD), both under public law, and other, none or not stated. Smaller religious communities, the annual members, joinings and leavings of the churches and church leavings by state or city are not collected: the website of the Deutsche Bischofskonferenz refuses automated requests, the terms of the EKD forbid the further use of its content without permission, and the open-data portals with church leavings could not be reached. The mapping of dioceses and regional churches to states and the gaps are described in [project_architecture.md](project_architecture.md#36-religious-affiliation).
+
+**Excluded sources.** Sources that were checked and are not collected are listed with the reason in the `[[excluded]]` entries of [config/snapshots.toml](config/snapshots.toml) and in [project_architecture.md](project_architecture.md#6-sources-and-fetch-rules), among them the tables of the Polizeiliche Kriminalstatistik on www.bka.de (crawl delay of 180 seconds), the statistics of the Bundesagentur für Arbeit (HTTP 403 and robots.txt) and the asylum statistics of the BAMF (robots.txt not reachable).
+
 ### Regions
 
 `geo` is the NUTS code of the region, the classification of the European Union that Eurostat uses for regional statistics:
@@ -84,6 +131,8 @@ for _, _, values, removed in revisions:
 | European Union | `eu` | `EU27_2020` | 1, for comparison |
 
 Every series of a German region carries `state`, the ISO 3166-2 code of its state (`DE-BY` for all regions in Bayern), which is the state key of dataset.politics.germany and dataset.economics.germany. The dataset `regions` lists all regions with their names and parents. NUTS 2024 changed the codes of six districts in Thüringen; the registry keeps the codes of NUTS 2016 and 2021 as well (`nuts_versions`), because Eurostat datasets that still use an earlier version publish their data under them.
+
+The snapshots keep the region codes of their sources (`geo_scheme`): official keys (Amtlicher Gemeindeschlüssel, AGS: two digits for the state, five for the district, twelve for the municipality), the three-digit numbers of the Bundestag constituencies, or the names of the states. The state of an official key is its first two digits (`01` Schleswig-Holstein to `16` Thüringen); the mapping of these keys and of the state names to the ISO 3166-2 codes is listed in [project_architecture.md](project_architecture.md#33-regions).
 
 Not every concept is available at every level: the population, the demographic balance, fertility, density and GDP are published down to the districts; weekly deaths by state; life expectancy, infant mortality, causes of death, education, regional income, poverty, deprivation, housing costs and the labour market down to the government regions; EU-SILC distributions, migration and citizenship, households and wealth for Germany as a whole. The [Variables](#variables) table lists the levels of every concept.
 
@@ -156,6 +205,7 @@ The units, the meaning of the codes and the SDMX keys are in [config/series.toml
 - **Children per woman by citizenship:** five times the sum of the age-specific rates `live_births_by_mother_age_citizenship.DE.<age>.<citizen>` / `women_by_age_citizenship.DE.<citizen>.<age>` over the seven age groups 15-19 to 45-49: for German women with `NAT` in both, for foreign women with the births of `FOR` and the women of `TOTAL` minus `NAT`. The regional fertility rate is `total_fertility_rate` down to the districts; Eurostat publishes no regional fertility rate by citizenship.
 - **Income classes:** the deciles of `income_decile_shares` and their upper limits in `income_decile_cut_offs`; regional income levels in `disposable_income_per_inhabitant`.
 - **Age pyramid:** `population_by_age_group` by region, `population_by_single_age` for Germany.
+- **Religious affiliation:** the shares of the Roman Catholic and the Protestant churches per municipality, district, state and constituency from the snapshots of the Zensus 2011 and 2022 (see [Snapshots of Volatile Sources](#snapshots-of-volatile-sources)).
 
 ## Correlation with Other Datasets
 
@@ -164,13 +214,14 @@ The dataset is built to be correlated with [dataset.politics.germany](https://gi
 - **Time:** periods use the formats of dataset.economics.germany (`YYYY`, `YYYY-Qn`, `YYYY-MM`, `YYYY-Www`); aggregate the event and day data of the other datasets to these periods. `observed_at` keeps joins point-in-time correct.
 - **Germany and the EU:** `geo` `DE` and `EU27_2020` are the codes of the series of dataset.economics.germany and of the Eurostat indicators of dataset.technology. Countries are ISO 3166-1 alpha-2 codes in dataset.fashion (`source_country`) and in most datasets of dataset.technology; the World Bank indicators there use alpha-3 (`DEU`).
 - **States:** `state` (ISO 3166-2, e.g. `DE-BY`) equals `jurisdiction`, `home_state` and `states_concerned` of dataset.politics.germany (polls for the state parliaments, regional outlets, annotations) and `home_state` and `states_concerned` of dataset.economics.germany. State-level series (`geo_level = nuts1`) join directly; series of government regions and districts aggregate to their state.
-- **Regions below the states:** NUTS codes are the keys of the regional statistics of Eurostat and of the GISCO maps, so further regional data can be added.
+- **Bundestag constituencies:** the snapshots with `geo_scheme = constituency` (structural data of the Bundeswahlleiterin, special evaluations of the Zensus 2022 on religion, citizenship, age and marital status) carry the number of the constituency, the key of the constituency results and of the members of parliament of dataset.politics.germany. Constituencies are redrawn before most elections; every edition holds the constituencies of its election.
+- **Regions below the states:** NUTS codes are the keys of the regional statistics of Eurostat and of the GISCO maps, so further regional data can be added. The official keys (AGS) of the snapshots map to the districts of the NUTS classification through the district key of five digits.
 
 Examples and further keys are described in [project_architecture.md](project_architecture.md#4-correlation-with-other-datasets).
 
 ## Data Model
 
-The diagram shows the three datasets with all their fields and the fields that link them. Each field has a short comment; the full descriptions are in [src/schema.py](src/schema.py).
+The diagram shows the five datasets with all their fields and the fields that link them. Each field has a short comment; the full descriptions are in [src/schema.py](src/schema.py).
 
 - **`common_fields`** lists the nine fields that every record of every dataset has. They are not repeated in the dataset entities.
 - **Types:** `list` and `map` are JSON arrays and objects; the comment names their content.
@@ -235,14 +286,48 @@ erDiagram
         date removed "end of collection"
         string removed_reason "why the region was removed"
     }
+    snapshot_catalog {
+        string snapshot_id PK "provider.item, e.g. zensus2022.religion_wahlkreise"
+        string name "name of the item"
+        string topic "topic group, e.g. religion"
+        string provider "provider id of config/providers.toml"
+        string format "genesis, csv, xlsx, json, html or pdf"
+        string address "GENESIS table, file address, or page and link pattern"
+        string geo_scheme "region codes in the content"
+        bool archive "whether the published file itself is stored"
+        date added "start of collection"
+        date removed "end of collection"
+        string removed_reason "why the entry was removed"
+    }
+    source_snapshots {
+        string snapshot_id FK "entry of the snapshot catalog"
+        string name "name of the item"
+        string topic "topic group"
+        string provider "provider id"
+        string item "table code, file name or address at the source"
+        string format "genesis, csv, xlsx, json, html or pdf"
+        string geo_scheme "nuts, ags, constituency, state_name, none and others"
+        string page_url "page from which the file address was read"
+        string source_title "title of the table, or file name and sheet"
+        datetime source_updated "last change stated by the source"
+        string content_hash "hash of the columns and rows"
+        string previous_hash "content_hash of the previous record"
+        list columns "column names"
+        list rows "rows as text, as published"
+        int row_count "number of rows"
+        map labels "labels of the codes in the rows"
+        string archived_file "path of the stored file in data/files/"
+        int byte_size "size of the published file in bytes"
+    }
     series_catalog ||--o{ sociodemographic_series : "concept"
     regions ||--o{ sociodemographic_series : "geo"
     regions ||--o{ regions : "parent"
+    snapshot_catalog ||--o{ source_snapshots : "snapshot_id"
 ```
 
 ## Example Records
 
-One record per dataset. The examples are linked: the series `median_age.DE212` belongs to the catalog entry `median_age` and to the region `DE212`. **The values of the series example are placeholders that show the structure;** they will be replaced with a record of the first run.
+One record per dataset. The examples are linked: the series `median_age.DE212` belongs to the catalog entry `median_age` and to the region `DE212`, the snapshot `zensus2022.religion_wahlkreise` to its entry of the snapshot catalog. **The values of the series example are placeholders that show the structure;** they will be replaced with a record of the first run. The snapshot example holds the values published by the source, with the rows shortened to the first two of 299.
 
 <details>
 <summary><code>sociodemographic_series</code>: the median age in the city of München at its first observation (placeholder values)</summary>
@@ -342,14 +427,84 @@ One record per dataset. The examples are linked: the series `median_age.DE212` b
 
 </details>
 
+<details>
+<summary><code>source_snapshots</code>: religious affiliation per Bundestag constituency (Zensus 2022) at its first observation (rows shortened)</summary>
+
+```json
+{
+  "record_id": "snapshot:zensus2022.religion_wahlkreise",
+  "revision": 0,
+  "dataset": "source_snapshots",
+  "schema_version": "1.0",
+  "observed_at": "2026-10-27T01:09:31Z",
+  "source_id": "zensus2022",
+  "source_url": "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/Publikationen/Downloads-Publikationen/Sonderauswertungen/religionszugehoerigkeit_je_btwkreis.xlsx?__blob=publicationFile&v=3",
+  "license": "Datenlizenz Deutschland - Namensnennung - Version 2.0",
+  "backfilled": false,
+  "snapshot_id": "zensus2022.religion_wahlkreise",
+  "name": "Population by religious affiliation per Bundestag constituency, Zensus 2022",
+  "topic": "religion",
+  "provider": "zensus2022",
+  "item": "religionszugehoerigkeit_je_btwkreis.xlsx",
+  "format": "xlsx",
+  "geo_scheme": "constituency",
+  "page_url": "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html",
+  "source_title": "religionszugehoerigkeit_je_btwkreis.xlsx (Daten)",
+  "source_updated": "2025-07-07T09:26:20Z",
+  "content_hash": "b4be1e53df45c3ca",
+  "previous_hash": null,
+  "columns": ["Bundestagswahlkreis", "Insgesamt / Anzahl Personen", "Römisch-katholische Kirche", "Evangelische Kirche", "Sonstige/ Keine/ Ohne Angabe"],
+  "rows": [
+    ["001", "298184", "13676", "140892", "143613"],
+    ["002", "237047", "12319", "124599", "100127"]
+  ],
+  "row_count": 299,
+  "labels": {},
+  "archived_file": null,
+  "byte_size": 95070
+}
+```
+
+</details>
+
+<details>
+<summary><code>snapshot_catalog</code>: the entry of the religious affiliation per constituency</summary>
+
+```json
+{
+  "record_id": "snapshot_catalog:zensus2022.religion_wahlkreise",
+  "revision": 0,
+  "dataset": "snapshot_catalog",
+  "schema_version": "1.0",
+  "observed_at": "2026-10-27T01:07:02Z",
+  "source_id": "registry",
+  "source_url": "https://github.com/kleinnconrad/dataset.sociodemographics.germany/blob/main/config/snapshots.toml",
+  "license": "Configuration of this project; no license granted",
+  "backfilled": false,
+  "snapshot_id": "zensus2022.religion_wahlkreise",
+  "name": "Population by religious affiliation per Bundestag constituency, Zensus 2022",
+  "topic": "religion",
+  "provider": "zensus2022",
+  "format": "xlsx",
+  "address": "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html (link matching religionszugehoerigkeit_je_btwkreis\\.xlsx)",
+  "geo_scheme": "constituency",
+  "archive": false,
+  "added": "2026-10-26",
+  "removed": null,
+  "removed_reason": null
+}
+```
+
+</details>
+
 ## Sources and Fetch Rules
 
-- **APIs:** the dissemination API of Eurostat and the ECB Data Portal (SDMX 2.1 REST, SDMX-CSV) and the table of contents of Eurostat. These documented interfaces are used under their terms, without keys.
-- **Websites:** only the terms pages of the providers, which the monthly source review reads. Every website request is checked against the robots.txt of its host for the user agent `GermanSociodemographicsDataset`, with the longest-match rule of RFC 9309, and against text-and-data-mining reservations (TDMRep).
-- **Bot protection:** a provider that answers with HTTP 401/403, a challenge page or a CAPTCHA stops its collector with an error. The pipeline does not use a headless browser.
-- **Pacing:** at most one request per second per host, retries for server errors and rate limits. The User-Agent names the repository; no personal data is sent.
+- **APIs:** the dissemination API of Eurostat and the ECB Data Portal (SDMX 2.1 REST, SDMX-CSV), the table of contents of Eurostat, and the web services of the GENESIS databases (GENESIS-Online, Regionaldatenbank Deutschland, Zensus database; REST with flat CSV). These documented interfaces are used under their terms; the GENESIS web services need free accounts.
+- **Websites:** the pages and files of the snapshot sources (www.destatis.de, www.bundeswahlleiterin.de) and the terms pages of the providers. Every website request is checked against the robots.txt of its host for the user agent `GermanSociodemographicsDataset`, with the longest-match rule of RFC 9309, and against text-and-data-mining reservations (TDMRep). A host whose crawl delay exceeds 120 seconds is not fetched.
+- **Bot protection:** a provider that answers with HTTP 401/403, a challenge page or a CAPTCHA stops its collector with an error (statistical series) or fails the item (snapshots). The pipeline does not use a headless browser.
+- **Pacing:** at most one request per second per host, longer if robots.txt sets a crawl delay (30 seconds for www.destatis.de), retries for server errors and rate limits. Conditional requests (ETag, Last-Modified) avoid downloading unchanged files, and a file that several items read is downloaded once per run. The User-Agent names the repository; no personal data is sent.
 - **Unchanged datasets:** the Eurostat collector reads the table of contents of Eurostat first and skips catalog entries whose dataset has not been updated since their last download; every entry is downloaded again after 28 days at the latest.
-- **Source review:** on the first day of every month, `source_review.yml` checks every catalog entry, the regions and the terms of the providers and proposes changes as a pull request (see [Workflows](#workflows)).
+- **Source review:** on the first day of every month, `source_review.yml` checks every catalog entry, every snapshot item, the regions and the terms of the providers and proposes changes as a pull request (see [Workflows](#workflows)).
 
 ## Pipeline
 
@@ -357,12 +512,22 @@ One record per dataset. The examples are linked: the series `median_age.DE212` b
 sequenceDiagram
     participant Action as GitHub Actions
     participant Run as main.py / pipeline.py
+    participant Web as Websites (Destatis, Bundeswahlleiterin)
+    participant Genesis as GENESIS databases
     participant ECB as ECB Data Portal
     participant Eurostat as Eurostat
     participant Store as storage.py / state.py
 
     Action->>Run: Pipeline run (Tuesdays and Fridays, 02:07 Europe/Berlin)
-    Run->>Store: New and changed entries of the series catalog and the region registry
+    Run->>Store: New and changed entries of the series catalog, the region registry and the snapshot catalog
+    loop Every file item that is due
+        Run->>Web: Page with the file link, then the file (robots.txt, TDMRep, conditional request)
+        Run->>Store: Snapshot if the content changed
+    end
+    loop Every GENESIS table that is due
+        Run->>Genesis: Table title (metadata/table), then the table (data/tablefile, flat CSV)
+        Run->>Store: Snapshot if the content changed
+    end
     Run->>ECB: Every ECB entry of the catalog (SDMX-CSV)
     Run->>Store: New and revised vintages
     Run->>Eurostat: Table of contents (last update of every dataset)
@@ -375,6 +540,8 @@ sequenceDiagram
 
 **Run deadline.** The collectors start no new work 25 minutes after the start of the run (`RUN_DEADLINE_MINUTES`), so that the workflow commits the data before its timeout of 30 minutes. A collector that stops at the deadline has the status `partial` and continues in the next run; a collector that has not started by then is skipped.
 
+**Snapshot items** are checked when their interval `check_days` has passed (0: in every run). An item that fails (unreachable page, changed file, title or columns that do not match `expect`) is counted and listed in the run log; the other items continue. GENESIS tables without a token are counted as `no_access`.
+
 Each collector runs in isolation: a failure is logged in `data/state/collectors.json` and the run log, the other collectors continue, and the data already written is kept. A catalog entry without data (discontinued dataset or wrong key) is counted and listed in the run log; the other entries continue. The run ends with exit code 1 if a collector failed, so that the workflow fails visibly.
 
 ## Data Files
@@ -382,9 +549,10 @@ Each collector runs in isolation: a failure is logged in `data/state/collectors.
 | Path | Content |
 |---|---|
 | `data/<dataset>/year=YYYY/month=MM/<dataset>_YYYY-MM-DD.json` | Records of a dataset observed on one UTC day |
-| `data/state/seen/<dataset>.json` | Catalog entries and regions already written, with content hash and revision |
+| `data/files/<snapshot_id>/YYYY-MM-DD_<hash>.<ext>` | Published files stored by snapshot items with `archive = true` (PDF documents) |
+| `data/state/seen/<dataset>.json` | Catalog entries, regions and snapshot items already written, with content hash and revision; for snapshot items also the file address, its ETag and Last-Modified, and the day of the last change |
 | `data/state/seen/sociodemographic_series/<concept>/<shard>.json` | Current values of the series of a concept in one state (`DE1` to `DEG`) or of Germany and the EU (`DE`, `EU27_2020`), compared with the next download |
-| `data/state/collectors.json` | First run, last run, failures and cursor per collector (with the last download and dataset update of every catalog entry) |
+| `data/state/collectors.json` | First run, last run, failures and cursor per collector (with the last download and dataset update of every catalog entry and the last check of every snapshot item) |
 | `data/state/run_log.jsonl` | One line per run with the outcome and counters of each collector |
 | `reviews/YYYY-MM.md` | Report of the monthly source review |
 
@@ -415,9 +583,12 @@ series = duckdb.sql("""
 - **Datasets:** catalog datasets that the table of contents of Eurostat no longer lists (discontinued or renamed), with possible successors, and new or restructured datasets on the topics of the catalog as candidates.
 - **Regions:** German NUTS codes that Eurostat publishes and the registry lacks, e.g. after a new version of the NUTS classification.
 - **State and runs:** catalog entries without stored series, stale stored series and entries that had no data or failed in the runs of the last 35 days.
+- **Snapshot items:** every active item of `config/snapshots.toml` is fetched: items that are unavailable or whose link, title or columns no longer match, GENESIS tables without access (with the name of the missing secret), changed file addresses, content without rows, content that changed since the last run, items never stored, and items whose content did not change for longer than their `update_days` (a sign that the source moved or stopped). The report shows the title, the columns and the first row of every item, so that a changed layout is seen. With a GENESIS token, the other tables of the observed statistics are listed as candidates. The excluded sources are listed with the day of their check; a source checked more than a year ago is marked as due for a new check.
 - **Terms of use:** the terms page of every provider is fetched and the hash of its text compared with `config/providers.toml`. A changed text is reported and its new hash is part of the pull request; read the terms before merging.
 
-Changes of the catalog and the region registry are proposed in the report only, because they need a verified key and an entry in the measurement log. A pull request opened with the `GITHUB_TOKEN` starts no workflows, so the review starts `ci.yml` on its branch. The next review rebuilds the branch, so merge or close the pull request before the first day of the next month. Started by hand with `pull_request` off, the review writes its report to the job summary only; with `concepts`, it checks only the listed catalog entries, e.g. to verify a new key.
+Changes of the catalog, the snapshot configuration and the region registry are proposed in the report only, because they need a verified key or address and an entry in the measurement log. A pull request opened with the `GITHUB_TOKEN` starts no workflows, so the review starts `ci.yml` on its branch. The next review rebuilds the branch, so merge or close the pull request before the first day of the next month. Started by hand with `pull_request` off, the review writes its report to the job summary only; with `concepts` or `snapshots`, it checks only the listed catalog entries or snapshot items, e.g. to verify a new key or address.
+
+**Probe of candidate sources.** Started by hand with URLs in the input `probe`, `source_review.yml` checks them with the fetch rules instead of running the review and describes them in the job summary: robots.txt (with its rules and crawl delay), TDM reservations, the response, the title, text and links of a page (`probe_filter` selects the links, `probe_text` the passages of the text, e.g. the terms of reuse), the first lines of a CSV file, and the sheets and first rows of an xlsx workbook. Every new source is checked this way before it is added.
 
 **Manual runs.** The workflows can be started by hand: open the **Actions** tab, select **German Sociodemographics Pipeline** (or **Source Review**, **CI**), click **Run workflow**, and choose the branch and the inputs. The modes of `pipeline.yml`:
 - `normal`: same as the scheduled run; commits the data.
@@ -435,7 +606,18 @@ The input `collectors` restricts a manual run to a comma-separated list of colle
 | `FULL_CHECK_DAYS` | 28 | Days after which a catalog entry is downloaded again although Eurostat reports its dataset as unchanged |
 | `COLLECTORS` | all | Comma-separated list of collectors to run |
 
-The pipeline needs no secrets. The series, regions and providers are configured in [config/series.toml](config/series.toml), [config/regions.toml](config/regions.toml) and [config/providers.toml](config/providers.toml). Fixed thresholds, such as the share of removed periods that marks a response as incomplete, are constants in the modules that use them.
+**Secrets.** The GENESIS databases need free accounts. Set the values as repository secrets under **Settings > Secrets and variables > Actions**; `pipeline.yml` and `source_review.yml` pass them to the collectors. Without them the GENESIS tables are counted as `no_access` and all other sources are collected.
+
+| Secret | Account | Content |
+|---|---|---|
+| `GENESIS_TOKEN` | GENESIS-Online of the Statistisches Bundesamt (https://genesis.destatis.de, registration free of charge) | API token of the account (or the user name) |
+| `GENESIS_PASSWORD` | as above | Empty when a token is used; the password when `GENESIS_TOKEN` holds a user name |
+| `REGIONALSTATISTIK_TOKEN` | Regionaldatenbank Deutschland (https://www.regionalstatistik.de, registration free of charge) | API token or user name |
+| `REGIONALSTATISTIK_PASSWORD` | as above | Empty when a token is used; otherwise the password |
+| `ZENSUS2022_TOKEN` | Zensus database (https://ergebnisse.zensus2022.de, registration free of charge) | API token or user name |
+| `ZENSUS2022_PASSWORD` | as above | Empty when a token is used; otherwise the password |
+
+The series, the snapshot items, the regions and the providers are configured in [config/series.toml](config/series.toml), [config/snapshots.toml](config/snapshots.toml), [config/regions.toml](config/regions.toml) and [config/providers.toml](config/providers.toml). Fixed thresholds, such as the share of removed periods that marks a response as incomplete, are constants in the modules that use them.
 
 ## Running Locally
 
@@ -444,12 +626,15 @@ uv sync
 uv run python src/main.py --dry-run                                   # fetch everything, write nothing
 uv run python src/main.py --collectors series_catalog,regions         # registries only, no requests
 uv run python src/main.py --collectors eurostat                       # Eurostat series
+uv run python src/main.py --collectors files,genesis                  # snapshot items
 uv run python src/main.py --backfill                                  # download every catalog entry
 uv run python src/generate_dataset_overview.py                        # README overview
 uv run python src/source_review.py --report review.md --concepts median_age   # review one entry
+uv run python src/source_review.py --report review.md --snapshots zensus2022.religion_wahlkreise   # review one snapshot item
+uv run python src/source_review.py --report probe.md --probe "https://www.destatis.de/" --text-filter "Lizenz"   # probe a candidate source
 ```
 
-Local runs write to `~/Downloads/german_sociodemographics_dataset/` unless `--output-dir` is given; in GitHub Actions they write to `data/`. Environment variables can be set in a `.env` file in the repository root, which is listed in `.gitignore`. The collectors, in the order of a run, are `series_catalog`, `regions`, `ecb` and `eurostat`.
+Local runs write to `~/Downloads/german_sociodemographics_dataset/` unless `--output-dir` is given; in GitHub Actions they write to `data/`. Environment variables can be set in a `.env` file in the repository root, which is listed in `.gitignore`. The collectors, in the order of a run, are `series_catalog`, `regions`, `snapshot_catalog`, `files`, `genesis`, `ecb` and `eurostat`.
 
 ## Continuous Integration
 
@@ -473,8 +658,9 @@ uv run pytest
 ## Setup
 
 1. Under **Settings > Actions > General > Workflow permissions**, choose read and write permissions, so that the workflows can push, and allow GitHub Actions to create and approve pull requests, so that the source review can open its pull request.
-2. Start `source_review.yml` once by hand with `pull_request` off, to check every catalog entry against the live providers.
-3. Start `pipeline.yml` once by hand in the mode `backfill`, or wait for the next scheduled run. The first run imports the history of all series (from 1990 for the population of the districts); an offline test with synthetic responses of the same size processed about 34,000 series in under two minutes, so the run time is set by the about 170 requests to the providers.
+2. Register the free accounts of GENESIS-Online, the Regionaldatenbank and the Zensus database and set their tokens as repository secrets (see [Configuration](#configuration)).
+3. Start `source_review.yml` once by hand with `pull_request` off, to check every catalog entry and snapshot item against the live sources; the report shows the title, columns and first row of every GENESIS table once the tokens are set.
+4. Start `pipeline.yml` once by hand in the mode `backfill`, or wait for the next scheduled run. The first run imports the history of all series (from 1990 for the population of the districts); an offline test with synthetic responses of the same size processed about 34,000 series in under two minutes, so the run time is set by the about 170 requests to the providers.
 
 ## Sources and Attribution
 
@@ -485,3 +671,7 @@ No license is granted for the code or the data of this repository. The data cont
 | Eurostat (https://ec.europa.eu/eurostat) | `sociodemographic_series` | Reuse authorised with acknowledgement of the source: "Source: Eurostat". Most series are compiled from the data of the Statistisches Bundesamt (Destatis) and the statistical offices of the states. |
 | European Central Bank, ECB Data Portal (https://data.ecb.europa.eu) | `sociodemographic_series` (Distributional Wealth Accounts) | Reuse free of charge with acknowledgement of the source: "Source: ECB statistics". The Distributional Wealth Accounts are experimental statistics. |
 | Eurostat, NUTS classification (https://github.com/eurostat/Nuts2json) | codes and names of `regions` | Codes and names of the NUTS classification of the European Union. |
+| Statistisches Bundesamt (Destatis), GENESIS-Online and www.destatis.de | `source_snapshots` | Datenlizenz Deutschland – Namensnennung – Version 2.0 (https://www.govdata.de/dl-de/by-2-0): "Datenquelle: Statistisches Bundesamt (Destatis), Genesis-Online, <Abrufdatum>; Datenlizenz by-2-0". The Statistische Berichte permit reproduction and distribution with a reference to the source. |
+| Statistische Ämter des Bundes und der Länder, Regionaldatenbank Deutschland (https://www.regionalstatistik.de) | `source_snapshots` | Datenlizenz Deutschland – Namensnennung – Version 2.0: "Statistische Ämter des Bundes und der Länder, Regionaldatenbank Deutschland". Tables of the Bundesagentur für Arbeit name it as source. |
+| Statistische Ämter des Bundes und der Länder, Zensus 2022 (https://www.zensus2022.de) | `source_snapshots` | Datenlizenz Deutschland – Namensnennung – Version 2.0; the special evaluations permit storing, passing on, reproducing and distributing their content with a reference to the source: "Statistische Ämter des Bundes und der Länder, Zensus 2022". |
+| Die Bundeswahlleiterin (https://www.bundeswahlleiterin.de) | `source_snapshots` (structural data of the constituencies) | Datenlizenz Deutschland – Namensnennung – Version 2.0: "© Die Bundeswahlleiterin, Wiesbaden"; the raw data of columns 35 to 48 of the structural data: "© Bundesagentur für Arbeit". |

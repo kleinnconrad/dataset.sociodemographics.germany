@@ -1,0 +1,42 @@
+# Test configuration of the snapshot sources.
+
+[[snapshot]]
+id = "zensus2022.1000A-1018"
+name = "Persons by religion"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1018"
+expect = "Religion"
+geo_scheme = "ags"
+added = 2026-10-26
+
+[[snapshot]]
+id = "bundeswahlleiterin.btw2025_strukturdaten"
+name = "Structural data of the constituencies"
+topic = "regional_structure"
+provider = "bundeswahlleiterin"
+format = "csv"
+page = "https://wahl.example/strukturdaten.html"
+link = "strukturdaten\\.csv$"
+csv.skip_lines = 2
+geo_scheme = "constituency"
+added = 2026-10-26
+
+[[snapshot]]
+id = "ekd.kirchenmitglieder_bericht"
+name = "Church members report"
+topic = "religion"
+provider = "ekd"
+format = "pdf"
+url = "https://church.example/bericht.pdf"
+geo_scheme = "regional_church"
+check_days = 7
+added = 2026-10-26
+
+[[excluded]]
+id = "dbk.kirchliche_statistik"
+name = "Kirchliche Statistik der Deutschen Bischofskonferenz"
+url = "https://www.dbk.de/"
+checked = 2026-10-26
+reason = "answers automated requests with HTTP 401"

@@ -47,7 +47,7 @@ This file contains foundational instructions and conventions for developing in t
 ## 6. Linting & Validation
 - Code must pass `ruff check` before being finalized.
 - Always verify that configuration files (e.g., `.yml`, `.toml` or `.json` files) remain structurally compliant and correctly reflect any changes made to the codebase (such as script renames or moving files).
-- The tests check that the README data model and example records match `src/schema.py` and that the README lists every active concept of `config/series.toml`; update the README together with the schema and the catalog.
+- The tests check that the README data model and example records match `src/schema.py` and that the README lists every active concept of `config/series.toml`; update the README together with the schema, the catalog and the snapshot configuration.
 
 ## 7. Security Best Practices
 - Never hardcode secrets, passwords, or API keys in the repository. Always rely on environment variables or the `.env` file, which is listed in `.gitignore`.
@@ -56,20 +56,21 @@ This file contains foundational instructions and conventions for developing in t
 
 ## 8. Data Collection Rules
 - All HTTP requests go through `src/web.py` (`WebClient`), which applies the fetch rules.
-- Never bypass bot protection. A provider that returns HTTP 401 or 403, a challenge page or a CAPTCHA stops its collector with an error. Do not add headless browsers.
-- Respect `robots.txt` for every website request. Only documented APIs and data files that are offered for programmatic use (Eurostat dissemination API and table of contents, ECB Data Portal) are called with `respect_robots=False`, under their terms and rate limits.
+- Never bypass bot protection. A statistical provider that returns HTTP 401 or 403, a challenge page or a CAPTCHA stops its collector with an error; a snapshot item that meets them fails and is not requested again for 30 days. Do not add headless browsers.
+- Respect `robots.txt` for every website request, including its crawl delay; a host whose crawl delay exceeds 120 seconds is not fetched. Only documented APIs and data files that are offered for programmatic use (Eurostat dissemination API and table of contents, ECB Data Portal, the web services of GENESIS-Online, the Regionaldatenbank Deutschland and the Zensus database) are called with `respect_robots=False`, under their terms and rate limits.
 - Respect text-and-data-mining reservations (TDMRep) of every website.
 - Store only published aggregates of official statistics. Do not store microdata or any data about individual persons.
 - Every record carries the license or terms of its source in the `license` field; the providers and their terms are listed in `config/providers.toml`.
 - Only sources whose terms permit the redistribution of their data are collected. Sources that require an API key or an account are added only with an optional key and a documented secret.
+- A source that is checked and not admitted is recorded with the day of the check and the reason as an `[[excluded]]` entry of `config/snapshots.toml`.
 
 ## 9. Long-Term Stability Rules
 The dataset is collected over many years. Changes must keep the time series comparable:
-- **Ids are permanent.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), region codes, provider ids, dataset names, field names and `record_id` formats are never reused for a different meaning. A concept or region that is no longer collected keeps its entry with `removed` and `removed_reason`.
-- **Vintages are complete.** `sociodemographic_series` stores the full series at the first observation and every later change; do not rewrite or drop past records of a series.
+- **Ids are permanent.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), snapshot ids (`<provider>.<item>`), region codes, provider ids, dataset names, field names and `record_id` formats are never reused for a different meaning. A concept, snapshot item or region that is no longer collected keeps its entry with `removed` and `removed_reason`.
+- **Vintages and snapshots are complete.** `sociodemographic_series` stores the full series at the first observation and every later change; `source_snapshots` stores the full published content at the first observation and every change. Do not rewrite or drop past records.
 - **Schema changes are additive.** New fields get a description and are added without changing existing ones; a changed meaning of a field requires a new field and an increment of `SCHEMA_VERSION` in `src/schema.py`. After an intended change, regenerate `tests/fixtures/schema_snapshot.txt`.
 - **Measurement changes are logged.** Any change of a source, a key, a code, a unit, a regional classification or a counting rule is recorded with its date in the measurement log of [project_architecture.md](project_architecture.md), so that structural breaks in the series can be identified.
-- **Identifiers are verified.** A new or changed key in `config/series.toml` is fetched from the live provider before it is committed, e.g. with the workflow `source_review.yml` started by hand with `pull_request` off and the concept in `concepts`. A new region code in `config/regions.toml` is taken from the NUTS classification published by Eurostat. A new provider in `config/providers.toml` is checked with the fetch rules (robots.txt, TDM reservation, bot protection) and its terms of reuse.
+- **Identifiers are verified.** A new or changed key in `config/series.toml` is fetched from the live provider before it is committed, e.g. with the workflow `source_review.yml` started by hand with `pull_request` off and the concept in `concepts`. A new or changed item in `config/snapshots.toml` is fetched in the same way with the item in `snapshots`; the report shows its title, columns and first row. A new region code in `config/regions.toml` is taken from the NUTS classification published by Eurostat. A new provider or source is checked with the fetch rules (robots.txt, TDM reservation, bot protection) and its terms of reuse, with the input `probe` of `source_review.yml`.
 
 ## 10. Error Handling
 - Use specific exception handling (`try...except` blocks) instead of catching generic `Exception`s where possible, and provide informative error messages.

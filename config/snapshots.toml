@@ -1,0 +1,579 @@
+# Snapshot sources: items that their sources overwrite, remove or revise without keeping a history.
+#
+# Every [[snapshot]] entry describes one published item (see src/snapshots.py):
+#   id              stable id <provider>.<item>; never reused for another meaning
+#   name            name of the item
+#   topic           topic group (SeriesTopic in src/schema.py)
+#   provider        provider id of config/providers.toml
+#   format          genesis (table of a GENESIS database), csv, xlsx, json, html (table of a page) or pdf
+#   table           table code of a GENESIS database (format genesis)
+#   expect          regular expression that the title of a GENESIS table (required), or the file name and column
+#                   names of a file, must match; content without a match is not stored
+#   url             fixed address of a file, or
+#   page, link      page that links the current file, and a regular expression of the file address
+#   geo_scheme      region codes in the content: nuts, ags (official keys), constituency (numbers of the Bundestag
+#                   constituencies), state_name (names of the states), diocese, regional_church or none
+#   archive         store the published file itself in data/files/ (always for pdf)
+#   check_days      days between two checks; 0 (default) checks in every run
+#   update_days     days within which the source is expected to change the content; the monthly review reports
+#                   an item without change for longer
+#   startyear, regionalvariable, regionalkey   options of a GENESIS table request
+#   csv.*, xlsx.*, html.*   format options (delimiter, encoding, skip_lines, header_pattern;
+#                           sheet, sheet_pattern, header_row or header_pattern, header_rows; table)
+#   added           day on which the entry was added; start of collection
+#   removed         day on which the entry was removed, with removed_reason
+#
+# Every [[excluded]] entry records a source that was checked and is not collected, with the day of the check and
+# the reason (robots.txt, text-and-data-mining reservation, bot protection, terms of use, no machine-readable data).
+#
+# Rules (CLAUDE.md, sections 8 and 9): every new source is checked with the fetch rules and its terms of use before
+# it is added (source review with the input probe); every new or changed address or table code is verified against
+# the live source; every change is recorded in the measurement log of project_architecture.md.
+
+# =============================================================================================================
+# GENESIS-Online of the Statistisches Bundesamt (secret GENESIS_TOKEN)
+#
+# The tables are overwritten with every update: provisional figures are replaced by final ones and earlier
+# years are revised without versions. Without a token the tables are counted as no_access. The expect pattern
+# protects against a table code that is changed or reused by the database.
+# =============================================================================================================
+
+[[snapshot]]
+id = "destatis.12612-0002"
+name = "Live births by month and sex"
+topic = "births_and_fertility"
+provider = "destatis"
+format = "genesis"
+table = "12612-0002"
+expect = "Lebendgeborene"
+geo_scheme = "none"
+check_days = 7
+update_days = 120
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12612-0101"
+name = "Live births by state, month and sex"
+topic = "births_and_fertility"
+provider = "destatis"
+format = "genesis"
+table = "12612-0101"
+expect = "Lebendgeborene"
+geo_scheme = "ags"
+check_days = 7
+update_days = 120
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12612-0104"
+name = "Total fertility rate by state"
+topic = "births_and_fertility"
+provider = "destatis"
+format = "genesis"
+table = "12612-0104"
+expect = "Geburtenziffer"
+geo_scheme = "ags"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12612-0010"
+name = "Total fertility rate by citizenship of the mother"
+topic = "births_and_fertility"
+provider = "destatis"
+format = "genesis"
+table = "12612-0010"
+expect = "Geburtenziffer"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12613-0006"
+name = "Deaths by month and sex"
+topic = "mortality_and_health"
+provider = "destatis"
+format = "genesis"
+table = "12613-0006"
+expect = "Gestorbene"
+geo_scheme = "none"
+check_days = 7
+update_days = 120
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12211-0300"
+name = "Private households by monthly net income class (Mikrozensus)"
+topic = "income_and_poverty"
+provider = "destatis"
+format = "genesis"
+table = "12211-0300"
+expect = "Nettoeinkommen"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12211-0200"
+name = "Population by migration background (Mikrozensus)"
+topic = "migration_and_citizenship"
+provider = "destatis"
+format = "genesis"
+table = "12211-0200"
+expect = "Migrationshintergrund|Einwanderungsgeschichte"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12521-0002"
+name = "Foreigners by citizenship (Central Register of Foreigners)"
+topic = "migration_and_citizenship"
+provider = "destatis"
+format = "genesis"
+table = "12521-0002"
+expect = "Ausländer"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12521-0040"
+name = "Foreigners by district (Central Register of Foreigners)"
+topic = "migration_and_citizenship"
+provider = "destatis"
+format = "genesis"
+table = "12521-0040"
+expect = "Ausländer"
+startyear = 2018
+geo_scheme = "ags"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.12531-0001"
+name = "Persons seeking protection by protection status (Central Register of Foreigners)"
+topic = "migration_and_citizenship"
+provider = "destatis"
+format = "genesis"
+table = "12531-0001"
+expect = "Schutzsuchende"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.24911-0001"
+name = "Offences recorded by the police (Polizeiliche Kriminalstatistik)"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "genesis"
+table = "24911-0001"
+expect = "Straftaten|Fälle"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.24911-0002"
+name = "Suspects by nationality and sex (Polizeiliche Kriminalstatistik)"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "genesis"
+table = "24911-0002"
+expect = "Tatverdächtig"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.24311-0001"
+name = "Convicted persons by offence (Strafverfolgungsstatistik)"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "genesis"
+table = "24311-0001"
+expect = "Verurteilte"
+startyear = 2015
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.24311-0002"
+name = "Convicted persons (Strafverfolgungsstatistik)"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "genesis"
+table = "24311-0002"
+expect = "Verurteilte"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.24321-0001"
+name = "Prisoners by sex, age, nationality and type of detention (Strafvollzugsstatistik)"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "genesis"
+table = "24321-0001"
+expect = "Strafgefangene|Gefangene"
+geo_scheme = "none"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+# =============================================================================================================
+# Regionaldatenbank Deutschland (secrets REGIONALSTATISTIK_TOKEN and REGIONALSTATISTIK_PASSWORD)
+# =============================================================================================================
+
+[[snapshot]]
+id = "regionalstatistik.13211-02-05-4"
+name = "Unemployed persons by district, annual average (Bundesagentur für Arbeit)"
+topic = "labour_market"
+provider = "regionalstatistik"
+format = "genesis"
+table = "13211-02-05-4"
+expect = "Arbeitslose"
+geo_scheme = "ags"
+check_days = 30
+update_days = 550
+added = 2026-10-26
+
+# =============================================================================================================
+# Zensus database (secret ZENSUS2022_TOKEN)
+# =============================================================================================================
+
+[[snapshot]]
+id = "zensus2022.1000A-1018"
+name = "Persons by religion (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1018"
+expect = "Religion"
+geo_scheme = "ags"
+check_days = 30
+added = 2026-10-26
+
+# =============================================================================================================
+# Structural data of the Bundestag constituencies (Die Bundeswahlleiterin); join key: constituency number
+# =============================================================================================================
+
+[[snapshot]]
+id = "bundeswahlleiterin.btw2025_strukturdaten"
+name = "Structural data of the constituencies of the Bundestag election 2025"
+topic = "regional_structure"
+provider = "bundeswahlleiterin"
+format = "csv"
+page = "https://www.bundeswahlleiterin.de/bundestagswahlen/2025/strukturdaten.html"
+link = "btw2025_strukturdaten\\.csv$"
+csv.header_pattern = "^Land;Wahlkreis"
+expect = "Wahlkreis"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "bundeswahlleiterin.btw21_strukturdaten"
+name = "Structural data of the constituencies of the Bundestag election 2021"
+topic = "regional_structure"
+provider = "bundeswahlleiterin"
+format = "csv"
+page = "https://www.bundeswahlleiterin.de/bundestagswahlen/2021/strukturdaten.html"
+link = "btw21_strukturdaten\\.csv$"
+csv.header_pattern = "^Land;Wahlkreis"
+expect = "Wahlkreis"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "bundeswahlleiterin.btw2017_strukturdaten"
+name = "Structural data of the constituencies of the Bundestag election 2017"
+topic = "regional_structure"
+provider = "bundeswahlleiterin"
+format = "csv"
+page = "https://www.bundeswahlleiterin.de/bundestagswahlen/2017/strukturdaten.html"
+link = "btw2017_strukturdaten\\.csv$"
+csv.header_pattern = "^Land;Wahlkreis"
+expect = "Wahlkreis"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+# =============================================================================================================
+# Statistischer Bericht Sterbefälle nach Tagen, Wochen und Monaten (Destatis): replaced every week; the
+# figures of the last weeks are provisional and estimated, and are revised with every edition. One download
+# per run serves all entries of the file. The check interval of the larger tables limits the stored volume.
+# =============================================================================================================
+
+[[snapshot]]
+id = "destatis.sterbefaelle_tage"
+name = "Deaths by day, Germany (provisional, weekly edition)"
+topic = "mortality_and_health"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Sterbefaelle-Lebenserwartung/Publikationen/Downloads-Sterbefaelle/statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109.html"
+link = "statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109\\.xlsx"
+xlsx.sheet = "csv-12613-b01"
+expect = "Sterbefaelle"
+geo_scheme = "none"
+update_days = 21
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.sterbefaelle_wochen_alter"
+name = "Deaths by calendar week and age group, Germany (provisional, weekly edition)"
+topic = "mortality_and_health"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Sterbefaelle-Lebenserwartung/Publikationen/Downloads-Sterbefaelle/statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109.html"
+link = "statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109\\.xlsx"
+xlsx.sheet = "csv-12613-01"
+expect = "Kalenderwoche"
+geo_scheme = "none"
+check_days = 28
+update_days = 60
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.sterbefaelle_monate_laender"
+name = "Deaths by month, state and age group (provisional, weekly edition)"
+topic = "mortality_and_health"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Sterbefaelle-Lebenserwartung/Publikationen/Downloads-Sterbefaelle/statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109.html"
+link = "statistischer-bericht-sterbefaelle-tage-wochen-monate-aktuell-5126109\\.xlsx"
+xlsx.sheet = "csv-12613-11"
+expect = "Monat"
+geo_scheme = "state_name"
+check_days = 28
+update_days = 60
+added = 2026-10-26
+
+# =============================================================================================================
+# Special evaluations of the Zensus 2022 (one-time publications on www.destatis.de; they can be replaced or
+# removed without notice). The census of 2011 and 2022 publish the religious affiliation in three groups:
+# Roman Catholic Church, Protestant Church (both public-law), other/none/not stated.
+# =============================================================================================================
+
+[[snapshot]]
+id = "zensus2022.religion_gemeinden_2022"
+name = "Population by religious affiliation per municipality, district and state, Zensus 2022"
+topic = "religion"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "religionszugehoerigkeit_zenus2022_und_zensus2011_bundesland\\.xlsx"
+xlsx.sheet = "Religion_Zensus2022"
+xlsx.header_pattern = "^Amtlicher Gemeinde"
+xlsx.header_rows = 3
+expect = "Römisch-katholisch"
+geo_scheme = "ags"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.religion_gemeinden_2011"
+name = "Population by religious affiliation per municipality, district and state, Zensus 2011"
+topic = "religion"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "religionszugehoerigkeit_zenus2022_und_zensus2011_bundesland\\.xlsx"
+xlsx.sheet = "Religion_Zensus2011"
+xlsx.header_pattern = "^Amtlicher Gemeinde"
+xlsx.header_rows = 3
+expect = "Römisch-katholisch"
+geo_scheme = "ags"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.religion_wahlkreise"
+name = "Population by religious affiliation per Bundestag constituency, Zensus 2022"
+topic = "religion"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "religionszugehoerigkeit_je_btwkreis\\.xlsx"
+xlsx.sheet = "Daten"
+xlsx.header_pattern = "^Bundestagswahlkreis"
+xlsx.header_rows = 2
+expect = "Römisch-katholisch"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.auslaenderanteil_wahlkreise"
+name = "Share of foreigners per Bundestag constituency, Zensus 2022"
+topic = "migration_and_citizenship"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "auslaenderanteil_je_btwkreis\\.xlsx"
+xlsx.sheet = "Daten"
+xlsx.header_pattern = "^Bundestagswahlkreis"
+xlsx.header_rows = 2
+expect = "Ausländeranteil"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.staatsangehoerige_altersklassen_wahlkreise"
+name = "German citizens in five age groups per Bundestag constituency, Zensus 2022"
+topic = "population_structure"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "staatsangehoerige_5_altersklassen_btwkreis\\.xlsx"
+xlsx.sheet = "Daten"
+xlsx.header_pattern = "^Bundestagswahlkreis"
+xlsx.header_rows = 2
+expect = "Unter 18"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.familienstand_wahlkreise"
+name = "Population by marital status per Bundestag constituency, Zensus 2022"
+topic = "households_and_families"
+provider = "zensus2022"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Zensus2022/_inhalt.html"
+link = "familienstand_je_btwkreis\\.xlsx"
+xlsx.sheet = "Daten"
+xlsx.header_pattern = "^Bundestagswahlkreis"
+xlsx.header_rows = 2
+expect = "Verheiratet"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+# =============================================================================================================
+# Special evaluation of the Strafverfolgungsstatistik (Destatis, published once on 10 November 2021)
+# =============================================================================================================
+
+[[snapshot]]
+id = "destatis.untersuchungshaft_2019"
+name = "Persons with pre-trial detention by citizenship (German, not German) and state, 2019"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Staat/Justiz-Rechtspflege/Tabellen/sonderauswertung-untersuchungshaft.html"
+link = "sonderauswertung-untersuchungshaft\\.xlsx"
+xlsx.sheet = "U-Haft 2019"
+xlsx.header_pattern = "^Land \\| Erfasste"
+xlsx.header_rows = 4
+expect = "Untersuchungshaft"
+geo_scheme = "state_name"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.untersuchungshaft_2017"
+name = "Persons with pre-trial detention by citizenship (German, not German) and state, 2017"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Staat/Justiz-Rechtspflege/Tabellen/sonderauswertung-untersuchungshaft.html"
+link = "sonderauswertung-untersuchungshaft\\.xlsx"
+xlsx.sheet = "U-Haft 2017"
+xlsx.header_pattern = "^Land \\| Erfasste"
+xlsx.header_rows = 4
+expect = "Untersuchungshaft"
+geo_scheme = "state_name"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "destatis.untersuchungshaft_2014"
+name = "Persons with pre-trial detention by citizenship (German, not German) and state, 2014"
+topic = "crime_and_justice"
+provider = "destatis"
+format = "xlsx"
+page = "https://www.destatis.de/DE/Themen/Staat/Justiz-Rechtspflege/Tabellen/sonderauswertung-untersuchungshaft.html"
+link = "sonderauswertung-untersuchungshaft\\.xlsx"
+xlsx.sheet = "U-Haft 2014"
+xlsx.header_pattern = "^Land \\| Erfasste"
+xlsx.header_rows = 4
+expect = "Untersuchungshaft"
+geo_scheme = "state_name"
+check_days = 30
+added = 2026-10-26
+
+# =============================================================================================================
+# Sources that were checked and are not collected
+# =============================================================================================================
+
+[[excluded]]
+id = "bka.polizeiliche_kriminalstatistik"
+name = "Bundeskriminalamt, Polizeiliche Kriminalstatistik (tables by state and district)"
+url = "https://www.bka.de/DE/AktuelleInformationen/StatistikenLagebilder/PolizeilicheKriminalstatistik/pks_node.html"
+checked = 2026-10-26
+reason = "The robots.txt of www.bka.de sets a crawl delay of 180 seconds, longer than the maximum of 120 seconds of the pipeline: a check of the page, robots.txt, the TDM file and the tables would take 10 to 15 minutes of a run. The terms of reuse could not be read for the same reason (a secondary source names the Datenlizenz Deutschland 2.0 for the PKS yearbook). The PKS tables for Germany are collected through GENESIS-Online (statistic 24911); tables by state and district are not collected."
+
+[[excluded]]
+id = "dbk.kirchliche_statistik"
+name = "Deutsche Bischofskonferenz, Kirchliche Statistik (Catholic Church by diocese and state)"
+url = "https://www.dbk.de/themen/kirche-staat-und-recht/kirchliche-statistik"
+checked = 2026-10-26
+reason = "The website answers automated requests with HTTP 401 (bot protection); the statistics are published as PDF only."
+
+[[excluded]]
+id = "ekd.kirchenmitgliederzahlen"
+name = "Evangelische Kirche in Deutschland, Kirchenmitgliederzahlen (members by regional church and state, Catholics by state)"
+url = "https://www.ekd.de/kirchenmitgliederzahlen-downloads-44413.htm"
+checked = 2026-10-26
+reason = "The imprint reserves all rights of use (Eine weitere Verwendung ist ohne ausdrückliche Genehmigung der Rechteinhaber untersagt); the xlsx reports by regional church and state can be fetched (robots.txt allows them), but their redistribution is not permitted without a permission of the EKD."
+
+[[excluded]]
+id = "ba.statistik"
+name = "Statistik der Bundesagentur für Arbeit (labour market by district, monthly)"
+url = "https://statistik.arbeitsagentur.de/"
+checked = 2026-10-26
+reason = "The website answers automated requests with HTTP 403, and the robots.txt of the data API statistik-dr.arbeitsagentur.de disallows it. Unemployment by district is collected as an annual table of the Regionaldatenbank and in the structural data of the constituencies."
+
+[[excluded]]
+id = "bamf.asylgeschaeftsstatistik"
+name = "Bundesamt für Migration und Flüchtlinge, Asylgeschäftsstatistik (monthly asylum figures)"
+url = "https://www.bamf.de/DE/Themen/Statistik/Asylzahlen/asylzahlen-node.html"
+checked = 2026-10-26
+reason = "The robots.txt of www.bamf.de could not be fetched from GitHub-hosted runners in three checks (connection error); RFC 9309 then requires to assume that every path is disallowed. The monthly figures are published as PDF. Asylum applications and decisions are collected from Eurostat, persons seeking protection from GENESIS-Online (12531)."
+
+[[excluded]]
+id = "bbsr.inkar"
+name = "BBSR, INKAR (indicators of spatial and urban development by district)"
+url = "https://www.inkar.de/"
+checked = 2026-10-26
+reason = "The robots.txt of www.inkar.de could not be fetched from GitHub-hosted runners in three checks (connection error); RFC 9309 then requires to assume that every path is disallowed."
+
+[[excluded]]
+id = "opendata_ruhr.kirchenaustritte"
+name = "Open data Ruhr (Dortmund), church leavings by denomination and sex"
+url = "https://opendata.ruhr/"
+checked = 2026-10-26
+reason = "The robots.txt of opendata.ruhr returned a server error or timed out in three checks; RFC 9309 then requires to assume that every path is disallowed."
+
+[[excluded]]
+id = "open_nrw.kirchenaustritte_duesseldorf"
+name = "Open data Düsseldorf, church leavings since 1988"
+url = "https://opendata.duesseldorf.de/"
+checked = 2026-10-26
+reason = "ckan.open.nrw.de could not be reached (connection timeout), and opendata.duesseldorf.de offers no CKAN API at /api/3 (HTTP 404); the data set could not be located with the fetch rules."

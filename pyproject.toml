@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 # Same versions as in dataset.economics.germany, so that the shared modules run on a tested set
 dependencies = [
     "httpx==0.28.1",
+    "openpyxl==3.1.5",
     "pydantic==2.14.1",
     "python-dotenv==1.2.4",
 ]

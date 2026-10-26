@@ -13,7 +13,12 @@ on:
         type: boolean
         default: true
       concepts:
-        description: 'Comma-separated catalog entries to check, e.g. population,median_age; empty checks all'
+        description: 'Comma-separated catalog entries to check, e.g. population,median_age; empty checks all (none if only snapshots is set)'
+        type: string
+        required: false
+        default: ''
+      snapshots:
+        description: 'Comma-separated snapshot entries to check, e.g. ekd.kirchenmitglieder; empty checks all (none if only concepts is set)'
         type: string
         required: false
         default: ''
@@ -27,6 +32,11 @@ on:
         type: string
         required: false
         default: ''
+      probe_text:
+        description: 'Regular expression for the passages of the text of probed pages to list, e.g. Lizenz|Nutzung'
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: source-review
@@ -35,7 +45,7 @@ concurrency:
 jobs:
   review-sources:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
       pull-requests: write
@@ -44,8 +54,10 @@ jobs:
     env:
       OPEN_PR: ${{ (github.event_name == 'workflow_dispatch' && (inputs.pull_request == false || inputs.probe != '')) && 'off' || 'on' }}
       CONCEPTS: ${{ inputs.concepts }}
+      SNAPSHOTS: ${{ inputs.snapshots }}
       PROBE: ${{ inputs.probe }}
       PROBE_FILTER: ${{ inputs.probe_filter }}
+      PROBE_TEXT: ${{ inputs.probe_text }}
 
     steps:
     - name: Checkout Repository
@@ -63,6 +75,13 @@ jobs:
       run: uv sync --frozen
 
     - name: Review Sources
+      env:
+        GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
+        GENESIS_PASSWORD: ${{ secrets.GENESIS_PASSWORD }}
+        REGIONALSTATISTIK_TOKEN: ${{ secrets.REGIONALSTATISTIK_TOKEN }}
+        REGIONALSTATISTIK_PASSWORD: ${{ secrets.REGIONALSTATISTIK_PASSWORD }}
+        ZENSUS2022_TOKEN: ${{ secrets.ZENSUS2022_TOKEN }}
+        ZENSUS2022_PASSWORD: ${{ secrets.ZENSUS2022_PASSWORD }}
       run: |
         report="reviews/$(date -u +%Y-%m).md"
         if [ "$OPEN_PR" = "off" ]; then
@@ -74,8 +93,16 @@ jobs:
           if [ -n "$PROBE_FILTER" ]; then
             args+=(--link-filter "$PROBE_FILTER")
           fi
-        elif [ -n "$CONCEPTS" ]; then
-          args+=(--concepts "$CONCEPTS")
+          if [ -n "$PROBE_TEXT" ]; then
+            args+=(--text-filter "$PROBE_TEXT")
+          fi
+        else
+          if [ -n "$CONCEPTS" ]; then
+            args+=(--concepts "$CONCEPTS")
+          fi
+          if [ -n "$SNAPSHOTS" ]; then
+            args+=(--snapshots "$SNAPSHOTS")
+          fi
         fi
         uv run python src/source_review.py "${args[@]}"
         cat "$report"

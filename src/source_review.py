@@ -16,7 +16,14 @@ The review
    NUTS classification);
 4. reads the state and the run log: catalog entries without stored series,
    stale stored series and entries that failed in recent runs;
-5. fetches the terms of use of every provider and compares the hash of their
+5. fetches every active snapshot source of ``config/snapshots.toml`` (GENESIS
+   tables and files): unavailable items, refused credentials, file addresses
+   and content that changed since the last observation, items without rows,
+   items whose content did not change for longer than ``update_days`` and items
+   that were never stored; lists the other tables of the observed GENESIS
+   statistics as candidates (if a token is set) and the excluded sources that
+   are due for a new check;
+6. fetches the terms of use of every provider and compares the hash of their
    text with ``terms_hash`` in ``config/providers.toml``.
 
 The review writes a Markdown report and, when the text of a terms page
@@ -29,9 +36,9 @@ measurement log entry (CLAUDE.md, section 9). Every request goes through
 respect robots.txt.
 
 Usage:
-    uv run python src/source_review.py --report PATH [--concepts NAME,...] [--no-terms]
+    uv run python src/source_review.py --report PATH [--concepts NAME,...] [--snapshots ID,...] [--no-terms]
                                        [--providers PATH] [--output-dir PATH]
-    uv run python src/source_review.py --report PATH --probe "URL URL ..." [--link-filter REGEX]
+    uv run python src/source_review.py --report PATH --probe "URL URL ..." [--link-filter REGEX] [--text-filter REGEX]
 """
 import argparse
 import hashlib
@@ -39,6 +46,7 @@ import json
 import logging
 import re
 import sys
+import zipfile
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, field, replace
@@ -61,13 +69,25 @@ from collectors.sdmx import (
 )
 from collectors.series import DATASET as SERIES_DATASET
 from collectors.series import SeriesKey
+from collectors.snapshots import DATASET as SNAPSHOT_DATASET
+from collectors.snapshots import (
+    GENESIS_DATABASES,
+    GenesisError,
+    PublishedContent,
+    fetch_file,
+    fetch_genesis,
+    genesis_tables,
+    snapshot_hash,
+)
 from probe import probe_url
 from providers import CONFIG_PATH as PROVIDERS_PATH
 from providers import Provider, ProvidersError, load_providers, set_terms_hash
 from regions import Region, RegistryError, active_regions, load_regions
 from settings import Settings
-from state import RUN_LOG_FILE, SeenStore
-from web import FetchError, NotFoundError, WebClient
+from snapshots import CONFIG_PATH as SNAPSHOTS_PATH
+from snapshots import ExcludedSource, SnapshotConfigError, SnapshotSource, load_snapshot_config
+from state import RUN_LOG_FILE, SeenEntry, SeenStore
+from web import FetchError, NotFoundError, Response, WebClient
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +103,12 @@ MAX_CANDIDATES = 30
 MAX_SUCCESSORS = 3
 MAX_CODES_SHOWN = 30
 MAX_REPORT_NOTES = 40
+# An excluded source is checked again after this many days
+EXCLUDED_RECHECK_DAYS = 365
+# A snapshot entry added longer ago than this many days and never stored needs attention
+UNSTORED_GRACE_DAYS = 7
+MAX_GENESIS_CANDIDATES = 40
+MAX_CELLS_SHOWN = 8
 EUROSTAT_DSD_URL = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/datastructure/ESTAT/{flow}"
 _DIMENSION_TAG = re.compile(r"<(?:[\w-]+:)?Dimension\b([^>]*)>")
 _ATTRIBUTE = re.compile(r'\b(id|position)="([^"]*)"')
@@ -138,6 +164,36 @@ class TermsCheck:
 
 
 @dataclass
+class SnapshotCheck:
+    """Result of the live check of one snapshot entry.
+
+    Attributes:
+        snapshot_id (str): The snapshot entry.
+        format (str): Its format.
+        status (str): ok, attention (changed address, no rows, old or never stored content), no_access or failed.
+        rows (int): Rows of the published content.
+        title (Optional[str]): Title of the item at the source (table title, file name and sheet).
+        url (Optional[str]): Address that was fetched.
+        changed (Optional[str]): Day of the last stored change of the content.
+        columns (list[str]): Column names of the content.
+        first_row (list[Optional[str]]): First row of the content, as a check of the parsing.
+        problems (list[str]): Descriptions of the problems.
+        notes (list[str]): Remarks that need no action, e.g. content that the next run stores.
+    """
+    snapshot_id: str
+    format: str
+    status: str = "ok"
+    rows: int = 0
+    title: Optional[str] = None
+    url: Optional[str] = None
+    changed: Optional[str] = None
+    columns: list[str] = field(default_factory=list)
+    first_row: list[Optional[str]] = field(default_factory=list)
+    problems: list[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
+
+
+@dataclass
 class ReviewResult:
     """Everything the review found.
 
@@ -153,6 +209,10 @@ class ReviewResult:
         stale_series (list[str]): Entries with stored series whose newest period is old.
         run_failures (Counter): Failures per concept in the runs of the review window.
         terms (list[TermsCheck]): Checks of the terms pages.
+        snapshots (list[SnapshotCheck]): Live checks of the snapshot entries.
+        genesis_candidates (list[tuple[str, str, str]]): Provider, code and title of tables of the observed
+            GENESIS statistics that are not configured.
+        excluded (list[ExcludedSource]): Sources that were checked and not admitted.
         notes (list[str]): Further remarks.
     """
     checks: list[EntryCheck] = field(default_factory=list)
@@ -165,6 +225,9 @@ class ReviewResult:
     stale_series: list[str] = field(default_factory=list)
     run_failures: Counter[str] = field(default_factory=Counter)
     terms: list[TermsCheck] = field(default_factory=list)
+    snapshots: list[SnapshotCheck] = field(default_factory=list)
+    genesis_candidates: list[tuple[str, str, str]] = field(default_factory=list)
+    excluded: list[ExcludedSource] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
 
@@ -555,6 +618,104 @@ def recent_run_failures(state_dir: Path, since: datetime) -> Counter[str]:
 
 
 # ---------------------------------------------------------------------------
+# Snapshot sources
+# ---------------------------------------------------------------------------
+
+def check_snapshot(web: WebClient, source: SnapshotSource, stored: Optional[SeenEntry], today: date,
+                   cache: Optional[dict[str, Response]] = None) -> SnapshotCheck:
+    """Fetches a snapshot entry live and compares it with the last stored observation.
+
+    Args:
+        web: The HTTP client.
+        source: The snapshot entry.
+        stored: The state of its last observation; None if it was never stored.
+        today: Day of the review.
+        cache: Responses fetched in this review, so that a file that several entries read is downloaded once.
+
+    Returns:
+        SnapshotCheck: The result.
+    """
+    check = SnapshotCheck(source.id, source.format, changed=stored.data.get("changed") if stored else None)
+    content: Optional[PublishedContent]
+    try:
+        content = fetch_genesis(web, source) if source.format == "genesis" else fetch_file(web, source, {}, cache)
+    except GenesisError as e:
+        database = GENESIS_DATABASES[source.provider]
+        if e.access_denied:
+            check.status = "no_access"
+            check.problems.append(f"the database refused the credentials of {database.token_env}: {e.content}"
+                                  if database.credentials() else
+                                  f"no access without an account; set the secret {database.token_env}")
+        else:
+            check.status = "failed"
+            check.problems.append(str(e)[:300])
+        return check
+    except (FetchError, ValueError, zipfile.BadZipFile) as e:
+        check.status = "failed"
+        check.problems.append(str(e)[:300])
+        return check
+    if content is None:
+        check.status = "failed"
+        check.problems.append("the server answered an unconditional request with 304")
+        return check
+    check.rows, check.title, check.url = len(content.rows), content.title, content.url
+    check.columns, check.first_row = content.columns, content.rows[0] if content.rows else []
+    if source.format != "pdf" and not content.rows:
+        check.problems.append("the published content has no rows")
+    if stored is None:
+        if (today - source.added).days > UNSTORED_GRACE_DAYS:
+            check.problems.append(f"never stored since {source.added}; see the run log")
+        else:
+            check.notes.append("not stored yet")
+    else:
+        if stored.data.get("url") and stored.data["url"] != content.url:
+            check.problems.append(f"the file address changed (was {stored.data['url']}); the next run stores the "
+                                  "new file")
+        if stored.hash != snapshot_hash(source, content):
+            check.notes.append("the content changed since the last observation; the next run stores it")
+        changed = stored.data.get("changed")
+        if source.update_days and changed and (today - date.fromisoformat(changed)).days > source.update_days:
+            check.problems.append(f"the content did not change since {changed}, longer than the expected "
+                                  f"{source.update_days} days; the source may have moved or stopped")
+    if check.problems:
+        check.status = "attention"
+    return check
+
+
+def genesis_candidates(web: WebClient, sources: Sequence[SnapshotSource]) -> tuple[list[tuple[str, str, str]],
+                                                                                  list[str]]:
+    """Lists the tables of the observed GENESIS statistics that are not configured.
+
+    The statistic of a table is the part of its code before the hyphen (e.g. ``12612`` of ``12612-0104``).
+
+    Args:
+        web: The HTTP client.
+        sources: All snapshot entries, including removed ones.
+
+    Returns:
+        tuple: Provider, code and title of the tables, and notes on databases that could not be listed.
+    """
+    configured = {(source.provider, source.table) for source in sources if source.format == "genesis"}
+    candidates: list[tuple[str, str, str]] = []
+    notes: list[str] = []
+    for provider in sorted({provider for provider, _table in configured}):
+        database = GENESIS_DATABASES[provider]
+        if not database.credentials():
+            notes.append(f"{provider}: no candidate tables listed; the secret {database.token_env} is not set")
+            continue
+        statistics = sorted({(table or "").split("-", 1)[0] for source_provider, table in configured
+                             if source_provider == provider})
+        for statistic in statistics:
+            try:
+                tables = genesis_tables(web, database, f"{statistic}*")
+            except (GenesisError, FetchError, ValueError) as e:
+                notes.append(f"{provider}: tables of statistic {statistic} not listed: {e}")
+                continue
+            candidates.extend((provider, code, title) for code, title in tables if (provider, code) not in configured)
+    return candidates, notes
+
+
+# ---------------------------------------------------------------------------
 # Terms of use
 # ---------------------------------------------------------------------------
 
@@ -624,15 +785,20 @@ def check_terms(web: WebClient, provider: Provider) -> TermsCheck:
 # ---------------------------------------------------------------------------
 
 def run_review(settings: Settings, web: WebClient, now: datetime, concepts: Optional[set[str]] = None,
-               providers: Optional[list[Provider]] = None) -> ReviewResult:
+               providers: Optional[list[Provider]] = None, snapshot_ids: Optional[set[str]] = None,
+               snapshots_path: Path = SNAPSHOTS_PATH, provider_ids: Optional[set[str]] = None) -> ReviewResult:
     """Runs all checks of the review.
 
     Args:
         settings: The settings (output folder with the state).
         web: The HTTP client.
         now: Time of the review (UTC).
-        concepts: Catalog entries to check; None checks all active entries.
+        concepts: Catalog entries to check; None checks all active entries, an empty set none (and skips the
+            table of contents and the region check).
         providers: Providers whose terms are checked; None skips the terms.
+        snapshot_ids: Snapshot entries to check; None checks all active entries, an empty set none.
+        snapshots_path: The snapshot configuration.
+        provider_ids: Provider ids of the snapshot entries; None reads them from ``config/providers.toml``.
 
     Returns:
         ReviewResult: The findings.
@@ -645,6 +811,12 @@ def run_review(settings: Settings, web: WebClient, now: datetime, concepts: Opti
     unknown = sorted((concepts or set()) - {entry.concept for entry in catalog})
     if unknown:
         result.notes.append(f"unknown concepts: {', '.join(unknown)}")
+    check_snapshots(settings, web, today, result, snapshot_ids, snapshots_path, provider_ids)
+    if concepts is not None and not concepts:
+        result.run_failures = recent_run_failures(settings.state_dir, now - timedelta(days=REVIEW_WINDOW_DAYS))
+        for provider in providers or []:
+            result.terms.append(check_terms(web, provider))
+        return result
     toc: dict[str, TocEntry] = {}
     try:
         toc = fetch_eurostat_toc(web)
@@ -672,6 +844,41 @@ def run_review(settings: Settings, web: WebClient, now: datetime, concepts: Opti
     return result
 
 
+def check_snapshots(settings: Settings, web: WebClient, today: date, result: ReviewResult,
+                    snapshot_ids: Optional[set[str]], path: Path, providers: Optional[set[str]]) -> None:
+    """Checks the snapshot entries, lists GENESIS candidates and the excluded sources.
+
+    Args:
+        settings: The settings (output folder with the state).
+        web: The HTTP client.
+        today: Day of the review.
+        result: The review result to extend.
+        snapshot_ids: Entries to check; None checks all active entries, an empty set none.
+        path: The snapshot configuration.
+        providers: Provider ids; None reads them from ``config/providers.toml``.
+    """
+    if snapshot_ids is not None and not snapshot_ids:
+        return
+    try:
+        sources, result.excluded = load_snapshot_config(path, providers)
+    except (SnapshotConfigError, ProvidersError) as e:
+        result.notes.append(f"snapshot configuration invalid: {e}")
+        return
+    unknown = sorted((snapshot_ids or set()) - {source.id for source in sources})
+    if unknown:
+        result.notes.append(f"unknown snapshot entries: {', '.join(unknown)}")
+    stored = SeenStore.load(settings.state_dir, SNAPSHOT_DATASET)
+    cache: dict[str, Response] = {}
+    for source in sources:
+        if not source.active or (snapshot_ids is not None and source.id not in snapshot_ids):
+            continue
+        logger.info("Checking snapshot %s.", source.id)
+        result.snapshots.append(check_snapshot(web, source, stored.get(source.id), today, cache))
+    result.genesis_candidates, notes = genesis_candidates(
+        web, [source for source in sources if snapshot_ids is None or source.id in snapshot_ids])
+    result.notes.extend(notes)
+
+
 # ---------------------------------------------------------------------------
 # Report
 # ---------------------------------------------------------------------------
@@ -679,6 +886,55 @@ def run_review(settings: Settings, web: WebClient, now: datetime, concepts: Opti
 def _cell(text: Any) -> str:
     """Escapes a value for a Markdown table cell."""
     return " ".join(str(text).split()).replace("|", "\\|")
+
+
+def _shorten(cells: Sequence[Optional[str]]) -> str:
+    """Joins the first cells of a header or row for the report."""
+    text = " ; ".join("" if cell is None else cell for cell in cells[:MAX_CELLS_SHOWN])
+    return text + (f" ; ... ({len(cells)} cells)" if len(cells) > MAX_CELLS_SHOWN else "")
+
+
+def snapshot_section(result: ReviewResult, today: date) -> list[str]:
+    """Builds the report section on the snapshot sources.
+
+    Args:
+        result: The review result.
+        today: Day of the review.
+
+    Returns:
+        list[str]: The Markdown lines.
+    """
+    lines = ["", "## Snapshot sources", ""]
+    attention = [check for check in result.snapshots if check.status != "ok"]
+    if attention:
+        lines.extend(["| Entry | Format | Status | Problems |", "|---|---|---|---|"])
+        lines.extend(f"| `{check.snapshot_id}` | {check.format} | {check.status} | {_cell('; '.join(check.problems))} |"
+                     for check in attention)
+    elif result.snapshots:
+        lines.append("All checked entries are available.")
+    else:
+        lines.append("No snapshot entries checked.")
+    if result.snapshots:
+        lines.extend(["", "<details><summary>Published content of the snapshot entries</summary>", "",
+                      "| Entry | Status | Rows | Title at the source | Columns | First row | Last change stored | Notes |",
+                      "|---|---|---|---|---|---|---|---|"])
+        lines.extend(f"| `{check.snapshot_id}` | {check.status} | {check.rows:,} | {_cell(check.title or 'none')} | "
+                     f"{_cell(_shorten(check.columns))} | {_cell(_shorten(check.first_row))} | "
+                     f"{check.changed or 'none'} | {_cell('; '.join(check.notes))} |" for check in result.snapshots)
+        lines.extend(["", "</details>"])
+    if result.genesis_candidates:
+        lines.extend(["", f"**Other tables of the observed GENESIS statistics** ({len(result.genesis_candidates)}; "
+                          "candidates for new entries):", "", "| Database | Table | Title |", "|---|---|---|"])
+        lines.extend(f"| {provider} | `{code}` | {_cell(title)} |"
+                     for provider, code, title in result.genesis_candidates[:MAX_GENESIS_CANDIDATES])
+    if result.excluded:
+        lines.extend(["", "**Excluded sources** (checked and not collected; a source checked more than "
+                          f"{EXCLUDED_RECHECK_DAYS} days ago is due for a new check):", "",
+                      "| Source | Checked | Reason |", "|---|---|---|"])
+        lines.extend(f"| {_cell(item.name)} (`{item.id}`) | {item.checked}"
+                     f"{' (due)' if (today - item.checked).days > EXCLUDED_RECHECK_DAYS else ''} | "
+                     f"{_cell(item.reason)} |" for item in result.excluded)
+    return lines
 
 
 def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
@@ -695,13 +951,15 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
     statuses = Counter(check.status for check in result.checks)
     attention = [check for check in result.checks if check.status != "ok"]
     changed_terms = [check for check in result.terms if check.status in ("changed", "recorded")]
+    snapshot_statuses = Counter(check.status for check in result.snapshots)
+    due = [item for item in result.excluded if (now.date() - item.checked).days > EXCLUDED_RECHECK_DAYS]
     lines = [
         f"# Source review {now:%Y-%m}",
         "",
         f"Review of {now:%Y-%m-%d %H:%M} UTC. Checked {len(result.checks)} of {catalog_size} catalog entries live "
         f"(periods since {now.year - CHECK_YEARS}), the Eurostat table of contents "
-        f"({'read' if result.toc_available else 'not available'}), the German NUTS codes and the terms of "
-        f"{len(result.terms)} providers.",
+        f"({'read' if result.toc_available else 'not available'}), the German NUTS codes, "
+        f"{len(result.snapshots)} snapshot entries and the terms of {len(result.terms)} providers.",
         "",
         "## Table of Contents",
         "- [Summary](#summary)",
@@ -709,6 +967,7 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         "- [Coverage of the catalog entries](#coverage-of-the-catalog-entries)",
         "- [Datasets and regions](#datasets-and-regions)",
         "- [Stored series and recent runs](#stored-series-and-recent-runs)",
+        "- [Snapshot sources](#snapshot-sources)",
         "- [Terms of use](#terms-of-use)",
         "- [Next steps](#next-steps)",
         "",
@@ -719,6 +978,10 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         f"- **Datasets no longer listed by Eurostat:** {len(result.not_listed)}",
         f"- **Candidate datasets:** {len(result.candidates)}",
         f"- **Unregistered German NUTS codes:** {len(result.unregistered_regions)}",
+        f"- **Snapshot entries:** {snapshot_statuses.get('ok', 0)} ok, {snapshot_statuses.get('attention', 0)} need "
+        f"attention, {snapshot_statuses.get('no_access', 0)} without access, {snapshot_statuses.get('failed', 0)} "
+        f"failed",
+        f"- **Excluded sources due for a new check:** {len(due)}",
         f"- **Terms pages changed or recorded:** {len(changed_terms)}",
         "",
         "## Entries that need attention",
@@ -778,6 +1041,7 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
                      + ", ".join(f"`{name}` ({count})" for name, count in result.run_failures.most_common()))
     if not (result.unstored_entries or result.stale_series or result.run_failures):
         lines.append("Nothing to report.")
+    lines.extend(snapshot_section(result, now.date()))
     lines.extend(["", "## Terms of use", "", "| Provider | Page | Status | Detail |", "|---|---|---|---|"])
     lines.extend(f"| {check.provider} | {check.url} | {check.status} | {_cell(check.detail)} |" for check in result.terms)
     if not result.terms:
@@ -792,6 +1056,9 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         "measurement log of `project_architecture.md`.",
         "- Add candidate datasets that extend the catalog, with verified keys.",
         "- Add unregistered NUTS codes to `config/regions.toml`.",
+        "- Correct the address, link pattern or table of failing snapshot entries in `config/snapshots.toml`, or "
+        "remove them with `removed` and `removed_reason`; set the secrets of databases without access; check the "
+        "excluded sources that are due again with the probe of this workflow.",
         "- Read the terms pages marked as changed; the pull request records their new hash in "
         "`config/providers.toml`.",
         "- Merge this pull request to keep the report in `reviews/`. The next review replaces the branch, so merge "
@@ -804,7 +1071,8 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
 # Entry point
 # ---------------------------------------------------------------------------
 
-def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, web: Optional[WebClient] = None) -> int:
+def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, web: Optional[WebClient] = None,
+               text_filter: Optional[str] = None) -> int:
     """Checks URLs with the fetch rules and writes their description as a Markdown report.
 
     Args:
@@ -812,6 +1080,7 @@ def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, we
         link_filter: Regular expression for the links of HTML pages to list.
         report: Path of the report.
         web: HTTP client; created if omitted.
+        text_filter: Regular expression for the passages of the text of HTML pages to list.
 
     Returns:
         int: 0.
@@ -819,12 +1088,13 @@ def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, we
     now = datetime.now(timezone.utc).replace(microsecond=0)
     lines = [f"# Source probe {now:%Y-%m-%d %H:%M} UTC", "",
              f"Checked {len(urls)} URLs with the fetch rules of the pipeline"
-             + (f"; links filtered with `{link_filter}`" if link_filter else "") + ".", ""]
+             + (f"; links filtered with `{link_filter}`" if link_filter else "")
+             + (f"; passages of the text matching `{text_filter}`" if text_filter else "") + ".", ""]
     client = web or WebClient()
     try:
         for url in urls:
             logger.info("Probing %s.", url)
-            lines.extend([f"## {url}", "", "```text", *probe_url(client, url, link_filter), "```", ""])
+            lines.extend([f"## {url}", "", "```text", *probe_url(client, url, link_filter, text_filter), "```", ""])
     finally:
         if web is None:
             client.close()
@@ -844,13 +1114,19 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="Reviews the data sources and writes a report.")
     parser.add_argument("--report", type=Path, required=True, help="path of the Markdown report to write")
-    parser.add_argument("--concepts", help="comma-separated catalog entries to check (default: all active entries)")
+    parser.add_argument("--concepts", help="comma-separated catalog entries to check (default: all active entries; "
+                                           "with --snapshots only, none)")
+    parser.add_argument("--snapshots", help="comma-separated snapshot entries to check (default: all active entries; "
+                                            "with --concepts only, none)")
     parser.add_argument("--terms", action=argparse.BooleanOptionalAction, default=True,
                         help="check the terms pages of the providers (default: on)")
     parser.add_argument("--providers", type=Path, default=PROVIDERS_PATH, help="the provider configuration")
+    parser.add_argument("--snapshot-config", type=Path, default=SNAPSHOTS_PATH, help="the snapshot configuration")
     parser.add_argument("--probe", help="URLs separated by spaces: check them with the fetch rules and describe "
                                          "their content instead of running the review")
     parser.add_argument("--link-filter", help="regular expression for the links of probed HTML pages to list")
+    parser.add_argument("--text-filter", help="regular expression for the passages of the text of probed HTML pages "
+                                              "to list, e.g. the terms of reuse")
     parser.add_argument("--output-dir", type=Path,
                         help="folder with the datasets and state (default: data/ in GitHub Actions, "
                              "~/Downloads/german_sociodemographics_dataset locally)")
@@ -871,7 +1147,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
     if args.probe:
-        return run_probes(args.probe.split(), args.link_filter, args.report)
+        return run_probes(args.probe.split(), args.link_filter, args.report, text_filter=args.text_filter)
     try:
         settings = Settings.from_env()
         if args.output_dir is not None:
@@ -882,9 +1158,15 @@ def main(argv: Optional[list[str]] = None) -> int:
         logger.error("The review cannot start: %s", e)
         return 1
     concepts = {name.strip() for name in args.concepts.split(",") if name.strip()} if args.concepts else None
+    snapshot_ids = {name.strip() for name in args.snapshots.split(",") if name.strip()} if args.snapshots else None
+    if concepts is not None and snapshot_ids is None:
+        snapshot_ids = set()
+    elif snapshot_ids is not None and concepts is None:
+        concepts = set()
     now = datetime.now(timezone.utc).replace(microsecond=0)
     with WebClient() as web:
-        result = run_review(settings, web, now, concepts, providers if args.terms else None)
+        result = run_review(settings, web, now, concepts, providers if args.terms else None, snapshot_ids,
+                            args.snapshot_config, {provider.id for provider in providers})
     text = args.providers.read_text(encoding="utf-8")
     for check in result.terms:
         if check.status in ("changed", "recorded") and check.new_hash:
@@ -894,8 +1176,10 @@ def main(argv: Optional[list[str]] = None) -> int:
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(build_report(result, now, catalog_size), encoding="utf-8", newline="\n")
     statuses = Counter(check.status for check in result.checks)
-    logger.info("Source review: %s; %d candidates, %d unregistered regions; report written to %s.",
+    snapshot_statuses = Counter(check.status for check in result.snapshots)
+    logger.info("Source review: %s; snapshots: %s; %d candidates, %d unregistered regions; report written to %s.",
                 ", ".join(f"{count} {status}" for status, count in sorted(statuses.items())) or "no entries",
+                ", ".join(f"{count} {status}" for status, count in sorted(snapshot_statuses.items())) or "none",
                 len(result.candidates), len(result.unregistered_regions), args.report)
     return 0
 

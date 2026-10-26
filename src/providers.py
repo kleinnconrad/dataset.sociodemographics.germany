@@ -3,7 +3,9 @@ The providers of the statistical series and their terms of use (``config/provide
 
 Every ``[[provider]]`` entry names an organization and interface, the terms of
 reuse that the records carry in their field ``license``, the required
-attribution, and the page with the terms. The monthly source review fetches
+attribution, and the page with the terms. The providers of the statistical
+series (``schema.Provider``) and of the snapshot sources
+(``config/snapshots.toml``) are listed here. The monthly source review fetches
 every terms page and compares the hash of its text with ``terms_hash``; a
 change is proposed in the review pull request, so that the terms are read
 again before the change is merged.
@@ -79,8 +81,8 @@ def load_providers(path: Path = CONFIG_PATH) -> list[Provider]:
             if unknown:
                 raise ValueError(f"unknown keys: {', '.join(unknown)}")
             provider_id = _required_str(raw, "id")
-            if provider_id not in get_args(ProviderId):
-                raise ValueError(f"unknown provider id {provider_id!r}")
+            if not re.fullmatch(r"[a-z0-9_]+", provider_id):
+                raise ValueError(f"provider id {provider_id!r} must be lower-case letters, digits and underscores")
             since = raw.get("terms_hash_since")
             if since is not None and (not isinstance(since, date) or isinstance(since, datetime)):
                 raise ValueError("terms_hash_since must be a date")
@@ -100,7 +102,7 @@ def load_providers(path: Path = CONFIG_PATH) -> list[Provider]:
         problems.append(f"duplicate ids: {', '.join(duplicates)}")
     missing = sorted(set(get_args(ProviderId)) - set(ids))
     if missing:
-        problems.append(f"providers without an entry: {', '.join(missing)}")
+        problems.append(f"series providers without an entry: {', '.join(missing)}")
     if problems:
         raise ProvidersError(f"{path}: " + "; ".join(problems))
     return providers

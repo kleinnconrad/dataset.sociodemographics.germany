@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 START_MARKER = "<!-- DATASET_OVERVIEW_START -->"
 END_MARKER = "<!-- DATASET_OVERVIEW_END -->"
 SERIES_DATASET = "sociodemographic_series"
+# Fields whose distinct values are not counted: the published content of the snapshots
+UNCOUNTED_FIELDS = frozenset({"rows", "labels"})
 
 
 @dataclass
@@ -144,7 +146,8 @@ def field_lines(datasets: dict[str, DatasetData]) -> list[str]:
         for name, field in DATASET_MODELS[dataset].model_fields.items():
             values = [record.get(name) for record in data.records]
             filled = sum(1 for value in values if _is_filled(value))
-            lines.append(f"| `{name}` | {_cell(field.description)} | {_share(filled, total)} | {_distinct(values):,} |")
+            distinct = "not counted" if name in UNCOUNTED_FIELDS else f"{_distinct(values):,}"
+            lines.append(f"| `{name}` | {_cell(field.description)} | {_share(filled, total)} | {distinct} |")
         lines.extend(["", "</details>", ""])
     return lines
 

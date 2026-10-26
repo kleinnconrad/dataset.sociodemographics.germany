@@ -32,3 +32,41 @@ license = "ECB (reuse free of charge with acknowledgement of the source)"
 attribution = "Source: ECB statistics"
 terms_url = "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html"
 notes = "Policy regarding the reuse of ESCB statistics: free of charge for commercial and non-commercial use, provided the source is quoted and the data are not altered."
+
+# Providers of the snapshot sources (config/snapshots.toml)
+
+[[provider]]
+id = "destatis"
+name = "Statistisches Bundesamt (Destatis)"
+api = "https://genesis.destatis.de/genesisWS/rest/2020"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "Datenquelle: Statistisches Bundesamt (Destatis), Genesis-Online; Datenlizenz by-2-0"
+terms_url = "https://www.destatis.de/DE/Service/Impressum/copyright-genesis-online.html"
+notes = "GENESIS-Online (web service with a free account) and the files of www.destatis.de (Statistische Berichte). The page Copyright allgemein (https://www.destatis.de/DE/Service/Impressum/copyright-allgemein.html) permits the reproduction and distribution of texts, data and graphics, also in extracts, with a reference to the source, for non-commercial and commercial purposes."
+
+[[provider]]
+id = "regionalstatistik"
+name = "Statistische Ämter des Bundes und der Länder, Regionaldatenbank Deutschland"
+api = "https://www.regionalstatistik.de/genesisws/rest/2020"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "Statistische Ämter des Bundes und der Länder, Regionaldatenbank Deutschland; Datenlizenz by-2-0"
+terms_url = "https://www.statistikportal.de/de/open-data"
+notes = "The robots.txt of www.regionalstatistik.de disallows every path; the web service is called as a documented API, whose base URL the open-data page of the statistical offices names for programmatic use. Needs a free account. Tables of the Bundesagentur für Arbeit in the database name it as source."
+
+[[provider]]
+id = "zensus2022"
+name = "Statistische Ämter des Bundes und der Länder, Zensus 2022"
+api = "https://ergebnisse.zensus2022.de/api/rest/2020"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "Statistische Ämter des Bundes und der Länder, Zensus 2022; Datenlizenz by-2-0"
+terms_url = "https://www.statistikportal.de/de/open-data"
+notes = "Zensus database (web service with a free account) and the special evaluations of the Zensus 2022 on www.destatis.de. The files state: Sie können Informationen speichern, (auch auszugsweise) mit Quellenangabe weitergeben, vervielfältigen und verbreiten."
+
+[[provider]]
+id = "bundeswahlleiterin"
+name = "Die Bundeswahlleiterin"
+api = "https://www.bundeswahlleiterin.de"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "© Die Bundeswahlleiterin, Wiesbaden; raw data of columns 35 to 48 of the structural data: © Bundesagentur für Arbeit"
+terms_url = "https://www.bundeswahlleiterin.de/info/impressum.html"
+notes = "The imprint permits the reproduction and distribution, also in extracts, with a reference to the source, for non-commercial and commercial purposes; the CSV files state the Datenlizenz Deutschland - Namensnennung - Version 2.0."

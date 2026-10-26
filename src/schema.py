@@ -1,7 +1,11 @@
 """
 Defines the Pydantic models of the German sociodemographics dataset.
 
-Every record written to disk is a subclass of ``RecordBase``. Vocabularies are
+Every record written to disk is a subclass of ``RecordBase``. The statistical
+series of the SDMX providers are stored as vintages
+(``SociodemographicSeriesRecord``); sources that overwrite or remove what they
+published are stored as snapshots of their published content
+(``SnapshotRecord``). Vocabularies are
 ``Literal`` aliases, so that the stored values are validated and the README
 can list them.
 """
@@ -26,7 +30,15 @@ Frequency = Literal["W", "M", "Q", "A"]
 GeoLevel = Literal["eu", "country", "nuts1", "nuts2", "nuts3"]
 SeriesTopic = Literal["population_structure", "population_change", "births_and_fertility", "mortality_and_health",
                       "migration_and_citizenship", "households_and_families", "education", "income_and_poverty",
-                      "wealth", "housing", "labour_market", "regional_economy"]
+                      "wealth", "housing", "labour_market", "regional_economy", "religion", "regional_structure",
+                      "crime_and_justice"]
+# Formats of the published content of a snapshot source: a table of a GENESIS database (flat CSV), a CSV, xlsx or
+# JSON file, a table of an HTML page, or a PDF document that is archived without rows
+SnapshotFormat = Literal["genesis", "csv", "xlsx", "json", "html", "pdf"]
+# Region codes used in the content of a snapshot: NUTS codes, official keys of states, districts and municipalities
+# (Amtlicher Gemeindeschlüssel or Regionalschlüssel), numbers of the Bundestag constituencies, names of the
+# states, dioceses, regional churches of the EKD, or none (Germany only)
+GeoScheme = Literal["nuts", "ags", "constituency", "state_name", "diocese", "regional_church", "none"]
 
 
 # ---------------------------------------------------------------------------
@@ -101,10 +113,49 @@ class RegionRecord(RecordBase):
     removed_reason: Optional[str] = Field(description="Why the region was removed.")
 
 
+class SnapshotRecord(RecordBase):
+    """The content that a source without a reliable history published at one observation, stored again only when it changes."""
+    snapshot_id: str = Field(description="Stable id of the published item: provider and item, e.g. 'zensus2022.religion_wahlkreise' or 'destatis.12612-0002'.")
+    name: str = Field(description="Name of the item in the snapshot configuration.")
+    topic: SeriesTopic = Field(description="Topic group of the item.")
+    provider: str = Field(description="Provider id of config/providers.toml.")
+    item: str = Field(description="Id of the item at the provider: the table code, or the name of the fetched file.")
+    format: SnapshotFormat = Field(description="Format of the published content: genesis, csv, xlsx, json, html or pdf.")
+    geo_scheme: GeoScheme = Field(description="Region codes used in the content: nuts, ags (official keys of states, districts and municipalities), constituency (numbers of the Bundestag constituencies), state_name (names of the states), diocese, regional_church or none (Germany only).")
+    page_url: Optional[str] = Field(description="Page from which the address of the published file was read; null for a fixed address or an API.")
+    source_title: Optional[str] = Field(description="Title of the item as the source states it, e.g. the title of a GENESIS table or the file name.")
+    source_updated: Optional[datetime] = Field(description="Last change of the item as the source states it (UTC), e.g. the Last-Modified header; null if not stated.")
+    content_hash: str = Field(description="Hash of the columns and rows (or of the file of an archived document). A record is written only when it differs from the previous observation.")
+    previous_hash: Optional[str] = Field(description="content_hash of the previous record of the item; null for the first observation.")
+    columns: list[str] = Field(description="Column names of the rows. For GENESIS tables: time and the codes of the variables and their attributes, value, value_unit, value_variable_code.")
+    rows: list[list[Optional[str]]] = Field(description="The published rows as text, exactly as the source wrote the cells (numbers keep their notation, e.g. decimal commas); null for an empty cell. Empty for an archived document.")
+    row_count: int = Field(description="Number of rows.")
+    labels: dict[str, str] = Field(description="Labels of the codes in the rows, e.g. {'KREISE:08222': 'Mannheim, Stadtkreis'} for GENESIS tables; empty if the rows hold the labels.")
+    archived_file: Optional[str] = Field(description="Path of the published file in this repository (data/files/...) if the file itself is archived, e.g. a PDF document.")
+    byte_size: int = Field(description="Size of the published file in bytes.")
+
+
+class SnapshotCatalogRecord(RecordBase):
+    """An entry of the snapshot configuration, recorded when it appears or changes."""
+    snapshot_id: str = Field(description="Stable id of the item; the join key of source_snapshots.")
+    name: str = Field(description="Name of the item.")
+    topic: SeriesTopic = Field(description="Topic group of the item.")
+    provider: str = Field(description="Provider id of config/providers.toml.")
+    format: SnapshotFormat = Field(description="Format of the published content.")
+    address: str = Field(description="Where the item is read: the GENESIS database and table, the fixed file address, or the page and the pattern of the file link.")
+    geo_scheme: GeoScheme = Field(description="Region codes used in the content.")
+    archive: bool = Field(description="Whether the published file itself is archived in data/files/.")
+    added: date = Field(description="Day on which the item was added to the configuration; start of collection.")
+    removed: Optional[date] = Field(description="Day on which the item was removed from the configuration; end of collection.")
+    removed_reason: Optional[str] = Field(description="Why the item was removed.")
+
+
 DATASET_MODELS: dict[str, type[RecordBase]] = {
     "sociodemographic_series": SociodemographicSeriesRecord,
     "series_catalog": SeriesCatalogRecord,
     "regions": RegionRecord,
+    "source_snapshots": SnapshotRecord,
+    "snapshot_catalog": SnapshotCatalogRecord,
 }
 
 

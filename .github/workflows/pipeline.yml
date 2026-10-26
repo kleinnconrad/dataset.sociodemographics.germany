@@ -64,7 +64,16 @@ jobs:
           cp -r data/state "$RUNNER_TEMP/$MODE/"
         fi
 
+    # The accounts of the GENESIS databases are optional; without them the genesis collector counts its tables as
+    # no_access. Secrets are not passed to workflows of pull requests from forks.
     - name: Execute Pipeline
+      env:
+        GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
+        GENESIS_PASSWORD: ${{ secrets.GENESIS_PASSWORD }}
+        REGIONALSTATISTIK_TOKEN: ${{ secrets.REGIONALSTATISTIK_TOKEN }}
+        REGIONALSTATISTIK_PASSWORD: ${{ secrets.REGIONALSTATISTIK_PASSWORD }}
+        ZENSUS2022_TOKEN: ${{ secrets.ZENSUS2022_TOKEN }}
+        ZENSUS2022_PASSWORD: ${{ secrets.ZENSUS2022_PASSWORD }}
       run: |
         case "$MODE" in
           normal) uv run python src/main.py ;;

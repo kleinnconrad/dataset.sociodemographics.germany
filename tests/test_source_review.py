@@ -5,19 +5,23 @@ from datetime import date, datetime, timezone
 
 from catalog import load_catalog
 from collectors.sdmx import ECB, EUROSTAT, EUROSTAT_TOC_URL, parse_toc
-from conftest import CATALOG_FIXTURE, FIXTURES_DIR, REGIONS_FIXTURE
+from conftest import CATALOG_FIXTURE, FIXTURES_DIR, PROVIDERS_FIXTURE, REGIONS_FIXTURE
 from providers import load_providers
 from regions import active_regions
 from settings import Settings
+from snapshots import ExcludedSource, load_snapshot_config
 from source_review import (
     EUROSTAT_DSD_URL,
     ReviewResult,
+    SnapshotCheck,
     TermsCheck,
     build_report,
     candidate_datasets,
     check_entry,
+    check_snapshot,
     check_terms,
     eurostat_dimensions,
+    genesis_candidates,
     is_stale,
     page_text,
     period_end,
@@ -27,7 +31,7 @@ from source_review import (
     stored_coverage,
     unregistered_regions,
 )
-from state import SeenStore, append_run_log
+from state import SeenEntry, SeenStore, append_run_log
 
 TODAY = date(2026, 11, 1)
 NOW = datetime(2026, 11, 1, 6, 17, tzinfo=timezone.utc)
@@ -171,7 +175,8 @@ def test_run_review_and_report(fake_web, tmp_path) -> None:
     fake_web.add(EUROSTAT_TOC_URL, (FIXTURES_DIR / "sdmx" / "toc.txt").read_text(encoding="utf-8"),
                  content_type="text/plain")
     settings = replace(Settings(), output_dir=tmp_path / "data")
-    result = run_review(settings, fake_web.client(), NOW, concepts={"median_age", "unknown_concept"})
+    result = run_review(settings, fake_web.client(), NOW, concepts={"median_age", "unknown_concept"},
+                        snapshot_ids=set())
     assert result.toc_available
     assert [check.concept for check in result.checks] == ["median_age"]
     assert result.checks[0].status == "no_data"
@@ -189,3 +194,92 @@ def test_report_lists_changed_terms() -> None:
     assert "- **Terms pages changed or recorded:** 1" in report
     assert "| ecb | https://x.example | changed | the text differs |" in report
     json.dumps(report)
+
+
+SNAPSHOT_FIXTURE = FIXTURES_DIR / "config" / "snapshots.toml"
+PROVIDER_IDS = {provider.id for provider in load_providers(PROVIDERS_FIXTURE)}
+ZENSUS = "https://ergebnisse.zensus2022.de/api/rest/2020/"
+PAGE = "https://wahl.example/strukturdaten.html"
+FILE = "https://wahl.example/dam/jcr/abc/btw2025_strukturdaten.csv"
+STRUCTURE_CSV = "Strukturdaten\n© Die Bundeswahlleiterin\nWkr-Nr.;Name;Bevölkerung\n1;Flensburg – Schleswig;250,3\n"
+
+
+def snapshot_sources():
+    return {source.id: source for source in load_snapshot_config(SNAPSHOT_FIXTURE, PROVIDER_IDS)[0]}
+
+
+def stored_entry(url: str, changed: str, item_hash: str = "old") -> SeenEntry:
+    return SeenEntry(hash=item_hash, first_seen=date(2026, 1, 6), last_seen=date(2026, 10, 30), revision=0,
+                     data={"url": url, "changed": changed})
+
+
+def test_snapshot_check_reports_changed_addresses_and_old_content(fake_web) -> None:
+    fake_web.add(PAGE, '<a href="/dam/jcr/abc/btw2025_strukturdaten.csv">CSV</a>')
+    fake_web.add(FILE, STRUCTURE_CSV, content_type="text/csv")
+    source = replace(snapshot_sources()["bundeswahlleiterin.btw2025_strukturdaten"], update_days=200)
+    check = check_snapshot(fake_web.client(), source, stored_entry(FILE, "2026-09-01"), TODAY)
+    assert check.status == "ok" and check.rows == 1 and check.title == "btw2025_strukturdaten.csv"
+    assert check.columns == ["Wkr-Nr.", "Name", "Bevölkerung"] and check.first_row == ["1", "Flensburg – Schleswig", "250,3"]
+    assert check.notes == ["the content changed since the last observation; the next run stores it"]
+    moved = check_snapshot(fake_web.client(), source, stored_entry("https://wahl.example/old.csv", "2026-01-02"), TODAY)
+    assert moved.status == "attention"
+    assert any("file address changed" in problem for problem in moved.problems)
+    assert any("did not change since 2026-01-02" in problem for problem in moved.problems)
+    assert check_snapshot(fake_web.client(), source, None, TODAY).notes == ["not stored yet"]
+    never = check_snapshot(fake_web.client(), replace(source, added=date(2026, 10, 1)), None, TODAY)
+    assert never.status == "attention" and "never stored" in never.problems[0]
+    wrong = check_snapshot(fake_web.client(), replace(source, expect="Wahlkreis-Nr"), None, TODAY)
+    assert wrong.status == "failed" and "does not match" in wrong.problems[0]
+
+
+def test_snapshot_check_without_token_reports_the_secret(fake_web, monkeypatch) -> None:
+    monkeypatch.delenv("ZENSUS2022_TOKEN", raising=False)
+    fake_web.add(ZENSUS + "metadata/table", {"Status": {"Code": 15, "Content": "Sie sind nicht berechtigt."}})
+    check = check_snapshot(fake_web.client(), snapshot_sources()["zensus2022.1000A-1018"], None, TODAY)
+    assert check.status == "no_access" and "ZENSUS2022_TOKEN" in check.problems[0]
+    missing = check_snapshot(fake_web.client(), snapshot_sources()["ekd.kirchenmitglieder_bericht"], None, TODAY)
+    assert missing.status == "failed" and "404" in missing.problems[0]
+
+
+def test_genesis_candidates_need_a_token(fake_web, monkeypatch) -> None:
+    sources = list(snapshot_sources().values())
+    monkeypatch.delenv("ZENSUS2022_TOKEN", raising=False)
+    assert genesis_candidates(fake_web.client(), sources) == (
+        [], ["zensus2022: no candidate tables listed; the secret ZENSUS2022_TOKEN is not set"])
+    monkeypatch.setenv("ZENSUS2022_TOKEN", "token")
+    fake_web.add(ZENSUS + "catalogue/tables", {"Status": {"Code": 0}, "List": [
+        {"Code": "1000A-1018", "Content": "Personen: Religion"}, {"Code": "1000A-1019", "Content": "Personen:\nAlter"}]})
+    assert genesis_candidates(fake_web.client(), sources) == ([("zensus2022", "1000A-1019", "Personen: Alter")], [])
+
+
+def test_review_of_snapshots_only_skips_the_catalog(fake_web, tmp_path, monkeypatch) -> None:
+    monkeypatch.delenv("ZENSUS2022_TOKEN", raising=False)
+    fake_web.add(PAGE, '<a href="/dam/jcr/abc/btw2025_strukturdaten.csv">CSV</a>')
+    fake_web.add(FILE, STRUCTURE_CSV, content_type="text/csv")
+    settings = replace(Settings(), output_dir=tmp_path / "data")
+    result = run_review(settings, fake_web.client(), NOW, concepts=set(),
+                        snapshot_ids={"bundeswahlleiterin.btw2025_strukturdaten", "unknown.entry"},
+                        snapshots_path=SNAPSHOT_FIXTURE, provider_ids=PROVIDER_IDS)
+    assert not result.checks and not result.toc_available
+    assert [check.snapshot_id for check in result.snapshots] == ["bundeswahlleiterin.btw2025_strukturdaten"]
+    assert "unknown snapshot entries: unknown.entry" in result.notes
+    assert [item.id for item in result.excluded] == ["dbk.kirchliche_statistik"]
+    assert not any(EUROSTAT_TOC_URL in url for url in fake_web.requested)
+
+
+def test_report_lists_snapshot_problems_and_excluded_sources() -> None:
+    result = ReviewResult(
+        snapshots=[SnapshotCheck("zensus2022.1000A-1018", "genesis", "no_access",
+                                 problems=["no access without an account; set the secret ZENSUS2022_TOKEN"]),
+                   SnapshotCheck("ekd.bericht", "xlsx", rows=12, title="Bericht.xlsx (Tabelle 1)", changed="2026-10-02",
+                                 columns=[f"c{number}" for number in range(10)], first_row=["01", None])],
+        genesis_candidates=[("zensus2022", "1000A-1019", "Personen: Alter")],
+        excluded=[ExcludedSource("dbk.x", "DBK", "https://www.dbk.de/", date(2025, 6, 1), "HTTP 401")])
+    report = build_report(result, NOW, 54)
+    assert "- [Snapshot sources](#snapshot-sources)" in report and "## Snapshot sources" in report
+    assert "- **Snapshot entries:** 1 ok, 0 need attention, 1 without access, 0 failed" in report
+    assert "- **Excluded sources due for a new check:** 1" in report
+    assert "| `zensus2022.1000A-1018` | genesis | no_access | no access without an account" in report
+    assert "| zensus2022 | `1000A-1019` | Personen: Alter |" in report
+    assert "| c0 ; c1 ; c2 ; c3 ; c4 ; c5 ; c6 ; c7 ; ... (10 cells) | 01 ; |" in report
+    assert "| DBK (`dbk.x`) | 2025-06-01 (due) | HTTP 401 |" in report

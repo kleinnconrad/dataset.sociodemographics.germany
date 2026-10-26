@@ -32,3 +32,27 @@ license = "ECB (reuse free of charge with acknowledgement of the source)"
 attribution = "Source: ECB statistics"
 terms_url = "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html"
 notes = "Policy regarding the reuse of ESCB statistics: free of charge for commercial and non-commercial use, provided the source is quoted and the data are not altered."
+
+[[provider]]
+id = "zensus2022"
+name = "Statistische Ämter des Bundes und der Länder, Zensus 2022 database"
+api = "https://ergebnisse.zensus2022.de/api/rest/2020"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "Statistische Ämter des Bundes und der Länder"
+terms_url = "https://ergebnisse.zensus2022.de/datenbank/online/"
+
+[[provider]]
+id = "bundeswahlleiterin"
+name = "Die Bundeswahlleiterin"
+api = "https://www.bundeswahlleiterin.de"
+license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
+attribution = "Die Bundeswahlleiterin"
+terms_url = "https://www.bundeswahlleiterin.de/service/impressum.html"
+
+[[provider]]
+id = "ekd"
+name = "Evangelische Kirche in Deutschland"
+api = "https://www.ekd.de"
+license = "terms of the EKD"
+attribution = "EKD"
+terms_url = "https://www.ekd.de/impressum.htm"

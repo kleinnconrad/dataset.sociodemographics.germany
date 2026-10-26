@@ -2,9 +2,13 @@
 Executes one pipeline run.
 
 The collectors run one after another in COLLECTOR_ORDER: first the
-registries (series catalog and regions), which send no requests, then the
-statistical series of the ECB and of Eurostat. Each collector runs in isolation: a failure is logged and
-recorded in ``state/collectors.json`` and the run log, and the other
+registries (series catalog, regions, snapshot configuration), which send no
+requests, then the snapshots of the volatile sources (files of websites,
+GENESIS tables), because these sources do not keep what they published, and
+last the statistical series of the ECB and of Eurostat, whose providers keep
+the history and can be fetched by a later run. Each collector runs in
+isolation: a failure is logged and recorded in ``state/collectors.json`` and
+the run log, and the other
 collectors continue. The data that a failing collector has already emitted
 stays written.
 
@@ -25,15 +29,17 @@ from datetime import datetime
 from typing import Any, Optional
 
 from collectors.base import Collector, CollectorSkipped, RunContext, utc_now
-from collectors.registries import RegionsCollector, SeriesCatalogCollector
+from collectors.registries import RegionsCollector, SeriesCatalogCollector, SnapshotCatalogCollector
 from collectors.sdmx import EcbCollector, EurostatCollector
+from collectors.snapshots import FilesCollector, GenesisCollector
 from settings import Settings
 from state import CollectorStates, append_run_log
 from web import WebClient
 
 logger = logging.getLogger(__name__)
 
-COLLECTOR_ORDER: tuple[str, ...] = ("series_catalog", "regions", "ecb", "eurostat")
+COLLECTOR_ORDER: tuple[str, ...] = ("series_catalog", "regions", "snapshot_catalog", "files", "genesis", "ecb",
+                                    "eurostat")
 # Request intervals per host in seconds; hosts not listed get one request per second.
 HOST_INTERVALS: dict[str, float] = {}
 # Outcomes that make the run exit with code 1
@@ -101,7 +107,8 @@ def build_collectors() -> list[Collector]:
     """
     collectors: dict[str, Collector] = {
         collector.name: collector for collector in (
-            SeriesCatalogCollector(), RegionsCollector(), EcbCollector(), EurostatCollector(),
+            SeriesCatalogCollector(), RegionsCollector(), SnapshotCatalogCollector(), FilesCollector(),
+            GenesisCollector(), EcbCollector(), EurostatCollector(),
         )
     }
     return [collectors[name] for name in COLLECTOR_ORDER]

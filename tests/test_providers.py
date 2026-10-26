@@ -10,7 +10,7 @@ from providers import ProvidersError, load_providers, set_terms_hash
 
 def test_licenses_of_the_records_match_the_configuration() -> None:
     providers = {provider.id: provider for provider in load_providers()}
-    assert set(providers) == set(PROVIDERS)
+    assert set(PROVIDERS) <= set(providers)
     for provider_id, provider in PROVIDERS.items():
         assert provider.license == providers[provider_id].license
 
@@ -35,5 +35,5 @@ def test_unknown_provider_is_rejected(tmp_path) -> None:
     path = tmp_path / "providers.toml"
     path.write_text(PROVIDERS_FIXTURE.read_text(encoding="utf-8").replace('id = "ecb"', 'id = "destatis"'),
                     encoding="utf-8")
-    with pytest.raises(ProvidersError, match="unknown provider id"):
+    with pytest.raises(ProvidersError, match="series providers without an entry: ecb"):
         load_providers(path)
