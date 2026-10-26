@@ -1,22 +1,28 @@
-"""Checks that the data model diagram and the example records of the README match the schema.
+"""Checks that the data model diagram, the example records and the variable tables of the README match the schema.
 
 The entity relationship diagram lists every field of every dataset, the README
-shows one example record per dataset, and its variables table lists the active
-concepts of the catalog. These tests fail when a field is added, renamed or
-removed in ``schema.py``, or a concept in ``config/series.toml``, without
+shows one example record per dataset, its variables table lists the active
+concepts of the catalog, and its variable overview names fields of the
+datasets and the topics of the series and the snapshots. These tests fail when
+a field is added, renamed or removed in ``schema.py``, or a concept in
+``config/series.toml`` or an item in ``config/snapshots.toml``, without
 updating the README.
 """
 import json
 import re
 from pathlib import Path
+from typing import get_args
 
 import pytest
 
 from catalog import load_catalog
-from schema import DATASET_MODELS, RecordBase
+from schema import DATASET_MODELS, RecordBase, SeriesTopic
+from snapshots import active_snapshots
 
 README = Path(__file__).resolve().parents[1] / "README.md"
 COMMON_ENTITY = "common_fields"
+# Text of the variable cell of the rows of the variable overview that stand for the series or snapshots of a topic
+TOPIC_ROWS = {"sociodemographic_series": "Series of topic", "source_snapshots": "Snapshot tables of topic"}
 
 
 def _readme() -> str:
@@ -92,3 +98,58 @@ def test_variables_table_lists_every_active_concept() -> None:
     listed = re.findall(r"^\| `(\w+)` \|", section, flags=re.MULTILINE)
     active = [entry.concept for entry in load_catalog() if entry.active]
     assert listed == active
+
+
+def variable_overview_rows(text: str) -> list[tuple[str, str]]:
+    """Returns the variable and the dataset of every row of the variable overview of the README.
+
+    Args:
+        text: The README.
+
+    Returns:
+        list[tuple[str, str]]: Text of the variable cell and dataset name, in table order.
+    """
+    section = text.split("## Variable Overview", 1)[1].split("\n## ", 1)[0]
+    return re.findall(r"^\| (.+?) \| `(\w+)` \|", section, flags=re.MULTILINE)
+
+
+def overview_topics(text: str, dataset: str) -> list[str]:
+    """Returns the topics of the topic rows of a dataset in the variable overview of the README.
+
+    Args:
+        text: The README.
+        dataset: ``sociodemographic_series`` or ``source_snapshots``.
+
+    Returns:
+        list[str]: Topics in table order.
+    """
+    prefix = TOPIC_ROWS[dataset]
+    topics = []
+    for variable, row_dataset in variable_overview_rows(text):
+        if variable.startswith(prefix):
+            match = re.fullmatch(rf"{prefix} `(\w+)`", variable)
+            assert match and row_dataset == dataset, (variable, row_dataset)
+            topics.append(match.group(1))
+    return topics
+
+
+def test_variable_overview_names_content_fields_of_the_datasets() -> None:
+    rows = [(variable, dataset) for variable, dataset in variable_overview_rows(_readme())
+            if not variable.startswith(tuple(TOPIC_ROWS.values()))]
+    assert rows
+    for variable, dataset in rows:
+        name = variable.strip("`")
+        assert name in DATASET_MODELS[dataset].model_fields, (variable, dataset)
+        assert name not in RecordBase.model_fields, (variable, dataset)
+
+
+def test_variable_overview_lists_every_series_topic() -> None:
+    active = {entry.topic for entry in load_catalog() if entry.active}
+    expected = [topic for topic in get_args(SeriesTopic) if topic in active]
+    assert overview_topics(_readme(), "sociodemographic_series") == expected
+
+
+def test_variable_overview_lists_every_snapshot_topic() -> None:
+    active = {source.topic for source in active_snapshots()}
+    expected = [topic for topic in get_args(SeriesTopic) if topic in active]
+    assert overview_topics(_readme(), "source_snapshots") == expected
