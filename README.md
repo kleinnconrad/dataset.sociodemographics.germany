@@ -67,7 +67,7 @@ for _, _, values, removed in revisions:
         vintage.pop(period, None)
 ```
 
-**Series ids** have the form `<concept>.<geo>[.<code>...]`: the concept of the catalog, the region and one code per breakdown dimension in the order of the catalog key, e.g. `population_by_age_group.DE212.F.Y20-24` (women aged 20 to 24 in the city of München) or `median_age.DE2` (Bayern). The breakdown codes are those of the provider (Eurostat or ECB) and are also stored in the field `breakdown`, e.g. `{"sex": "F", "age": "Y20-24"}`. Common codes: `T` total, `M` males, `F` females; `Y_LT5` under 5 years, `Y5-9` 5 to 9 years, `Y_GE85` 85 years and over; `NAT` German citizens, `FOR` foreign citizens, `EU27_2020_FOR` citizens of other EU countries, `NEU27_2020_FOR` citizens of non-EU countries. The meaning of the other codes is noted in the entries of [config/series.toml](config/series.toml).
+**Series ids** have the form `<concept>.<geo>[.<code>...]`: the concept of the catalog, the region and one code per breakdown dimension in the order of the catalog key, e.g. `population_by_age_group.DE212.F.Y20-24` (women aged 20 to 24 in the city of München) or `median_age.DE2` (Bayern). The breakdown codes are those of the provider (Eurostat or ECB) and are also stored in the field `breakdown`, e.g. `{"sex": "F", "age": "Y20-24"}`. Common codes: `T` total, `M` males, `F` females; `Y_LT5` under 5 years, `Y5-9` 5 to 9 years, `Y_GE85` 85 years and over; `NAT` German citizens, `FOR` foreign citizens (where the dataset has the code), `EU27_2020_FOR` citizens of other EU countries, `NEU27_2020_FOR` citizens of non-EU countries. The meaning of the other codes is noted in the entries of [config/series.toml](config/series.toml).
 
 **Periods** are stored as `YYYY` (annual), `YYYY-Qn` (quarterly), `YYYY-MM` (monthly) and `YYYY-Www` (ISO weeks), the formats of dataset.economics.germany. Population stocks refer to 1 January of the year; EU-SILC indicators (income, poverty, housing) refer to the survey year, whose income reference period is the previous calendar year.
 
@@ -85,7 +85,7 @@ for _, _, values, removed in revisions:
 
 Every series of a German region carries `state`, the ISO 3166-2 code of its state (`DE-BY` for all regions in Bayern), which is the state key of dataset.politics.germany and dataset.economics.germany. The dataset `regions` lists all regions with their names and parents. NUTS 2024 changed the codes of six districts in Thüringen; the registry keeps the codes of NUTS 2016 and 2021 as well (`nuts_versions`), because Eurostat datasets that still use an earlier version publish their data under them.
 
-Not every concept is available at every level: the population, the demographic balance, fertility, density and GDP are published down to the districts; life expectancy, infant mortality, causes of death, education, regional income, poverty, deprivation, housing costs and the labour market down to the government regions; EU-SILC distributions, migration and citizenship, households and wealth for Germany as a whole. The [Variables](#variables) table lists the levels of every concept.
+Not every concept is available at every level: the population, the demographic balance, fertility, density and GDP are published down to the districts; weekly deaths by state; life expectancy, infant mortality, causes of death, education, regional income, poverty, deprivation, housing costs and the labour market down to the government regions; EU-SILC distributions, migration and citizenship, households and wealth for Germany as a whole. The [Variables](#variables) table lists the levels of every concept.
 
 ## Variables
 
@@ -102,19 +102,19 @@ Not every concept is available at every level: the population, the demographic b
 | `total_fertility_rate` | births and fertility | Total fertility rate (children per woman) | A | DE, states, gov. regions, districts | none | eurostat `demo_r_find3` |
 | `mean_age_at_birth` | births and fertility | Mean age of women at childbirth | A | DE, states, gov. regions, districts | none | eurostat `demo_r_find3` |
 | `live_births_by_mother_age_citizenship` | births and fertility | Live births by age group and citizenship of the mother | A | DE | age: total and 15-19 to 45-49; citizen: TOTAL, NAT, FOR | eurostat `demo_faczc` |
-| `women_by_age_citizenship` | births and fertility | Women on 1 January by age group and citizenship | A | DE | citizen: TOTAL, NAT, FOR; age: 15-19 to 45-49 | eurostat `migr_pop1ctz` |
+| `women_by_age_citizenship` | births and fertility | Women on 1 January by age group and citizenship | A | DE | citizen: TOTAL, NAT, EU27_2020_FOR, NEU27_2020_FOR; age: 15-19 to 45-49 | eurostat `migr_pop1ctz` |
 | `life_expectancy` | mortality and health | Life expectancy at birth and at age 65 by sex | A | DE, states, gov. regions | sex: T, M, F; age: Y_LT1, Y65 | eurostat `demo_r_mlifexp` |
 | `infant_mortality_rate` | mortality and health | Infant mortality rate | A | DE, states, gov. regions | none | eurostat `demo_r_minfind` |
 | `deaths_weekly` | mortality and health | Deaths by week and sex | W | DE | sex: T, M, F | eurostat `demo_r_mwk_ts` |
-| `deaths_weekly_regional` | mortality and health | Deaths by week, states and government regions | W | states, gov. regions | sex: T | eurostat `demo_r_mwk2_ts` |
+| `deaths_weekly_regional` | mortality and health | Deaths by week and state | W | states | sex: T | eurostat `demo_r_mwk2_ts` |
 | `death_rate_by_cause` | mortality and health | Standardised death rate by main cause of death | A | DE, states, gov. regions | cause: all causes, neoplasms, circulatory, respiratory, mental disorders, self-harm | eurostat `hlth_cd_asdr2` |
-| `population_by_citizenship` | migration and citizenship | Population on 1 January by citizenship and sex | A | DE | citizen: TOTAL, NAT, FOR, EU27_2020_FOR, NEU27_2020_FOR; sex: T, M, F | eurostat `migr_pop1ctz` |
+| `population_by_citizenship` | migration and citizenship | Population on 1 January by citizenship and sex | A | DE | citizen: TOTAL, NAT, EU27_2020_FOR, NEU27_2020_FOR; sex: T, M, F | eurostat `migr_pop1ctz` |
 | `population_by_country_of_birth` | migration and citizenship | Population on 1 January by country of birth | A | DE | birth: TOTAL, NAT, FOR, EU27_2020_FOR, NEU27_2020_FOR | eurostat `migr_pop3ctb` |
 | `immigration` | migration and citizenship | Immigration by citizenship | A | DE | citizen: TOTAL, NAT, EU27_2020_FOR, NEU27_2020_FOR | eurostat `migr_imm1ctz` |
 | `emigration` | migration and citizenship | Emigration by citizenship | A | DE | citizen: TOTAL, NAT, EU27_2020_FOR, NEU27_2020_FOR | eurostat `migr_emi1ctz` |
 | `citizenship_acquisitions` | migration and citizenship | Acquisitions of German citizenship by previous citizenship | A | DE | citizen: TOTAL, EU27_2020_FOR, NEU27_2020_FOR | eurostat `migr_acq` |
-| `asylum_applicants` | migration and citizenship | Asylum applicants and first-time applicants by month | M | DE | applicant: ASY_APP, NASY_APP | eurostat `migr_asyappctzm` |
-| `asylum_decisions` | migration and citizenship | First-instance decisions on asylum applications by quarter | Q | DE | decision: TOTAL, TOTAL_POS, REJECTED | eurostat `migr_asydcfstq` |
+| `asylum_applicants` | migration and citizenship | Asylum applicants, first-time and subsequent applicants by month | M | DE | applicant: TOTAL, FRST, SSEQ | eurostat `migr_asyappctzm` |
+| `asylum_decisions` | migration and citizenship | First-instance decisions on asylum applications by quarter | Q | DE | decision: TOTAL, POS, NEG, POS_RFG, POS_SPROT, POS_HUM | eurostat `migr_asydcfstq` |
 | `temporary_protection_beneficiaries` | migration and citizenship | Beneficiaries of temporary protection at the end of the month | M | DE | none | eurostat `migr_asytpsm` |
 | `average_household_size` | households and families | Average household size | A | DE, EU27_2020 | none | eurostat `ilc_lvph01` |
 | `young_adults_living_with_parents` | households and families | Share of young adults aged 18 to 34 living with their parents | A | DE, EU27_2020 | sex: T, M, F | eurostat `ilc_lvps08` |
@@ -153,7 +153,7 @@ Not every concept is available at every level: the population, the demographic b
 The units, the meaning of the codes and the SDMX keys are in [config/series.toml](config/series.toml) and in the dataset `series_catalog`. Some variables are derived in the analysis, not stored:
 
 - **Share of men and women** per region: `population.<geo>.M.TOTAL` and `population.<geo>.F.TOTAL` divided by `population.<geo>.T.TOTAL`.
-- **Children per woman by citizenship:** five times the sum of the age-specific rates `live_births_by_mother_age_citizenship.DE.<age>.<citizen>` / `women_by_age_citizenship.DE.<citizen>.<age>` over the seven age groups 15-19 to 45-49, for `NAT` and `FOR`. The regional fertility rate is `total_fertility_rate` down to the districts; Eurostat publishes no regional fertility rate by citizenship.
+- **Children per woman by citizenship:** five times the sum of the age-specific rates `live_births_by_mother_age_citizenship.DE.<age>.<citizen>` / `women_by_age_citizenship.DE.<citizen>.<age>` over the seven age groups 15-19 to 45-49: for German women with `NAT` in both, for foreign women with the births of `FOR` and the women of `TOTAL` minus `NAT`. The regional fertility rate is `total_fertility_rate` down to the districts; Eurostat publishes no regional fertility rate by citizenship.
 - **Income classes:** the deciles of `income_decile_shares` and their upper limits in `income_decile_cut_offs`; regional income levels in `disposable_income_per_inhabitant`.
 - **Age pyramid:** `population_by_age_group` by region, `population_by_single_age` for Germany.
 

@@ -209,9 +209,9 @@ provider = "eurostat"
 flow = "migr_pop1ctz"
 key = "A.{citizen}.{age}.NR.F.{geo}"
 geo_levels = ["country"]
-breakdown.citizen = ["TOTAL", "NAT", "FOR"]
+breakdown.citizen = ["TOTAL", "NAT", "EU27_2020_FOR", "NEU27_2020_FOR"]
 breakdown.age = ["Y15-19", "Y20-24", "Y25-29", "Y30-34", "Y35-39", "Y40-44", "Y45-49"]
-notes = "denominators of the age-specific fertility rates by citizenship"
+notes = "denominators of the age-specific fertility rates by citizenship; foreign women are TOTAL minus NAT (the dataset has no code FOR)"
 added = 2026-10-26
 
 # =============================================================================================================
@@ -260,15 +260,16 @@ added = 2026-10-26
 
 [[series]]
 concept = "deaths_weekly_regional"
-name = "Deaths by week, states and government regions"
+name = "Deaths by week and state"
 topic = "mortality_and_health"
 frequency = "W"
 unit = "deaths"
 provider = "eurostat"
 flow = "demo_r_mwk2_ts"
 key = "W.{sex}.NR.{geo}"
-geo_levels = ["nuts1", "nuts2"]
+geo_levels = ["nuts1"]
 breakdown.sex = ["T"]
+notes = "Germany reports the weekly deaths by state only; the dataset has no German government regions"
 added = 2026-10-26
 
 [[series]]
@@ -299,9 +300,9 @@ provider = "eurostat"
 flow = "migr_pop1ctz"
 key = "A.{citizen}.TOTAL.NR.{sex}.{geo}"
 geo_levels = ["country"]
-breakdown.citizen = ["TOTAL", "NAT", "FOR", "EU27_2020_FOR", "NEU27_2020_FOR"]
+breakdown.citizen = ["TOTAL", "NAT", "EU27_2020_FOR", "NEU27_2020_FOR"]
 breakdown.sex = ["T", "M", "F"]
-notes = "NAT German citizens, FOR foreign citizens, EU27_2020_FOR citizens of other EU countries, NEU27_2020_FOR citizens of non-EU countries"
+notes = "NAT German citizens, EU27_2020_FOR citizens of other EU countries, NEU27_2020_FOR citizens of non-EU countries; all foreign citizens are TOTAL minus NAT (the dataset has no code FOR)"
 added = 2026-10-26
 
 [[series]]
@@ -367,8 +368,8 @@ provider = "eurostat"
 flow = "migr_asyappctzm"
 key = "M.PER.TOTAL.T.{applicant}.TOTAL.{geo}"
 geo_levels = ["country"]
-breakdown.applicant = ["ASY_APP", "NASY_APP"]
-notes = "ASY_APP all applicants, NASY_APP first-time applicants"
+breakdown.applicant = ["TOTAL", "FRST", "SSEQ"]
+notes = "TOTAL all applicants, FRST first-time applicants, SSEQ subsequent applicants"
 added = 2026-10-26
 
 [[series]]
@@ -381,7 +382,8 @@ provider = "eurostat"
 flow = "migr_asydcfstq"
 key = "Q.PER.TOTAL.T.TOTAL.{decision}.{geo}"
 geo_levels = ["country"]
-breakdown.decision = ["TOTAL", "TOTAL_POS", "REJECTED"]
+breakdown.decision = ["TOTAL", "POS", "NEG", "POS_RFG", "POS_SPROT", "POS_HUM"]
+notes = "POS positive decisions: POS_RFG refugee status, POS_SPROT subsidiary protection, POS_HUM humanitarian status; NEG rejections"
 added = 2026-10-26
 
 [[series]]
@@ -652,7 +654,7 @@ frequency = "A"
 unit = "ratio of the income of the top and the bottom fifth"
 provider = "eurostat"
 flow = "ilc_di11_r"
-key = "A.RAT.{geo}"
+key = "A.INX.{geo}"
 geo_levels = ["country", "nuts1", "nuts2"]
 added = 2026-10-26
 

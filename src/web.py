@@ -362,24 +362,28 @@ class WebClient:
                 self.sleep(remaining)
 
     def _send(self, url: str, params: Optional[Mapping[str, Any]], headers: Optional[Mapping[str, str]],
-              timeout_s: Optional[float] = None) -> httpx.Response:
-        """Sends one GET request after waiting for the host interval.
+              timeout_s: Optional[float] = None, data: Optional[Mapping[str, Any]] = None) -> httpx.Response:
+        """Sends one request after waiting for the host interval: GET, or POST if form data is given.
 
         Args:
             url: The URL.
             params: Query parameters.
             headers: Additional request headers.
             timeout_s: Timeout of this request; None uses ``timeout_s`` of the client.
+            data: Form fields of a POST request; None sends a GET request.
 
         Returns:
             httpx.Response: The response.
         """
         self._wait_for_host(url)
         self.request_count += 1
+        options: dict[str, Any] = {"params": params, "headers": headers}
+        if timeout_s is not None:
+            options["timeout"] = timeout_s
         try:
-            if timeout_s is None:
-                return self._client.get(url, params=params, headers=headers)
-            return self._client.get(url, params=params, headers=headers, timeout=timeout_s)
+            if data is None:
+                return self._client.get(url, **options)
+            return self._client.post(url, data=data, **options)
         finally:
             self._last_request_at[host_of(url)] = self.clock()
 
@@ -508,6 +512,30 @@ class WebClient:
 
     # -- requests -----------------------------------------------------------
 
+    def post(
+        self,
+        url: str,
+        data: Mapping[str, Any],
+        *,
+        headers: Optional[Mapping[str, str]] = None,
+        timeout_s: Optional[float] = None,
+    ) -> Response:
+        """Sends form data to a documented API with the fetch rules (no robots.txt check).
+
+        Args:
+            url: The URL of the API method.
+            data: The form fields.
+            headers: Additional request headers, e.g. credentials that the API expects in headers.
+            timeout_s: Timeout of this request; None uses ``timeout_s`` of the client.
+
+        Returns:
+            Response: The successful response.
+
+        Raises:
+            RateLimitError, BlockedError, NotFoundError, FetchError: As for ``get``.
+        """
+        return self.get(url, headers=headers, respect_robots=False, timeout_s=timeout_s, data=data)
+
     def get(
         self,
         url: str,
@@ -516,6 +544,7 @@ class WebClient:
         headers: Optional[Mapping[str, str]] = None,
         respect_robots: bool = True,
         timeout_s: Optional[float] = None,
+        data: Optional[Mapping[str, Any]] = None,
     ) -> Response:
         """Fetches a URL with the fetch rules.
 
@@ -525,6 +554,7 @@ class WebClient:
             headers: Additional request headers, e.g. ``If-None-Match`` for a conditional request.
             respect_robots: False only for documented APIs whose terms allow automated access.
             timeout_s: Timeout of this request; None uses ``timeout_s`` of the client.
+            data: Form fields; if given, the request is sent as POST (used by ``post``).
 
         Returns:
             Response: The successful response; a conditional request can return status 304
@@ -542,7 +572,7 @@ class WebClient:
         attempt = 0
         while True:
             try:
-                raw = self._send(url, params, headers, timeout_s=timeout_s)
+                raw = self._send(url, params, headers, timeout_s=timeout_s, data=data)
             except httpx.TransportError as e:
                 if attempt < MAX_RETRIES:
                     self.sleep(RETRY_BACKOFF_S[min(attempt, len(RETRY_BACKOFF_S) - 1)])

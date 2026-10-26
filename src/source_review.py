@@ -31,6 +31,7 @@ respect robots.txt.
 Usage:
     uv run python src/source_review.py --report PATH [--concepts NAME,...] [--no-terms]
                                        [--providers PATH] [--output-dir PATH]
+    uv run python src/source_review.py --report PATH --probe "URL URL ..." [--link-filter REGEX]
 """
 import argparse
 import hashlib
@@ -60,6 +61,7 @@ from collectors.sdmx import (
 )
 from collectors.series import DATASET as SERIES_DATASET
 from collectors.series import SeriesKey
+from probe import probe_url
 from providers import CONFIG_PATH as PROVIDERS_PATH
 from providers import Provider, ProvidersError, load_providers, set_terms_hash
 from regions import Region, RegistryError, active_regions, load_regions
@@ -73,7 +75,7 @@ REVIEW_WINDOW_DAYS = 35
 # Years before the current one that the live check fetches
 CHECK_YEARS = 3
 # A series whose newest period ended longer ago than this many days is stale
-STALE_DAYS: dict[str, int] = {"W": 35, "M": 120, "Q": 270, "A": 1100}
+STALE_DAYS: dict[str, int] = {"W": 180, "M": 120, "Q": 270, "A": 1100}
 # Prefixes of Eurostat dataset codes on the topics of the catalog; new datasets with them are candidates
 WATCHED_PREFIXES = ("demo_", "migr_", "edat_", "educ_", "trng_", "ilc_", "lfst_r_", "lfst_hh", "hlth_", "yth_",
                     "nama_10r_", "cens_", "proj_", "hbs_", "icw_", "tus_", "urt_", "met_")
@@ -802,6 +804,35 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
 # Entry point
 # ---------------------------------------------------------------------------
 
+def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, web: Optional[WebClient] = None) -> int:
+    """Checks URLs with the fetch rules and writes their description as a Markdown report.
+
+    Args:
+        urls: The URLs.
+        link_filter: Regular expression for the links of HTML pages to list.
+        report: Path of the report.
+        web: HTTP client; created if omitted.
+
+    Returns:
+        int: 0.
+    """
+    now = datetime.now(timezone.utc).replace(microsecond=0)
+    lines = [f"# Source probe {now:%Y-%m-%d %H:%M} UTC", "",
+             f"Checked {len(urls)} URLs with the fetch rules of the pipeline"
+             + (f"; links filtered with `{link_filter}`" if link_filter else "") + ".", ""]
+    client = web or WebClient()
+    try:
+        for url in urls:
+            logger.info("Probing %s.", url)
+            lines.extend([f"## {url}", "", "```text", *probe_url(client, url, link_filter), "```", ""])
+    finally:
+        if web is None:
+            client.close()
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    return 0
+
+
 def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     """Parses the command-line arguments.
 
@@ -817,6 +848,9 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     parser.add_argument("--terms", action=argparse.BooleanOptionalAction, default=True,
                         help="check the terms pages of the providers (default: on)")
     parser.add_argument("--providers", type=Path, default=PROVIDERS_PATH, help="the provider configuration")
+    parser.add_argument("--probe", help="URLs separated by spaces: check them with the fetch rules and describe "
+                                         "their content instead of running the review")
+    parser.add_argument("--link-filter", help="regular expression for the links of probed HTML pages to list")
     parser.add_argument("--output-dir", type=Path,
                         help="folder with the datasets and state (default: data/ in GitHub Actions, "
                              "~/Downloads/german_sociodemographics_dataset locally)")
@@ -836,6 +870,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     load_dotenv()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(name)s - %(message)s")
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    if args.probe:
+        return run_probes(args.probe.split(), args.link_filter, args.report)
     try:
         settings = Settings.from_env()
         if args.output_dir is not None:

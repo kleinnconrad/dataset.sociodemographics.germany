@@ -1,5 +1,5 @@
 name: Source Review
-run-name: Source review (${{ (github.event_name == 'workflow_dispatch' && inputs.pull_request == false) && 'report only' || 'pull request' }})
+run-name: Source review (${{ inputs.probe != '' && inputs.probe != null && 'probe' || ((github.event_name == 'workflow_dispatch' && inputs.pull_request == false) && 'report only' || 'pull request') }})
 
 on:
   schedule:
@@ -14,6 +14,16 @@ on:
         default: true
       concepts:
         description: 'Comma-separated catalog entries to check, e.g. population,median_age; empty checks all'
+        type: string
+        required: false
+        default: ''
+      probe:
+        description: 'URLs separated by spaces: check them with the fetch rules and describe them instead of the review'
+        type: string
+        required: false
+        default: ''
+      probe_filter:
+        description: 'Regular expression for the links of probed pages to list'
         type: string
         required: false
         default: ''
@@ -32,8 +42,10 @@ jobs:
       # Starts the CI workflow on the review branch
       actions: write
     env:
-      OPEN_PR: ${{ (github.event_name == 'workflow_dispatch' && inputs.pull_request == false) && 'off' || 'on' }}
+      OPEN_PR: ${{ (github.event_name == 'workflow_dispatch' && (inputs.pull_request == false || inputs.probe != '')) && 'off' || 'on' }}
       CONCEPTS: ${{ inputs.concepts }}
+      PROBE: ${{ inputs.probe }}
+      PROBE_FILTER: ${{ inputs.probe_filter }}
 
     steps:
     - name: Checkout Repository
@@ -57,7 +69,12 @@ jobs:
           report="$RUNNER_TEMP/source_review.md"
         fi
         args=(--report "$report")
-        if [ -n "$CONCEPTS" ]; then
+        if [ -n "$PROBE" ]; then
+          args+=(--probe "$PROBE")
+          if [ -n "$PROBE_FILTER" ]; then
+            args+=(--link-filter "$PROBE_FILTER")
+          fi
+        elif [ -n "$CONCEPTS" ]; then
           args+=(--concepts "$CONCEPTS")
         fi
         uv run python src/source_review.py "${args[@]}"
