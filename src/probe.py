@@ -186,11 +186,23 @@ def describe_content(response: Response, link_filter: Optional[re.Pattern[str]] 
     Args:
         response: The response.
         link_filter: Filter of the links of an HTML page.
-        text_filter: Filter of the passages of the text of an HTML page.
+        text_filter: Filter of the passages of the text of an HTML page, a JSON document or a text file.
 
     Returns:
         list[str]: Lines of the description.
     """
+    lines = _describe(response, link_filter, text_filter)
+    is_html = lines and lines[0].startswith("title:")
+    if text_filter is not None and not is_html and response.content[:2] != b"PK" and response.content[:4] != b"%PDF":
+        excerpts = text_excerpts(response.text, text_filter)
+        lines.append(f"passages matching the text filter ({len(excerpts)}):")
+        lines.extend(f"- ...{' '.join(excerpt.split())}..." for excerpt in excerpts)
+    return lines
+
+
+def _describe(response: Response, link_filter: Optional[re.Pattern[str]],
+              text_filter: Optional[re.Pattern[str]]) -> list[str]:
+    """Describes the content of a response according to its type (see ``describe_content``)."""
     content = response.content
     kind = response.content_type
     if content[:4] == b"%PDF":

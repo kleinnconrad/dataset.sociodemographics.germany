@@ -75,3 +75,11 @@ def test_text_excerpts_merge_overlapping_passages() -> None:
     excerpts = text_excerpts(text, re.compile("lizenz|namensnennung|nutzung", re.IGNORECASE))
     assert len(excerpts) == 2
     assert "Datenlizenz Deutschland Namensnennung" in excerpts[0] and excerpts[1].endswith("c" * 50)
+
+
+def test_text_filter_selects_passages_of_json_documents(fake_web) -> None:
+    fake_web.add("https://api.example/v3/api-docs", {"paths": {"/data/tablefile": {"post": {
+        "parameters": [{"name": "username", "in": "header"}]}}}})
+    lines = probe_url(fake_web.client(), "https://api.example/v3/api-docs", text_filter="username")
+    assert lines[-2] == "passages matching the text filter (1):"
+    assert '"name": "username"' in lines[-1]

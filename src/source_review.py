@@ -107,7 +107,7 @@ MAX_REPORT_NOTES = 40
 EXCLUDED_RECHECK_DAYS = 365
 # A snapshot entry added longer ago than this many days and never stored needs attention
 UNSTORED_GRACE_DAYS = 7
-MAX_GENESIS_CANDIDATES = 40
+MAX_GENESIS_CANDIDATES = 400
 MAX_CELLS_SHOWN = 8
 EUROSTAT_DSD_URL = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/datastructure/ESTAT/{flow}"
 _DIMENSION_TAG = re.compile(r"<(?:[\w-]+:)?Dimension\b([^>]*)>")
@@ -923,10 +923,12 @@ def snapshot_section(result: ReviewResult, today: date) -> list[str]:
                      f"{check.changed or 'none'} | {_cell('; '.join(check.notes))} |" for check in result.snapshots)
         lines.extend(["", "</details>"])
     if result.genesis_candidates:
-        lines.extend(["", f"**Other tables of the observed GENESIS statistics** ({len(result.genesis_candidates)}; "
-                          "candidates for new entries):", "", "| Database | Table | Title |", "|---|---|---|"])
+        lines.extend(["", f"<details><summary>Other tables of the observed GENESIS statistics "
+                          f"({len(result.genesis_candidates)}; candidates for new entries)</summary>", "",
+                      "| Database | Table | Title |", "|---|---|---|"])
         lines.extend(f"| {provider} | `{code}` | {_cell(title)} |"
                      for provider, code, title in result.genesis_candidates[:MAX_GENESIS_CANDIDATES])
+        lines.extend(["", "</details>"])
     if result.excluded:
         lines.extend(["", "**Excluded sources** (checked and not collected; a source checked more than "
                           f"{EXCLUDED_RECHECK_DAYS} days ago is due for a new check):", "",
