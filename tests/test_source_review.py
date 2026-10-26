@@ -70,17 +70,37 @@ def test_check_entry_reports_coverage_and_gaps(fake_web) -> None:
     assert check.example == "population.DE.F 2025: 42,600,000.0"
 
 
-def test_entry_without_data_is_probed(fake_web) -> None:
+def test_entry_with_another_dimension_order_is_probed(fake_web) -> None:
     entry = entry_of("total_fertility_rate")
     fake_web.add(EUROSTAT_DSD_URL.format(flow="DEMO_R_FIND3"), DSD, content_type="application/xml")
-    fake_web.add(EUROSTAT.url(entry.flow, "...DE"),
-                 "DATAFLOW,LAST UPDATE,freq,indic_de,unit,geo,TIME_PERIOD,OBS_VALUE\n"
-                 "X,,A,TOTFERRT,NR,DE,2024,1.35\nX,,A,AGEMOTH,YR,DE,2024,31.8\n", content_type="text/csv")
     check = check_entry(fake_web.client(), entry, active_regions(path=REGIONS_FIXTURE), TODAY)
     assert check.status == "no_data"
-    assert check.probe[0].startswith("structure: 4 dimensions (freq, indic_de, unit, geo)")
-    assert "indic_de: AGEMOTH, TOTFERRT" in check.probe
-    assert "unit: NR, YR" in check.probe
+    assert check.probe[0] == ("structure: 4 dimensions (freq, indic_de, unit, geo); the key template "
+                              "A.NR.TOTFERRT.{geo} has 4 parts")
+    assert check.probe[2].startswith("indic_de: no data with the other parts as requested")
+
+
+ASYLUM_DSD = DSD.replace('<s:Dimension id="freq" position="1"/><s:Dimension id="indic_de" position="2"/>\n'
+                         '<s:Dimension position="3" id="unit"/>',
+                         '<s:Dimension id="freq" position="1"/><s:Dimension id="unit" position="2"/>'
+                         '<s:Dimension id="citizen" position="3"/><s:Dimension id="sex" position="4"/>'
+                         '<s:Dimension id="applicant" position="5"/><s:Dimension id="age" position="6"/>'
+                         ).replace('id="geo" position="4"', 'id="geo" position="7"')
+
+
+def test_probe_names_the_requested_codes_that_the_dataset_lacks(fake_web) -> None:
+    entry = entry_of("asylum_applicants")
+    fake_web.add(EUROSTAT.url(entry.flow, entry.request_key(["DE"])), "invalid code", status=400,
+                 content_type="text/plain")
+    fake_web.add(EUROSTAT_DSD_URL.format(flow="MIGR_ASYAPPCTZM"), ASYLUM_DSD, content_type="application/xml")
+    fake_web.add(EUROSTAT.url(entry.flow, "M.PER..T.ASY_APP+NASY_APP.TOTAL.DE"),
+                 "DATAFLOW,LAST UPDATE,freq,unit,citizen,sex,applicant,age,geo,TIME_PERIOD,OBS_VALUE\n"
+                 "X,,M,PER,EXT_EU27_2020,T,ASY_APP,TOTAL,DE,2026-08,9000\nX,,M,PER,SY,T,ASY_APP,TOTAL,DE,2026-08,900\n",
+                 content_type="text/csv")
+    check = check_entry(fake_web.client(), entry, active_regions(path=REGIONS_FIXTURE), TODAY)
+    assert check.status == "failed" and "HTTP 400" in check.problems[0]
+    assert "citizen: requested TOTAL; missing TOTAL; available EXT_EU27_2020, SY" in check.probe
+    assert any(line.startswith("unit: no data with the other parts as requested") for line in check.probe)
 
 
 def test_eurostat_dimensions_are_read_in_key_order(fake_web) -> None:
@@ -94,8 +114,8 @@ def test_ecb_entry_with_a_failing_key_is_probed_with_the_template_length(fake_we
                  content_type="text/csv")
     check = check_entry(fake_web.client(), entry, active_regions(path=REGIONS_FIXTURE), TODAY)
     assert check.status == "failed" and "dimensions" in check.problems[0]
-    probe_key = ".DE" + "." * 8
-    assert any(url.startswith(ECB.url("DWA", probe_key)) for url in fake_web.requested)
+    assert any(url.startswith(ECB.url("DWA", ".DE.S14._Z._Z.NWA.T10+B50.PT.S.N")) for url in fake_web.requested)
+    assert len(check.probe) == 9
 
 
 def test_unregistered_regions_are_listed(fake_web) -> None:

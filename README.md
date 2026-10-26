@@ -31,7 +31,7 @@ No run yet. The pipeline writes this overview after its first run.
 
 | Dataset | Content | Source | Kind |
 |---|---|---|---|
-| `sociodemographic_series` | About 34,000 statistical series of 54 concepts: population by age, sex and region, demographic balance, fertility, life expectancy, deaths, migration and citizenship, households, education, income distribution, poverty, wealth shares, housing, regional labour market and regional accounts | Eurostat, ECB | vintage |
+| `sociodemographic_series` | About 34,000 statistical series of 58 concepts: population by age, sex and region, demographic balance, fertility, life expectancy, deaths, migration and citizenship, households, education, income distribution, poverty, wealth shares, housing, regional labour market and regional accounts | Eurostat, ECB | vintage |
 | `series_catalog` | The catalog of the concepts with unit, frequency, provider, key template, regional levels and breakdown codes, recorded when an entry appears or changes | `config/series.toml` | change |
 | `regions` | The registry of the 462 German NUTS regions (Germany, states, government regions, districts) with level, parent region, ISO 3166-2 code of the state and NUTS versions, recorded when an entry appears or changes | `config/regions.toml` | change |
 
@@ -85,7 +85,7 @@ for _, _, values, removed in revisions:
 
 Every series of a German region carries `state`, the ISO 3166-2 code of its state (`DE-BY` for all regions in Bayern), which is the state key of dataset.politics.germany and dataset.economics.germany. The dataset `regions` lists all regions with their names and parents. NUTS 2024 changed the codes of six districts in Thüringen; the registry keeps the codes of NUTS 2016 and 2021 as well (`nuts_versions`), because Eurostat datasets that still use an earlier version publish their data under them.
 
-Not every concept is available at every level: the population, the demographic balance, fertility, density and GDP are published down to the districts; life expectancy, causes of death, education, regional income, poverty and the labour market down to the government regions; EU-SILC distributions, migration and citizenship, households and wealth for Germany as a whole. The [Variables](#variables) table lists the levels of every concept.
+Not every concept is available at every level: the population, the demographic balance, fertility, density and GDP are published down to the districts; life expectancy, infant mortality, causes of death, education, regional income, poverty, deprivation, housing costs and the labour market down to the government regions; EU-SILC distributions, migration and citizenship, households and wealth for Germany as a whole. The [Variables](#variables) table lists the levels of every concept.
 
 ## Variables
 
@@ -104,6 +104,7 @@ Not every concept is available at every level: the population, the demographic b
 | `live_births_by_mother_age_citizenship` | births and fertility | Live births by age group and citizenship of the mother | A | DE | age: total and 15-19 to 45-49; citizen: TOTAL, NAT, FOR | eurostat `demo_faczc` |
 | `women_by_age_citizenship` | births and fertility | Women on 1 January by age group and citizenship | A | DE | citizen: TOTAL, NAT, FOR; age: 15-19 to 45-49 | eurostat `migr_pop1ctz` |
 | `life_expectancy` | mortality and health | Life expectancy at birth and at age 65 by sex | A | DE, states, gov. regions | sex: T, M, F; age: Y_LT1, Y65 | eurostat `demo_r_mlifexp` |
+| `infant_mortality_rate` | mortality and health | Infant mortality rate | A | DE, states, gov. regions | none | eurostat `demo_r_minfind` |
 | `deaths_weekly` | mortality and health | Deaths by week and sex | W | DE | sex: T, M, F | eurostat `demo_r_mwk_ts` |
 | `deaths_weekly_regional` | mortality and health | Deaths by week, states and government regions | W | states, gov. regions | sex: T | eurostat `demo_r_mwk2_ts` |
 | `death_rate_by_cause` | mortality and health | Standardised death rate by main cause of death | A | DE, states, gov. regions | cause: all causes, neoplasms, circulatory, respiratory, mental disorders, self-harm | eurostat `hlth_cd_asdr2` |
@@ -128,17 +129,20 @@ Not every concept is available at every level: the population, the demographic b
 | `primary_income_per_inhabitant` | income and poverty | Net primary income of private households per inhabitant | A | DE, states, gov. regions | none | eurostat `nama_10r_2hhinc` |
 | `income_decile_shares` | income and poverty | Share of each income decile in the total equivalised disposable income (income classes) | A | DE, EU27_2020 | decile: D1 to D10 | eurostat `ilc_di01` |
 | `income_decile_cut_offs` | income and poverty | Upper limits of the income deciles of equivalised disposable income | A | DE, EU27_2020 | decile: D1 to D9 | eurostat `ilc_di01` |
-| `median_equivalised_income` | income and poverty | Mean and median equivalised net income | A | DE, EU27_2020 | indicator: MED_E, MEI_E | eurostat `ilc_di03` |
+| `median_equivalised_income` | income and poverty | Mean and median equivalised net income | A | DE, EU27_2020 | indicator: MED_EI, MEAN_EI | eurostat `ilc_di03` |
 | `gini_coefficient` | income and poverty | Gini coefficient of equivalised disposable income | A | DE, EU27_2020 | none | eurostat `ilc_di12` |
 | `income_quintile_share_ratio` | income and poverty | Income quintile share ratio S80/S20 | A | DE, EU27_2020 | none | eurostat `ilc_di11` |
 | `at_risk_of_poverty_rate` | income and poverty | At-risk-of-poverty rate (60 percent of the median income) by age group | A | DE, EU27_2020 | age: TOTAL, Y_LT18, Y18-64, Y_GE65 | eurostat `ilc_li02` |
+| `income_quintile_share_ratio_regional` | income and poverty | Income quintile share ratio S80/S20 by region | A | DE, states, gov. regions | none | eurostat `ilc_di11_r` |
 | `at_risk_of_poverty_rate_regional` | income and poverty | At-risk-of-poverty rate by region | A | DE, states, gov. regions | none | eurostat `ilc_li41` |
 | `poverty_or_social_exclusion_rate_regional` | income and poverty | People at risk of poverty or social exclusion by region | A | DE, states, gov. regions | none | eurostat `ilc_peps11n` |
 | `poverty_or_social_exclusion_by_citizenship` | income and poverty | People aged 18 and over at risk of poverty or social exclusion by citizenship | A | DE, EU27_2020 | citizen: NAT, FOR, EU27_2020_FOR, NEU27_2020_FOR | eurostat `ilc_peps05n` |
 | `severe_material_social_deprivation` | income and poverty | Severe material and social deprivation rate | A | DE, EU27_2020 | none | eurostat `ilc_mdsd11` |
+| `severe_material_social_deprivation_regional` | income and poverty | Severe material and social deprivation rate by region | A | DE, states, gov. regions | none | eurostat `ilc_mdsd18` |
 | `net_wealth_share` | wealth | Share of the net wealth of households held by the wealthiest 10 and 5 percent and the poorest 50 percent | Q | DE | group: T10, T5, B50 | ecb `DWA` |
 | `housing_tenure` | housing | Population by tenure status of the dwelling | A | DE, EU27_2020 | tenure: OWN, OWN_L, OWN_NL, RENT, RENT_MKT, RENT_FR | eurostat `ilc_lvho02` |
 | `housing_cost_overburden_rate` | housing | Housing cost overburden rate | A | DE, EU27_2020 | none | eurostat `ilc_lvho07a` |
+| `housing_cost_overburden_rate_regional` | housing | Housing cost overburden rate by region | A | DE, states, gov. regions | none | eurostat `ilc_lvho07_r` |
 | `overcrowding_rate` | housing | Overcrowding rate | A | DE, EU27_2020 | none | eurostat `ilc_lvho05a` |
 | `employment_rate` | labour market | Employment rate of the population aged 20 to 64 by sex | A | DE, states, gov. regions | sex: T, M, F | eurostat `lfst_r_lfe2emprt` |
 | `unemployment_rate` | labour market | Unemployment rate of the population aged 15 to 74 by sex | A | DE, states, gov. regions | sex: T, M, F | eurostat `lfst_r_lfu3rt` |

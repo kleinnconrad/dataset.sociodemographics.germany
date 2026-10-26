@@ -86,20 +86,20 @@ The registry holds the 462 German codes of the NUTS versions 2016, 2021 and 2024
 
 ### 3.4 Concepts by Topic
 
-The initial catalog has 54 concepts that expand to about 34,000 series:
+The initial catalog has 58 concepts that expand to about 34,000 series:
 
 | Topic | Concepts | Levels | Provider |
 |---|---|---|---|
 | population_structure | population by broad age group and sex; population by five-year age group and sex (age pyramid); population by single year of age and sex; median age; age dependency ratios; population density | districts (single years: Germany) | Eurostat |
 | population_change | demographic balance (population, live births, deaths, natural change, net migration, total change) and crude rates | districts | Eurostat |
 | births_and_fertility | total fertility rate; mean age at childbirth; live births by age and citizenship of the mother; women by age and citizenship | districts; citizenship: Germany | Eurostat |
-| mortality_and_health | life expectancy at birth and at 65 by sex; weekly deaths by sex; weekly deaths by region; standardised death rates by main cause | government regions; weekly: Germany and regions | Eurostat |
+| mortality_and_health | life expectancy at birth and at 65 by sex; infant mortality; weekly deaths by sex; weekly deaths by region; standardised death rates by main cause | government regions; weekly: Germany and regions | Eurostat |
 | migration_and_citizenship | population by citizenship and by country of birth; immigration and emigration by citizenship; acquisitions of citizenship; monthly asylum applicants; quarterly asylum decisions; monthly beneficiaries of temporary protection | Germany | Eurostat |
 | households_and_families | average household size; young adults living with their parents; age of leaving the parental home; crude marriage and divorce rates | Germany, EU | Eurostat |
 | education | educational attainment by level and sex; early leavers; NEET rate; adult learning | government regions, EU | Eurostat |
-| income_and_poverty | disposable and primary income of households per inhabitant; income decile shares and cut-offs (income classes); mean and median equivalised income; Gini coefficient; S80/S20; at-risk-of-poverty rates by age and by region; poverty or social exclusion by region and by citizenship; severe material and social deprivation | government regions; distributions: Germany, EU | Eurostat |
+| income_and_poverty | disposable and primary income of households per inhabitant; income decile shares and cut-offs (income classes); mean and median equivalised income; Gini coefficient; S80/S20 (also by region); at-risk-of-poverty rates by age and by region; poverty or social exclusion by region and by citizenship; severe material and social deprivation (also by region) | government regions; distributions: Germany, EU | Eurostat |
 | wealth | shares of net wealth of the wealthiest 10 and 5 percent and the poorest 50 percent of households (quarterly) | Germany | ECB |
-| housing | tenure status; housing cost overburden; overcrowding | Germany, EU | Eurostat |
+| housing | tenure status; housing cost overburden (also by region); overcrowding | Germany, EU; overburden: government regions | Eurostat |
 | labour_market | employment, unemployment and activity rates by sex | government regions | Eurostat |
 | regional_economy | GDP per inhabitant; employment at the place of work | districts | Eurostat |
 
@@ -270,6 +270,7 @@ dataset.sociodemographics.germany/
 - **A collector fails:** the error is logged, recorded in `collectors.json` and the run log, and the next collector starts. Data already written stays. The run exits with code 1.
 - **A catalog entry fails** (HTTP error, invalid response, other dimensions than the key template): the other entries continue; the failure is counted and listed in the run log (`failed_entries`). An entry without data in any group of regions (HTTP 404) is counted as `not_found` (`not_found_entries`); the monthly review reports both with a probe of the dataset.
 - **Groups of regions without data** (e.g. a level that a dataset does not publish) are counted and do not fail the entry.
+- **Region codes that a dataset does not know** (HTTP 400, e.g. codes of another NUTS version): the collector reads the regions of the dataset with one request, fetches the known ones and counts the others as `unknown_geos`; the review lists them. A 400 that is not caused by region codes fails the entry.
 - **Incomplete series response:** a response that would remove more than 5 % of the stored periods of a series (and more than three) is not written for that series; the next run tries again. Stored series that a response no longer contains are counted as `absent` and are not changed.
 - **Table of contents unavailable:** every entry is downloaded.
 - **Run deadline:** after `RUN_DEADLINE_MINUTES` the collectors start no new work; a collector that stops early has the status `partial` and continues in the next run.
@@ -284,6 +285,8 @@ Changes of sources, keys, codes, units, regional classifications and counting ru
 | Date | Dataset | Change |
 |---|---|---|
 | 2026-10-26 | all | Design of the pipeline; catalog of 54 concepts, registry of 462 regions (NUTS 2016, 2021 and 2024), providers Eurostat and ECB. |
+| 2026-10-26 | `series_catalog` | First live check (source review in report mode) before the first collection: the keys of 20 entries were corrected to the dimension order and codes of their datasets (e.g. `demo_r_pjangrp3` freq.sex.unit.age.geo, `demo_r_find3` freq.indic_de.unit.geo, EU-SILC indicators with `statinfo` MED_EI and MEAN_EI and the poverty threshold `rskpovth` B_60 instead of the former codes MED_E, MEI_E and LI_R_MD60, NEET rate with `training` NO_FE_NO_NFE and `wstatus` NEMP). Four regional entries were added from the candidates of the review: `income_quintile_share_ratio_regional`, `severe_material_social_deprivation_regional`, `housing_cost_overburden_rate_regional`, `infant_mortality_rate`. |
+| 2026-10-26 | `sociodemographic_series` | Datasets reject requests that list a region code they do not know (HTTP 400), e.g. the regional accounts (`nama_10r_3gdp`, `nama_10r_3empers`) the NUTS 2024 codes of Thüringen. The collector then reads the regions of the dataset with one request and fetches the known ones; the unknown codes are counted (`unknown_geos`). |
 | 2026-10-26 | `regions` | NUTS 2024 recoded six districts of Thüringen (DEG04, DEG0B, DEG0F, DEG0H, DEG0I, DEG0P became DEG0S, DEG0Q, DEG0T, DEG0V, DEG0U, DEG0R; DEG0N Eisenach merged into the Wartburgkreis). Both code sets are requested; a dataset publishes the codes of the NUTS version it uses, so a district series can change its code when Eurostat moves a dataset to NUTS 2024. |
 | 2026-10-26 | `sociodemographic_series` | Series of a catalog entry are fetched in groups of up to 50 regions with SDMX OR-lists; rows with codes that were not requested are ignored. Status flags of the providers (e.g. `p` provisional, `b` break in series, `e` estimated) are not stored. |
 

@@ -19,7 +19,7 @@ from conftest import CATALOG_FIXTURE, FIXTURES_DIR, REGIONS_FIXTURE, RUN_STARTED
 from regions import active_regions
 from schema import SociodemographicSeriesRecord
 from state import CollectorEntry
-from web import NotFoundError
+from web import FetchError, NotFoundError
 
 POPULATION_CSV = (FIXTURES_DIR / "sdmx" / "population.csv").read_text(encoding="utf-8")
 
@@ -75,6 +75,25 @@ def test_fetch_entry_groups_the_areas_and_counts_groups_without_data(fake_web) -
     key = next(key for key in data.series if key.series_id == "population.DE111.F")
     assert data.series[key].url.endswith("/data/demo_r_pjanaggr3/A.NR.F.TOTAL.DE111")
     assert data.series[key].source_updated is not None
+
+
+def test_fetch_entry_leaves_out_areas_that_the_dataset_does_not_know(fake_web) -> None:
+    fake_web.add(population_url(ALL_GEOS), "invalid code DE212", status=400, content_type="text/plain")
+    header = POPULATION_CSV.split("\n", 1)[0]
+    fake_web.add(EUROSTAT.url("demo_r_pjanaggr3", "A.NR.M.TOTAL."),
+                 header + "\nX,,A,NR,M,TOTAL,DE,2025,1,\nX,,A,NR,M,TOTAL,DE111,2025,1,\nX,,A,NR,M,TOTAL,FR1,2025,1,\n",
+                 content_type="text/csv")
+    fake_web.add(population_url(["DE", "DE111"]), POPULATION_CSV, content_type="text/csv")
+    data = fetch_entry(fake_web.client(), EUROSTAT, entry_of("population"), ALL_GEOS)
+    assert data.unknown_geos == ["DE1", "DE11", "DE2", "DE21", "DE212"]
+    assert sorted(key.series_id for key in data.series) == ["population.DE.F", "population.DE.M",
+                                                           "population.DE111.F", "population.DE111.M"]
+
+
+def test_fetch_entry_keeps_a_bad_request_that_is_not_caused_by_areas(fake_web) -> None:
+    fake_web.add(population_url(ALL_GEOS), "invalid code", status=400, content_type="text/plain")
+    with pytest.raises(FetchError, match="HTTP 400"):
+        fetch_entry(fake_web.client(), EUROSTAT, entry_of("population"), ALL_GEOS)
 
 
 def test_fetch_entry_without_data_in_any_group_raises_not_found(fake_web) -> None:

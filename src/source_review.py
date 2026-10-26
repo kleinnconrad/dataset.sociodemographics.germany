@@ -33,9 +33,7 @@ Usage:
                                        [--providers PATH] [--output-dir PATH]
 """
 import argparse
-import csv
 import hashlib
-import io
 import json
 import logging
 import re
@@ -52,11 +50,11 @@ from dotenv import load_dotenv
 
 from catalog import CatalogEntry, CatalogError, active_entries
 from collectors.sdmx import (
-    NON_DIMENSION_COLUMNS,
     PROVIDERS,
     REQUEST_TIMEOUT_S,
     SdmxProvider,
     TocEntry,
+    csv_dimensions,
     fetch_entry,
     fetch_eurostat_toc,
 )
@@ -226,18 +224,11 @@ def csv_codes(text: str) -> tuple[list[str], dict[str, set[str]]]:
         tuple: The dimension columns in order, and the codes per column.
 
     Raises:
-        ValueError: If the response has no TIME_PERIOD column.
+        ValueError: If the response is not an SDMX-CSV.
     """
-    text = text.lstrip("﻿")
-    first_line = text.split("\n", 1)[0]
-    delimiter = ";" if first_line.count(";") > first_line.count(",") else ","
-    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
-    columns = reader.fieldnames or []
-    if "TIME_PERIOD" not in columns:
-        raise ValueError(f"not an SDMX-CSV response (columns: {', '.join(columns[:8])})")
-    dimensions = [name for name in columns[:columns.index("TIME_PERIOD")] if name not in NON_DIMENSION_COLUMNS]
+    dimensions, rows = csv_dimensions(text)
     codes: dict[str, set[str]] = {name: set() for name in dimensions}
-    for row in reader:
+    for row in rows:
         for name in dimensions:
             codes[name].add(row.get(name) or "")
     return dimensions, codes
@@ -269,16 +260,34 @@ def eurostat_dimensions(web: WebClient, flow: str) -> list[str]:
     return [dimension for _position, dimension in sorted(found)]
 
 
-def probe_entry(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, today: date) -> list[str]:
-    """Lists the dimensions of the dataset of an entry and the codes it has for Germany.
+def _code_list(values: Sequence[str]) -> str:
+    """Formats codes for the report, at most MAX_CODES_SHOWN of them."""
+    shown = ", ".join(values[:MAX_CODES_SHOWN])
+    return shown + (f" and {len(values) - MAX_CODES_SHOWN} more" if len(values) > MAX_CODES_SHOWN else "")
 
-    The probe requests the recent periods of the dataset with every dimension open except the
-    area, which is set to DE.
+
+def _probe_get(web: WebClient, provider: SdmxProvider, flow: str, key: str, today: date) -> tuple[list[str], dict[str, set[str]]]:
+    """Requests the recent periods of a key of a dataset and returns its dimension columns and codes."""
+    params = {**dict(provider.params), "startPeriod": str(today.year - CHECK_YEARS)}
+    response = web.get(provider.url(flow, key), params=params, headers=dict(provider.headers) or None,
+                       respect_robots=False, timeout_s=REQUEST_TIMEOUT_S)
+    return csv_codes(response.text)
+
+
+def probe_entry(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, geo: str, today: date) -> list[str]:
+    """Describes the dataset of an entry so that a failing key can be corrected.
+
+    If the number of dimensions of the dataset equals the number of parts of the key template,
+    one request per dimension leaves that dimension open and keeps the requested codes of the
+    others; the report lists the codes of the dimension and the requested codes the dataset
+    lacks. Otherwise one request with every dimension open except the area lists the codes of
+    all dimensions.
 
     Args:
         web: The HTTP client.
         provider: The SDMX interface.
         entry: The catalog entry.
+        geo: Area of the probe requests, e.g. DE.
         today: Day of the review.
 
     Returns:
@@ -290,28 +299,40 @@ def probe_entry(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, tod
         try:
             dimensions = eurostat_dimensions(web, entry.flow)
             lines.append(f"structure: {len(dimensions)} dimensions ({', '.join(dimensions)}); "
-                         f"the key template has {len(entry.key_parts)} parts")
+                         f"the key template {entry.key} has {len(entry.key_parts)} parts")
         except (FetchError, ValueError) as e:
             lines.append(f"structure not available: {e}")
-    count = len(dimensions) if dimensions else len(entry.key_parts)
-    if dimensions and "geo" in dimensions:
-        geo_position = dimensions.index("geo")
-    else:
-        geo_position = min(entry.placeholder_positions()["geo"], count - 1)
-    key = ".".join("DE" if position == geo_position else "" for position in range(count))
-    params = {**dict(provider.params), "startPeriod": str(today.year - CHECK_YEARS)}
-    try:
-        response = web.get(provider.url(entry.flow, key), params=params, headers=dict(provider.headers) or None,
-                           respect_robots=False, timeout_s=REQUEST_TIMEOUT_S)
-        columns, codes = csv_codes(response.text)
-    except (FetchError, ValueError) as e:
-        lines.append(f"no data for DE with the key {key}: {e}")
+    positions = entry.placeholder_positions()
+    breakdown = dict(entry.breakdown)
+    if dimensions is not None and len(dimensions) != len(entry.key_parts):
+        geo_position = dimensions.index("geo") if "geo" in dimensions else len(dimensions) - 1
+        key = ".".join(geo if position == geo_position else "" for position in range(len(dimensions)))
+        try:
+            columns, codes = _probe_get(web, provider, entry.flow, key, today)
+        except (FetchError, ValueError) as e:
+            lines.append(f"no data for {geo} with the key {key}: {e}")
+            return lines
+        lines.extend(f"{column}: {_code_list(sorted(codes[column]))}" for column in columns)
         return lines
-    for column in columns:
-        values = sorted(codes[column])
-        shown = ", ".join(values[:MAX_CODES_SHOWN])
-        more = f" and {len(values) - MAX_CODES_SHOWN} more" if len(values) > MAX_CODES_SHOWN else ""
-        lines.append(f"{column}: {shown}{more}")
+    placeholders = {position: name for name, position in positions.items()}
+    requested: list[list[str]] = []
+    for position, part in enumerate(entry.key_parts):
+        name = placeholders.get(position)
+        requested.append([geo] if name == "geo" else list(breakdown[name]) if name else [part])
+    for position, wanted in enumerate(requested):
+        if position == positions["geo"]:
+            continue
+        label = dimensions[position] if dimensions else f"part {position + 1}"
+        key = ".".join("" if index == position else "+".join(codes) for index, codes in enumerate(requested))
+        try:
+            columns, codes = _probe_get(web, provider, entry.flow, key, today)
+        except (FetchError, ValueError) as e:
+            lines.append(f"{label}: no data with the other parts as requested ({str(e)[:120]})")
+            continue
+        found = sorted(codes[columns[position]]) if position < len(columns) else []
+        missing = [code for code in wanted if code not in found]
+        lines.append(f"{label}: requested {_code_list(wanted)}; missing {_code_list(missing) or 'none'}; "
+                     f"available {_code_list(found)}")
     return lines
 
 
@@ -329,6 +350,7 @@ def check_entry(web: WebClient, entry: CatalogEntry, regions: Sequence[Region], 
     """
     provider = PROVIDERS[entry.provider]
     geos = entry.geos(regions)
+    probe_geo = "DE" if "DE" in geos else geos[0]
     result = EntryCheck(concept=entry.concept, provider=entry.provider, flow=entry.flow,
                         expected=entry.expected_series(regions))
     try:
@@ -336,12 +358,12 @@ def check_entry(web: WebClient, entry: CatalogEntry, regions: Sequence[Region], 
     except NotFoundError as e:
         result.status = "no_data"
         result.problems.append(f"no data for the key: {e.reason}")
-        result.probe = probe_entry(web, provider, entry, today)
+        result.probe = probe_entry(web, provider, entry, probe_geo, today)
         return result
     except (FetchError, ValueError) as e:
         result.status = "failed"
         result.problems.append(str(e)[:300])
-        result.probe = probe_entry(web, provider, entry, today)
+        result.probe = probe_entry(web, provider, entry, probe_geo, today)
         return result
     result.series = len(data.series)
     levels = {region.geo: region.level for region in regions}
@@ -366,6 +388,9 @@ def check_entry(web: WebClient, entry: CatalogEntry, regions: Sequence[Region], 
     if result.series < result.expected:
         missing = result.expected - result.series
         result.problems.append(f"{missing} of {result.expected} series without values since {today.year - CHECK_YEARS}")
+    if data.unknown_geos:
+        result.problems.append(f"the dataset does not know {len(data.unknown_geos)} areas: "
+                               + ", ".join(data.unknown_geos[:MAX_CODES_SHOWN]))
     if result.problems:
         result.status = "attention"
     return result

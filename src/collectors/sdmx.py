@@ -139,11 +139,14 @@ class EntryData:
         requests (int): Requests sent.
         empty_groups (int): Groups of areas for which the provider has no data.
         unexpected_rows (int): Rows whose codes the entry did not request; they are ignored.
+        unknown_geos (list[str]): Requested areas that the dataset does not know, e.g. codes of another
+            NUTS version; they were left out of the requests.
     """
     series: dict[SeriesKey, SeriesData] = field(default_factory=dict)
     requests: int = 0
     empty_groups: int = 0
     unexpected_rows: int = 0
+    unknown_geos: list[str] = field(default_factory=list)
 
 
 def parse_timestamp(value: str) -> Optional[datetime]:
@@ -198,7 +201,7 @@ def parse_toc(text: str) -> dict[str, TocEntry]:
     Raises:
         ValueError: If the header lacks the code or the last-update column.
     """
-    reader = csv.reader(io.StringIO(text.lstrip("﻿")), delimiter="\t", quotechar='"')
+    reader = csv.reader(io.StringIO(text.lstrip("\ufeff")), delimiter="\t", quotechar='"')
     header = [name.strip().lower() for name in next(reader, [])]
     try:
         positions = {name: header.index(name) for name in ("title", "code", "type", "last update of data")}
@@ -263,14 +266,7 @@ def parse_sdmx_csv(text: str, entry: CatalogEntry, geos: Sequence[str]) -> tuple
         ValueError: If the CSV lacks TIME_PERIOD or OBS_VALUE, has another number of dimensions than the key,
             or a fixed dimension has another code than the key.
     """
-    text = text.lstrip("﻿")
-    first_line = text.split("\n", 1)[0]
-    delimiter = ";" if first_line.count(";") > first_line.count(",") else ","
-    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
-    columns = reader.fieldnames or []
-    if "TIME_PERIOD" not in columns or "OBS_VALUE" not in columns:
-        raise ValueError(f"not an SDMX-CSV response (columns: {', '.join(columns[:8])})")
-    dimensions = [name for name in columns[:columns.index("TIME_PERIOD")] if name not in NON_DIMENSION_COLUMNS]
+    dimensions, rows = csv_dimensions(text)
     parts = entry.key_parts
     if len(dimensions) != len(parts):
         raise ValueError(f"the response has {len(dimensions)} dimensions ({', '.join(dimensions)}); "
@@ -284,7 +280,7 @@ def parse_sdmx_csv(text: str, entry: CatalogEntry, geos: Sequence[str]) -> tuple
     series: dict[tuple[str, tuple[str, ...]], dict[str, float]] = {}
     unexpected = 0
     last_update: Optional[str] = None
-    for row in reader:
+    for row in rows:
         for column, code in fixed:
             if (row.get(column) or "") != code:
                 raise ValueError(f"column {column} has the code {row.get(column)!r}; the key requests {code!r}")
@@ -302,9 +298,62 @@ def parse_sdmx_csv(text: str, entry: CatalogEntry, geos: Sequence[str]) -> tuple
     return series, unexpected, last_update
 
 
+def csv_dimensions(text: str) -> tuple[list[str], list[dict[str, str]]]:
+    """Reads the dimension columns and the rows of an SDMX-CSV response.
+
+    Args:
+        text: The CSV text.
+
+    Returns:
+        tuple: The dimension columns in key order, and the rows.
+
+    Raises:
+        ValueError: If the response has no TIME_PERIOD column.
+    """
+    text = text.lstrip("\ufeff")
+    first_line = text.split("\n", 1)[0]
+    delimiter = ";" if first_line.count(";") > first_line.count(",") else ","
+    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
+    columns = reader.fieldnames or []
+    if "TIME_PERIOD" not in columns or "OBS_VALUE" not in columns:
+        raise ValueError(f"not an SDMX-CSV response (columns: {', '.join(columns[:8])})")
+    return [name for name in columns[:columns.index("TIME_PERIOD")] if name not in NON_DIMENSION_COLUMNS], list(reader)
+
+
+def available_geos(web: WebClient, provider: SdmxProvider, entry: CatalogEntry) -> set[str]:
+    """Lists the areas for which the dataset of an entry has data.
+
+    The request leaves the area open and selects the first code of every breakdown dimension.
+
+    Args:
+        web: The HTTP client.
+        provider: The SDMX interface.
+        entry: The catalog entry.
+
+    Returns:
+        set[str]: Area codes with data.
+
+    Raises:
+        FetchError: If the request fails.
+        ValueError: If the response is not an SDMX-CSV with the dimensions of the key template.
+    """
+    key = entry.fill_key("", {name: codes[0] for name, codes in entry.breakdown})
+    response = web.get(provider.url(entry.flow, key), params=dict(provider.params) or None,
+                       headers=dict(provider.headers) or None, respect_robots=False, timeout_s=REQUEST_TIMEOUT_S)
+    dimensions, rows = csv_dimensions(response.text)
+    if len(dimensions) != len(entry.key_parts):
+        raise ValueError(f"the response has {len(dimensions)} dimensions; the key template has {len(entry.key_parts)}")
+    geo_column = dimensions[entry.placeholder_positions()["geo"]]
+    return {row.get(geo_column) or "" for row in rows}
+
+
 def fetch_entry(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, geos: Sequence[str],
                 start_period: Optional[str] = None) -> EntryData:
     """Fetches all series of a catalog entry, in groups of at most ``provider.max_geos`` areas.
+
+    A dataset rejects a request with HTTP 400 if it lists a code that the dataset does not
+    know, e.g. a district code of another NUTS version. The areas of the dataset are then read
+    with one further request, and the series are fetched again for the known areas only.
 
     Args:
         web: The HTTP client.
@@ -318,9 +367,32 @@ def fetch_entry(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, geo
 
     Raises:
         NotFoundError: If the provider has data for none of the groups.
-        FetchError: If a request fails.
+        FetchError: If a request fails, also with the known areas only.
         ValueError: If a response is not a valid SDMX-CSV of the entry.
     """
+    try:
+        return _fetch_groups(web, provider, entry, geos, start_period)
+    except FetchError as e:
+        if isinstance(e, NotFoundError) or e.status != 400:
+            raise
+        try:
+            known = available_geos(web, provider, entry)
+        except (FetchError, ValueError):
+            raise e from None
+        usable = [geo for geo in geos if geo in known]
+        if not usable or len(usable) == len(geos):
+            raise
+        unknown = sorted(set(geos) - set(usable))
+        logger.info("%s %s: the dataset does not know %d of the requested areas (%s); fetching the others.",
+                    provider.name, entry.concept, len(unknown), ", ".join(unknown)[:200])
+        data = _fetch_groups(web, provider, entry, usable, start_period)
+        data.unknown_geos = unknown
+        return data
+
+
+def _fetch_groups(web: WebClient, provider: SdmxProvider, entry: CatalogEntry, geos: Sequence[str],
+                  start_period: Optional[str]) -> EntryData:
+    """Fetches the series of a catalog entry for some areas, in groups of at most ``provider.max_geos``."""
     data = EntryData()
     last_not_found: Optional[NotFoundError] = None
     params = dict(provider.params)
@@ -450,7 +522,7 @@ def collect_entries(ctx: RunContext, provider: SdmxProvider, catalog: Sequence[C
     states: dict[str, Any] = dict(cursor.get("entries") or {})
     counters: dict[str, Any] = {"entries": len(catalog), "unchanged_datasets": 0, "requests": 0, "series": 0,
                                 "new": 0, "revised": 0, "unchanged": 0, "absent": 0, "incomplete": 0, "values": 0,
-                                "not_found": 0, "failed": 0}
+                                "unknown_geos": 0, "not_found": 0, "failed": 0}
     complete = True
     error: Optional[str] = None
     not_found: list[str] = []
@@ -492,6 +564,7 @@ def collect_entries(ctx: RunContext, provider: SdmxProvider, catalog: Sequence[C
             continue
         counters["requests"] += data.requests
         counters["series"] += len(data.series)
+        counters["unknown_geos"] += len(data.unknown_geos)
         records = []
         for key, series_data in data.series.items():
             try:
