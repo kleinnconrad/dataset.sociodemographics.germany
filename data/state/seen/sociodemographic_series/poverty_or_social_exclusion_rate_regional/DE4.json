@@ -1,0 +1,7 @@
+{
+"version": 1,
+"items": {
+"poverty_or_social_exclusion_rate_regional.DE4": {"data": {"values": {"2021": 19.6, "2022": 17.7, "2023": 20.0, "2024": 19.3, "2025": 19.6}}, "first_seen": "2026-10-26", "hash": "0197101f7f6971fb", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE40": {"data": {"values": {"2021": 19.6, "2022": 17.7, "2023": 20.0, "2024": 19.3, "2025": 19.6}}, "first_seen": "2026-10-26", "hash": "0197101f7f6971fb", "last_seen": "2026-10-26", "revision": 0}
+}
+}

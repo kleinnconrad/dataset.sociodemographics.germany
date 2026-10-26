@@ -1,0 +1,13 @@
+{
+"version": 1,
+"items": {
+"at_risk_of_poverty_rate_regional.DE2": {"data": {"values": {"2021": 13.1, "2022": 11.5, "2023": 11.4, "2024": 11.8, "2025": 12.6}}, "first_seen": "2026-10-26", "hash": "1b798ac93567065e", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE21": {"data": {"values": {"2021": 11.3, "2022": 10.2, "2023": 9.9, "2024": 10.7, "2025": 11.8}}, "first_seen": "2026-10-26", "hash": "a6da69f943476896", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE22": {"data": {"values": {"2021": 14.9, "2022": 11.2, "2023": 14.4, "2024": 11.7, "2025": 12.3}}, "first_seen": "2026-10-26", "hash": "b280ef24ec0dc417", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE23": {"data": {"values": {"2021": 15.2, "2022": 11.0, "2023": 9.3, "2024": 11.7, "2025": 14.6}}, "first_seen": "2026-10-26", "hash": "f243947cd67d6fbc", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE24": {"data": {"values": {"2021": 13.4, "2022": 10.0, "2023": 12.1, "2024": 11.6, "2025": 13.7}}, "first_seen": "2026-10-26", "hash": "342e58d318d6853f", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE25": {"data": {"values": {"2021": 13.6, "2022": 14.4, "2023": 14.3, "2024": 15.3, "2025": 13.7}}, "first_seen": "2026-10-26", "hash": "5d869af3431623df", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE26": {"data": {"values": {"2021": 15.2, "2022": 12.9, "2023": 12.1, "2024": 11.8, "2025": 13.2}}, "first_seen": "2026-10-26", "hash": "4b7299218863913d", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DE27": {"data": {"values": {"2021": 13.2, "2022": 12.3, "2023": 10.9, "2024": 11.4, "2025": 11.4}}, "first_seen": "2026-10-26", "hash": "7c1c9d5b47889a3d", "last_seen": "2026-10-26", "revision": 0}
+}
+}

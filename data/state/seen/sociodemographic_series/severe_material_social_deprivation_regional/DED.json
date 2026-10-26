@@ -1,0 +1,9 @@
+{
+"version": 1,
+"items": {
+"severe_material_social_deprivation_regional.DED": {"data": {"values": {"2021": 2.8, "2022": 2.6, "2023": 4.4, "2024": 4.3, "2025": 3.8}}, "first_seen": "2026-10-26", "hash": "91634895820ebbdb", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DED2": {"data": {"values": {"2021": 2.0, "2022": 2.1, "2023": 3.8, "2024": 3.1, "2025": 3.4}}, "first_seen": "2026-10-26", "hash": "232a0b24ff7f738a", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DED4": {"data": {"values": {"2021": 2.0, "2022": 3.3, "2023": 4.8, "2024": 4.9, "2025": 4.4}}, "first_seen": "2026-10-26", "hash": "723d4f3fea76ed9c", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DED5": {"data": {"values": {"2021": 5.1, "2022": 2.3, "2023": 4.7, "2024": 5.5, "2025": 3.5}}, "first_seen": "2026-10-26", "hash": "88bbdce9f236fe83", "last_seen": "2026-10-26", "revision": 0}
+}
+}

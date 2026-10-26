@@ -1,0 +1,9 @@
+{
+"version": 1,
+"items": {
+"housing_cost_overburden_rate_regional.DE7": {"data": {"values": {"2021": 14.4, "2022": 12.8, "2023": 15.0, "2024": 13.4, "2025": 11.9}}, "first_seen": "2026-10-26", "hash": "6bc979b42917cc1e", "last_seen": "2026-10-26", "revision": 0},
+"housing_cost_overburden_rate_regional.DE71": {"data": {"values": {"2021": 15.8, "2022": 13.3, "2023": 15.1, "2024": 14.5, "2025": 12.6}}, "first_seen": "2026-10-26", "hash": "a7544b1832b021b5", "last_seen": "2026-10-26", "revision": 0},
+"housing_cost_overburden_rate_regional.DE72": {"data": {"values": {"2021": 11.9, "2022": 11.8, "2023": 15.6, "2024": 11.0, "2025": 12.1}}, "first_seen": "2026-10-26", "hash": "2e77d6fa46b4a499", "last_seen": "2026-10-26", "revision": 0},
+"housing_cost_overburden_rate_regional.DE73": {"data": {"values": {"2021": 11.7, "2022": 12.4, "2023": 14.4, "2024": 11.5, "2025": 9.4}}, "first_seen": "2026-10-26", "hash": "6375e40207e1ef3c", "last_seen": "2026-10-26", "revision": 0}
+}
+}

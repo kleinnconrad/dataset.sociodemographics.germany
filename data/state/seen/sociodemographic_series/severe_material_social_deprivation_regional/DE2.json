@@ -1,0 +1,13 @@
+{
+"version": 1,
+"items": {
+"severe_material_social_deprivation_regional.DE2": {"data": {"values": {"2021": 3.1, "2022": 4.1, "2023": 4.5, "2024": 3.4, "2025": 3.1}}, "first_seen": "2026-10-26", "hash": "0add42f8e7d54ecd", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE21": {"data": {"values": {"2021": 2.7, "2022": 3.7, "2023": 4.5, "2024": 4.1, "2025": 3.1}}, "first_seen": "2026-10-26", "hash": "572cb7fbace3e444", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE22": {"data": {"values": {"2021": 2.5, "2022": 3.1, "2023": 3.7, "2024": 3.1, "2025": 3.0}}, "first_seen": "2026-10-26", "hash": "13e83286222c0d3c", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE23": {"data": {"values": {"2021": 1.9, "2022": 3.4, "2023": 2.0, "2024": 1.0, "2025": 1.6}}, "first_seen": "2026-10-26", "hash": "c8608b1e1125b1f2", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE24": {"data": {"values": {"2021": 3.6, "2022": 5.1, "2023": 6.0, "2024": 3.1, "2025": 2.9}}, "first_seen": "2026-10-26", "hash": "82163986cb8f4996", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE25": {"data": {"values": {"2021": 3.4, "2022": 6.4, "2023": 5.7, "2024": 4.7, "2025": 5.0}}, "first_seen": "2026-10-26", "hash": "7edc7b4b2880404d", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE26": {"data": {"values": {"2021": 5.7, "2022": 4.9, "2023": 3.7, "2024": 3.4, "2025": 3.4}}, "first_seen": "2026-10-26", "hash": "b8a1c10fd01d74c9", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DE27": {"data": {"values": {"2021": 2.8, "2022": 2.7, "2023": 4.8, "2024": 2.2, "2025": 2.2}}, "first_seen": "2026-10-26", "hash": "a9b50a6a97bb41dc", "last_seen": "2026-10-26", "revision": 0}
+}
+}

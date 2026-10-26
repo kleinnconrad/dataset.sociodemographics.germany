@@ -1,0 +1,7 @@
+{
+"version": 1,
+"items": {
+"severe_material_social_deprivation_regional.DEF": {"data": {"values": {"2021": 4.0, "2022": 5.7, "2023": 6.7, "2024": 5.5, "2025": 4.7}}, "first_seen": "2026-10-26", "hash": "cb0134dbf4fc012a", "last_seen": "2026-10-26", "revision": 0},
+"severe_material_social_deprivation_regional.DEF0": {"data": {"values": {"2021": 4.0, "2022": 5.7, "2023": 6.7, "2024": 5.5, "2025": 4.7}}, "first_seen": "2026-10-26", "hash": "cb0134dbf4fc012a", "last_seen": "2026-10-26", "revision": 0}
+}
+}

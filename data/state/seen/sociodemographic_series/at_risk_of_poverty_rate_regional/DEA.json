@@ -1,0 +1,11 @@
+{
+"version": 1,
+"items": {
+"at_risk_of_poverty_rate_regional.DEA": {"data": {"values": {"2021": 17.4, "2022": 17.3, "2023": 16.7, "2024": 17.4, "2025": 17.6}}, "first_seen": "2026-10-26", "hash": "203d47dfecdd621b", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEA1": {"data": {"values": {"2021": 18.4, "2022": 19.9, "2023": 18.3, "2024": 16.4, "2025": 16.5}}, "first_seen": "2026-10-26", "hash": "d4add69ade37526c", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEA2": {"data": {"values": {"2021": 14.2, "2022": 14.5, "2023": 14.2, "2024": 15.8, "2025": 17.0}}, "first_seen": "2026-10-26", "hash": "32372435581e303d", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEA3": {"data": {"values": {"2021": 19.4, "2022": 16.6, "2023": 18.5, "2024": 20.0, "2025": 18.3}}, "first_seen": "2026-10-26", "hash": "a4e576594e885e12", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEA4": {"data": {"values": {"2021": 21.4, "2022": 13.6, "2023": 15.8, "2024": 17.3, "2025": 16.9}}, "first_seen": "2026-10-26", "hash": "ba9a6476fe913c57", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEA5": {"data": {"values": {"2021": 16.1, "2022": 19.8, "2023": 16.7, "2024": 19.0, "2025": 19.6}}, "first_seen": "2026-10-26", "hash": "583f353787f29f33", "last_seen": "2026-10-26", "revision": 0}
+}
+}

@@ -1,0 +1,13 @@
+{
+"version": 1,
+"items": {
+"poverty_or_social_exclusion_rate_regional.DE2": {"data": {"values": {"2021": 16.7, "2022": 15.9, "2023": 16.1, "2024": 15.2, "2025": 15.9}}, "first_seen": "2026-10-26", "hash": "34378f4a7b0ebd2d", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE21": {"data": {"values": {"2021": 14.5, "2022": 14.3, "2023": 14.9, "2024": 15.0, "2025": 15.3}}, "first_seen": "2026-10-26", "hash": "10bc1bf72f80c187", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE22": {"data": {"values": {"2021": 17.5, "2022": 14.9, "2023": 17.3, "2024": 15.3, "2025": 15.5}}, "first_seen": "2026-10-26", "hash": "10389a954a1cf02f", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE23": {"data": {"values": {"2021": 18.6, "2022": 14.6, "2023": 12.9, "2024": 13.0, "2025": 15.8}}, "first_seen": "2026-10-26", "hash": "aa43f66f6ca663a7", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE24": {"data": {"values": {"2021": 17.9, "2022": 15.4, "2023": 18.1, "2024": 15.1, "2025": 17.3}}, "first_seen": "2026-10-26", "hash": "c534a6256f8a51ae", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE25": {"data": {"values": {"2021": 18.0, "2022": 19.6, "2023": 19.6, "2024": 19.4, "2025": 18.6}}, "first_seen": "2026-10-26", "hash": "3a325ba7398a3283", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE26": {"data": {"values": {"2021": 20.8, "2022": 18.3, "2023": 15.7, "2024": 14.7, "2025": 16.5}}, "first_seen": "2026-10-26", "hash": "1f16b75b39a8c670", "last_seen": "2026-10-26", "revision": 0},
+"poverty_or_social_exclusion_rate_regional.DE27": {"data": {"values": {"2021": 15.9, "2022": 16.9, "2023": 16.0, "2024": 13.7, "2025": 14.5}}, "first_seen": "2026-10-26", "hash": "234b54581b8eaf06", "last_seen": "2026-10-26", "revision": 0}
+}
+}

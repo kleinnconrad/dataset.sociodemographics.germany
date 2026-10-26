@@ -25,7 +25,276 @@ A dataset of German sociodemographics for analysis and prediction. A pipeline in
 
 ## Dataset Overview
 <!-- DATASET_OVERVIEW_START -->
-No run yet. The pipeline writes this overview after its first run.
+**Last updated:** 2026-10-26 13:16 UTC
+
+| Dataset | Records | Items | Files | Observed | Content |
+|---|---|---|---|---|---|
+| `sociodemographic_series` | 34,441 | 34,441 | 1 | 2026-10-26 to 2026-10-26 | A vintage of a statistical series: all values at the first observation, then the added, revised and removed periods. |
+| `series_catalog` | 61 | 61 | 1 | 2026-10-26 to 2026-10-26 | An entry of the series catalog, recorded when it appears or changes. |
+| `regions` | 462 | 462 | 1 | 2026-10-26 to 2026-10-26 | An entry of the region registry, recorded when it appears or changes. |
+| `source_snapshots` | 54 | 54 | 1 | 2026-10-26 to 2026-10-26 | The content that a source without a reliable history published at one observation, stored again only when it changes. |
+| `snapshot_catalog` | 54 | 54 | 1 | 2026-10-26 to 2026-10-26 | An entry of the snapshot configuration, recorded when it appears or changes. |
+
+**Runs**
+
+- **Latest run:** 2026-10-26 12:55 UTC (normal)
+  - `ecb`: ok (sociodemographic_series 3)
+  - `eurostat`: ok (sociodemographic_series 34,438)
+  - `files`: ok (source_snapshots 15)
+  - `genesis`: ok (source_snapshots 39)
+  - `regions`: ok (regions 462)
+  - `series_catalog`: ok (series_catalog 61)
+  - `snapshot_catalog`: ok (snapshot_catalog 54)
+
+**Statistical series**
+
+- **Active catalog entries:** 61 (eurostat 60, ecb 1); with stored series: 61; stored series: 34,441
+
+<details>
+<summary>Catalog entries: stored series, levels and latest period</summary>
+
+| Concept | Topic | Frequency | Unit | Dataset | Series | Levels | Latest period | Revised records |
+|---|---|---|---|---|---|---|---|---|
+| `live_births_by_mother_age_citizenship` | births and fertility | A | live births | eurostat `demo_faczc` | 24 | country | 2024 | 0 |
+| `mean_age_at_birth` | births and fertility | A | years | eurostat `demo_r_find3` | 462 | country, nuts1, nuts2, nuts3 | 2024 | 0 |
+| `total_fertility_rate` | births and fertility | A | live births per woman | eurostat `demo_r_find3` | 462 | country, nuts1, nuts2, nuts3 | 2024 | 0 |
+| `women_by_age_citizenship` | births and fertility | A | persons on 1 January | eurostat `migr_pop1ctz` | 28 | country | 2025 | 0 |
+| `criminal_justice_persons_by_citizenship` | crime and justice | A | persons | eurostat `crim_just_ctz` | 6 | country | 2024 | 0 |
+| `police_recorded_offences` | crime and justice | A | offences | eurostat `crim_off_cat` | 20 | country | 2024 | 0 |
+| `prison_population` | crime and justice | A | persons | eurostat `crim_pris_cap` | 2 | country | 2024 | 0 |
+| `adult_learning` | education | A | percent of the population aged 25 to 64 | eurostat `trng_lfse_04` | 168 | eu, country, nuts1, nuts2 | 2025 | 0 |
+| `early_leavers_from_education` | education | A | percent of the population aged 18 to 24 | eurostat `edat_lfse_16` | 165 | eu, country, nuts1, nuts2 | 2025 | 0 |
+| `educational_attainment` | education | A | percent of the population aged 25 to 64 | eurostat `edat_lfse_04` | 504 | eu, country, nuts1, nuts2 | 2025 | 0 |
+| `neet_rate` | education | A | percent of the population aged 15 to 29 | eurostat `edat_lfse_22` | 167 | eu, country, nuts1, nuts2 | 2025 | 0 |
+| `age_leaving_parental_home` | households and families | A | years | eurostat `yth_demo_030` | 6 | eu, country | 2025 | 0 |
+| `average_household_size` | households and families | A | persons per household | eurostat `ilc_lvph01` | 2 | eu, country | 2025 | 0 |
+| `crude_divorce_rate` | households and families | A | divorces per 1,000 persons | eurostat `demo_ndivind` | 2 | eu, country | 2024 | 0 |
+| `crude_marriage_rate` | households and families | A | marriages per 1,000 persons | eurostat `demo_nind` | 2 | eu, country | 2024 | 0 |
+| `young_adults_living_with_parents` | households and families | A | percent of the population aged 18 to 34 | eurostat `ilc_lvps08` | 6 | eu, country | 2025 | 0 |
+| `housing_cost_overburden_rate` | housing | A | percent of the population | eurostat `ilc_lvho07a` | 2 | eu, country | 2025 | 0 |
+| `housing_cost_overburden_rate_regional` | housing | A | percent of the population | eurostat `ilc_lvho07_r` | 55 | country, nuts1, nuts2 | 2025 | 0 |
+| `housing_tenure` | housing | A | percent of the population | eurostat `ilc_lvho02` | 12 | eu, country | 2025 | 0 |
+| `overcrowding_rate` | housing | A | percent of the population | eurostat `ilc_lvho05a` | 2 | eu, country | 2025 | 0 |
+| `at_risk_of_poverty_rate` | income and poverty | A | percent of the population | eurostat `ilc_li02` | 8 | eu, country | 2025 | 0 |
+| `at_risk_of_poverty_rate_regional` | income and poverty | A | percent of the population | eurostat `ilc_li41` | 55 | country, nuts1, nuts2 | 2025 | 0 |
+| `disposable_income_per_inhabitant` | income and poverty | A | euro per inhabitant | eurostat `nama_10r_2hhinc` | 55 | country, nuts1, nuts2 | 2023 | 0 |
+| `gini_coefficient` | income and poverty | A | index from 0 to 100 | eurostat `ilc_di12` | 2 | eu, country | 2025 | 0 |
+| `income_decile_cut_offs` | income and poverty | A | euro per year | eurostat `ilc_di01` | 18 | eu, country | 2025 | 0 |
+| `income_decile_shares` | income and poverty | A | percent of the total equivalised disposable income | eurostat `ilc_di01` | 20 | eu, country | 2025 | 0 |
+| `income_quintile_share_ratio` | income and poverty | A | ratio of the income of the top and the bottom fifth | eurostat `ilc_di11` | 2 | eu, country | 2025 | 0 |
+| `income_quintile_share_ratio_regional` | income and poverty | A | ratio of the income of the top and the bottom fifth | eurostat `ilc_di11_r` | 55 | country, nuts1, nuts2 | 2025 | 0 |
+| `median_equivalised_income` | income and poverty | A | euro per year | eurostat `ilc_di03` | 4 | eu, country | 2025 | 0 |
+| `poverty_or_social_exclusion_by_citizenship` | income and poverty | A | percent of the population aged 18 and over | eurostat `ilc_peps05n` | 8 | eu, country | 2025 | 0 |
+| `poverty_or_social_exclusion_rate_regional` | income and poverty | A | percent of the population | eurostat `ilc_peps11n` | 55 | country, nuts1, nuts2 | 2025 | 0 |
+| `primary_income_per_inhabitant` | income and poverty | A | euro per inhabitant | eurostat `nama_10r_2hhinc` | 55 | country, nuts1, nuts2 | 2023 | 0 |
+| `severe_material_social_deprivation` | income and poverty | A | percent of the population | eurostat `ilc_mdsd11` | 2 | eu, country | 2025 | 0 |
+| `severe_material_social_deprivation_regional` | income and poverty | A | percent of the population | eurostat `ilc_mdsd18` | 55 | country, nuts1, nuts2 | 2025 | 0 |
+| `activity_rate` | labour market | A | percent of the population aged 15 to 64 | eurostat `lfst_r_lfp2actrt` | 165 | country, nuts1, nuts2 | 2025 | 0 |
+| `employment_rate` | labour market | A | percent of the population aged 20 to 64 | eurostat `lfst_r_lfe2emprt` | 165 | country, nuts1, nuts2 | 2025 | 0 |
+| `unemployment_rate` | labour market | A | percent of the labour force aged 15 to 74 | eurostat `lfst_r_lfu3rt` | 165 | country, nuts1, nuts2 | 2025 | 0 |
+| `asylum_applicants` | migration and citizenship | M | persons | eurostat `migr_asyappctzm` | 3 | country | 2026-07 | 0 |
+| `asylum_decisions` | migration and citizenship | Q | persons | eurostat `migr_asydcfstq` | 6 | country | 2026-Q2 | 0 |
+| `citizenship_acquisitions` | migration and citizenship | A | persons | eurostat `migr_acq` | 3 | country | 2024 | 0 |
+| `emigration` | migration and citizenship | A | persons | eurostat `migr_emi1ctz` | 4 | country | 2024 | 0 |
+| `immigration` | migration and citizenship | A | persons | eurostat `migr_imm1ctz` | 4 | country | 2024 | 0 |
+| `population_by_citizenship` | migration and citizenship | A | persons on 1 January | eurostat `migr_pop1ctz` | 12 | country | 2025 | 0 |
+| `population_by_country_of_birth` | migration and citizenship | A | persons on 1 January | eurostat `migr_pop3ctb` | 5 | country | 2025 | 0 |
+| `temporary_protection_beneficiaries` | migration and citizenship | M | persons | eurostat `migr_asytpsm` | 1 | country | 2026-09 | 0 |
+| `death_rate_by_cause` | mortality and health | A | deaths per 100,000 inhabitants, standardised (three-year average) | eurostat `hlth_cd_asdr2` | 330 | country, nuts1, nuts2 | 2023 | 0 |
+| `deaths_weekly` | mortality and health | W | deaths | eurostat `demo_r_mwk_ts` | 3 | country | 2026-W27 | 0 |
+| `deaths_weekly_regional` | mortality and health | W | deaths | eurostat `demo_r_mwk2_ts` | 16 | nuts1 | 2026-W24 | 0 |
+| `infant_mortality_rate` | mortality and health | A | deaths of children under one year per 1,000 live births | eurostat `demo_r_minfind` | 55 | country, nuts1, nuts2 | 2024 | 0 |
+| `life_expectancy` | mortality and health | A | years | eurostat `demo_r_mlifexp` | 330 | country, nuts1, nuts2 | 2024 | 0 |
+| `demographic_balance` | population change | A | persons | eurostat `demo_r_gind3` | 2,772 | country, nuts1, nuts2, nuts3 | 2026 | 0 |
+| `demographic_rates` | population change | A | per 1,000 persons of the average population | eurostat `demo_r_gind3` | 2,310 | country, nuts1, nuts2, nuts3 | 2025 | 0 |
+| `age_dependency_ratio` | population structure | A | percent of the population aged 15 to 64 | eurostat `demo_r_pjanind3` | 1,386 | country, nuts1, nuts2, nuts3 | 2025 | 0 |
+| `median_age` | population structure | A | years | eurostat `demo_r_pjanind3` | 462 | country, nuts1, nuts2, nuts3 | 2025 | 0 |
+| `population` | population structure | A | persons on 1 January | eurostat `demo_r_pjanaggr3` | 5,544 | country, nuts1, nuts2, nuts3 | 2025 | 0 |
+| `population_by_age_group` | population structure | A | persons on 1 January | eurostat `demo_r_pjangrp3` | 16,632 | country, nuts1, nuts2, nuts3 | 2025 | 0 |
+| `population_by_single_age` | population structure | A | persons on 1 January | eurostat `demo_pjan` | 202 | country | 2025 | 0 |
+| `population_density` | population structure | A | persons per square kilometre | eurostat `demo_r_d3dens` | 462 | country, nuts1, nuts2, nuts3 | 2024 | 0 |
+| `employment_by_place_of_work` | regional economy | A | thousand persons | eurostat `nama_10r_3empers` | 455 | country, nuts1, nuts2, nuts3 | 2024 | 0 |
+| `gdp_per_inhabitant` | regional economy | A | euro per inhabitant | eurostat `nama_10r_3gdp` | 455 | country, nuts1, nuts2, nuts3 | 2024 | 0 |
+| `net_wealth_share` | wealth | Q | percent of the total net wealth of households | ecb `DWA` | 3 | country | 2026-Q1 | 0 |
+
+</details>
+
+| Topic | Catalog entries |
+|---|---|
+| births and fertility | 4 |
+| crime and justice | 3 |
+| education | 4 |
+| households and families | 5 |
+| housing | 4 |
+| income and poverty | 14 |
+| labour market | 3 |
+| migration and citizenship | 8 |
+| mortality and health | 5 |
+| population change | 2 |
+| population structure | 6 |
+| regional economy | 2 |
+| wealth | 1 |
+
+**Regions**
+
+- **Registered regions:** 462 (Germany 1, states 16, government regions 38, districts 407)
+
+**Fields** (Filled: records with a value that is not null and not empty)
+
+<details>
+<summary><code>sociodemographic_series</code>: 27 fields</summary>
+
+| Field | Description | Filled | Distinct values |
+|---|---|---|---|
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (34,441) | 34,441 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (34,441) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (34,441) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (34,441) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (34,441) | 64 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (34,441) | 2 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (34,441) | 34,441 |
+| `license` | License or terms of the source. | 100.0% (34,441) | 2 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (34,441) | 1 |
+| `series_id` | Stable id of the series: concept, geo and the breakdown codes, separated by dots, e.g. 'population_by_age_group.DE212.F.Y20-24'. | 100.0% (34,441) | 34,441 |
+| `concept` | Catalog entry of the series. | 100.0% (34,441) | 61 |
+| `topic` | Topic group of the series. | 100.0% (34,441) | 13 |
+| `geo` | Region or area: NUTS code of the German region (DE, DE2, DE21, DE212) or an aggregate such as EU27_2020. | 100.0% (34,441) | 463 |
+| `geo_level` | Level of the region: eu, country, nuts1 (state), nuts2 (government region) or nuts3 (district). | 100.0% (34,441) | 5 |
+| `state` | ISO 3166-2 code of the state that contains the region; null for Germany and aggregates. | 98.4% (33,884) | 16 |
+| `breakdown` | Code of the provider per breakdown dimension, e.g. {'sex': 'F', 'age': 'Y20-24'}; empty for a series without breakdown. | 90.7% (31,226) | 15 |
+| `frequency` | Frequency of the periods. | 100.0% (34,441) | 4 |
+| `unit` | Unit of the values. | 100.0% (34,441) | 30 |
+| `provider` | Organization and interface the series is read from. | 100.0% (34,441) | 2 |
+| `provider_flow` | Dataset or dataflow of the provider. | 100.0% (34,441) | 55 |
+| `provider_key` | SDMX key of the series at the provider. | 100.0% (34,441) | 34,263 |
+| `values` | Values by period (YYYY-Www, YYYY-MM, YYYY-Qn or YYYY). Revision 0 holds all periods of the series; a later revision only the periods that were added or whose value changed. | 100.0% (34,441) | 1,749 |
+| `removed_periods` | Periods whose value disappeared at the provider since the previous revision. | 0.0% (0) | 0 |
+| `first_period` | First period of the complete series after this revision. | 100.0% (34,441) | 36 |
+| `last_period` | Last period of the complete series after this revision. | 100.0% (34,441) | 27 |
+| `observations` | Number of periods of the complete series after this revision. | 100.0% (34,441) | 42 |
+| `source_updated` | Last update of the dataset at the provider (UTC), if the provider states it. | 100.0% (34,438) | 26 |
+
+</details>
+
+<details>
+<summary><code>series_catalog</code>: 23 fields</summary>
+
+| Field | Description | Filled | Distinct values |
+|---|---|---|---|
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (61) | 61 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (61) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (61) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (61) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (61) | 1 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (61) | 1 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (61) | 1 |
+| `license` | License or terms of the source. | 100.0% (61) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (61) | 1 |
+| `concept` | Stable id of the entry: what its series measure, e.g. 'population_by_age_group'. The first part of every series_id of the entry. | 100.0% (61) | 61 |
+| `name` | Name of the concept. | 100.0% (61) | 61 |
+| `topic` | Topic group of the concept. | 100.0% (61) | 13 |
+| `frequency` | Frequency of the periods: W weekly, M monthly, Q quarterly, A annual. | 100.0% (61) | 4 |
+| `unit` | Unit of the values, e.g. 'persons on 1 January'. | 100.0% (61) | 30 |
+| `provider` | Organization and interface the series are read from. | 100.0% (61) | 2 |
+| `provider_flow` | Dataset or dataflow of the provider, e.g. 'demo_r_pjangrp3'. | 100.0% (61) | 55 |
+| `key_template` | SDMX key of the series with the placeholders {geo} and one placeholder per breakdown dimension, e.g. 'A.NR.{sex}.{age}.{geo}'. | 100.0% (61) | 53 |
+| `geo_levels` | Levels of the German regions the entry is collected for. | 100.0% (61) | 4 |
+| `extra_geos` | Further areas the entry is collected for, e.g. EU27_2020 for comparisons. | 32.8% (20) | 1 |
+| `breakdown` | Codes of the provider per breakdown dimension, e.g. {'sex': ['M', 'F']}; every combination is a series. | 62.3% (38) | 15 |
+| `added` | Day on which the entry was added to the catalog; start of collection. | 100.0% (61) | 1 |
+| `removed` | Day on which the entry was removed from the catalog; end of collection. | 0.0% (0) | 0 |
+| `removed_reason` | Why the entry was removed. | 0.0% (0) | 0 |
+
+</details>
+
+<details>
+<summary><code>regions</code>: 18 fields</summary>
+
+| Field | Description | Filled | Distinct values |
+|---|---|---|---|
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (462) | 462 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (462) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (462) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (462) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (462) | 1 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (462) | 1 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (462) | 1 |
+| `license` | License or terms of the source. | 100.0% (462) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (462) | 1 |
+| `geo` | NUTS code of the region, e.g. 'DE212'; the join key geo of sociodemographic_series. | 100.0% (462) | 462 |
+| `name` | Name of the region in the NUTS classification. | 100.0% (462) | 444 |
+| `level` | Level of the region: country, nuts1 (state), nuts2 or nuts3 (district). | 100.0% (462) | 4 |
+| `parent` | NUTS code of the region one level above; null for Germany. | 99.8% (461) | 55 |
+| `state` | ISO 3166-2 code of the state that contains the region; null for Germany. | 99.8% (461) | 16 |
+| `nuts_versions` | Versions of the NUTS classification that contain the code with this territory, e.g. ['2021', '2024']. | 100.0% (462) | 3 |
+| `added` | Day on which the region was added to the registry. | 100.0% (462) | 1 |
+| `removed` | Day on which the region was removed from the registry. | 0.0% (0) | 0 |
+| `removed_reason` | Why the region was removed. | 0.0% (0) | 0 |
+
+</details>
+
+<details>
+<summary><code>source_snapshots</code>: 27 fields</summary>
+
+| Field | Description | Filled | Distinct values |
+|---|---|---|---|
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (54) | 54 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (54) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (54) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (54) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (54) | 52 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (54) | 4 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (54) | 49 |
+| `license` | License or terms of the source. | 100.0% (54) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (54) | 1 |
+| `snapshot_id` | Stable id of the published item: provider and item, e.g. 'zensus2022.religion_wahlkreise' or 'destatis.12612-0002'. | 100.0% (54) | 54 |
+| `name` | Name of the item in the snapshot configuration. | 100.0% (54) | 54 |
+| `topic` | Topic group of the item. | 100.0% (54) | 10 |
+| `provider` | Provider id of config/providers.toml. | 100.0% (54) | 4 |
+| `item` | Id of the item at the provider: the table code, or the name of the fetched file. | 100.0% (54) | 49 |
+| `format` | Format of the published content: genesis, csv, xlsx, json, html or pdf. | 100.0% (54) | 3 |
+| `geo_scheme` | Region codes used in the content: nuts, ags (official keys of states, districts and municipalities), constituency (numbers of the Bundestag constituencies), state_name (names of the states), diocese, regional_church or none (Germany only). | 100.0% (54) | 6 |
+| `page_url` | Page from which the address of the published file was read; null for a fixed address or an API. | 27.8% (15) | 6 |
+| `source_title` | Title of the item as the source states it, e.g. the title of a GENESIS table or the file name. | 100.0% (54) | 47 |
+| `source_updated` | Last change of the item as the source states it (UTC), e.g. the Last-Modified header; null if not stated. | 27.8% (15) | 6 |
+| `content_hash` | Hash of the columns and rows (or of the file of an archived document). A record is written only when it differs from the previous observation. | 100.0% (54) | 54 |
+| `previous_hash` | content_hash of the previous record of the item; null for the first observation. | 0.0% (0) | 0 |
+| `columns` | Column names of the rows. For GENESIS tables: time and the codes of the variables and their attributes, value, value_unit, value_variable_code. | 100.0% (54) | 210 |
+| `rows` | The published rows as text, exactly as the source wrote the cells (numbers keep their notation, e.g. decimal commas); null for an empty cell. Empty for an archived document. | 100.0% (54) | not counted |
+| `row_count` | Number of rows. | 100.0% (54) | 40 |
+| `labels` | Labels of the codes in the rows, e.g. {'KREISE:08222': 'Mannheim, Stadtkreis'} for GENESIS tables; empty if the rows hold the labels. | 72.2% (39) | not counted |
+| `archived_file` | Path of the published file in this repository (data/files/...) if the file itself is archived, e.g. a PDF document. | 0.0% (0) | 0 |
+| `byte_size` | Size of the published file in bytes. | 100.0% (54) | 49 |
+
+</details>
+
+<details>
+<summary><code>snapshot_catalog</code>: 20 fields</summary>
+
+| Field | Description | Filled | Distinct values |
+|---|---|---|---|
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (54) | 54 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (54) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (54) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (54) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (54) | 1 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (54) | 1 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (54) | 1 |
+| `license` | License or terms of the source. | 100.0% (54) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (54) | 1 |
+| `snapshot_id` | Stable id of the item; the join key of source_snapshots. | 100.0% (54) | 54 |
+| `name` | Name of the item. | 100.0% (54) | 54 |
+| `topic` | Topic group of the item. | 100.0% (54) | 10 |
+| `provider` | Provider id of config/providers.toml. | 100.0% (54) | 4 |
+| `format` | Format of the published content. | 100.0% (54) | 3 |
+| `address` | Where the item is read: the GENESIS database and table, the fixed file address, or the page and the pattern of the file link. | 100.0% (54) | 49 |
+| `geo_scheme` | Region codes used in the content. | 100.0% (54) | 6 |
+| `archive` | Whether the published file itself is archived in data/files/. | 100.0% (54) | 1 |
+| `added` | Day on which the item was added to the configuration; start of collection. | 100.0% (54) | 1 |
+| `removed` | Day on which the item was removed from the configuration; end of collection. | 0.0% (0) | 0 |
+| `removed_reason` | Why the item was removed. | 0.0% (0) | 0 |
+
+</details>
 <!-- DATASET_OVERVIEW_END -->
 
 ## Datasets

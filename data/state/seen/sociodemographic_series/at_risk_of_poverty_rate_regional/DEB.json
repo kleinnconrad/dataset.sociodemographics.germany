@@ -1,0 +1,9 @@
+{
+"version": 1,
+"items": {
+"at_risk_of_poverty_rate_regional.DEB": {"data": {"values": {"2021": 16.3, "2022": 13.1, "2023": 12.3, "2024": 15.6, "2025": 15.9}}, "first_seen": "2026-10-26", "hash": "08d4d5b4276a42b8", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEB1": {"data": {"values": {"2021": 15.8, "2022": 16.8, "2023": 13.0, "2024": 14.5, "2025": 12.8}}, "first_seen": "2026-10-26", "hash": "980d482c40e8f460", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEB2": {"data": {"values": {"2021": 10.1, "2022": 8.8, "2023": 9.2, "2024": 15.4, "2025": 21.4}}, "first_seen": "2026-10-26", "hash": "ae6e7c982636f8cb", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEB3": {"data": {"values": {"2021": 18.2, "2022": 11.5, "2023": 12.6, "2024": 16.4, "2025": 16.8}}, "first_seen": "2026-10-26", "hash": "589778bedbc8ff00", "last_seen": "2026-10-26", "revision": 0}
+}
+}

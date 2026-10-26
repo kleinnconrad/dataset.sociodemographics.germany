@@ -1,0 +1,10 @@
+{
+"version": 1,
+"items": {
+"income_quintile_share_ratio_regional.DE9": {"data": {"values": {"2021": 5.1, "2022": 4.6, "2023": 4.3, "2024": 4.3, "2025": 4.5}}, "first_seen": "2026-10-26", "hash": "363177206460427f", "last_seen": "2026-10-26", "revision": 0},
+"income_quintile_share_ratio_regional.DE91": {"data": {"values": {"2021": 5.4, "2022": 4.4, "2023": 3.8, "2024": 4.0, "2025": 4.5}}, "first_seen": "2026-10-26", "hash": "cb560ce6d7d9dd2d", "last_seen": "2026-10-26", "revision": 0},
+"income_quintile_share_ratio_regional.DE92": {"data": {"values": {"2021": 4.6, "2022": 4.2, "2023": 4.5, "2024": 4.6, "2025": 4.7}}, "first_seen": "2026-10-26", "hash": "e4ac8b93549d2df6", "last_seen": "2026-10-26", "revision": 0},
+"income_quintile_share_ratio_regional.DE93": {"data": {"values": {"2021": 5.1, "2022": 4.5, "2023": 4.2, "2024": 3.9, "2025": 4.0}}, "first_seen": "2026-10-26", "hash": "238658b329ae0a69", "last_seen": "2026-10-26", "revision": 0},
+"income_quintile_share_ratio_regional.DE94": {"data": {"values": {"2021": 5.3, "2022": 4.8, "2023": 4.6, "2024": 4.4, "2025": 4.7}}, "first_seen": "2026-10-26", "hash": "d032c26bda906fae", "last_seen": "2026-10-26", "revision": 0}
+}
+}

@@ -1,0 +1,6 @@
+{
+"version": 1,
+"items": {
+"housing_cost_overburden_rate_regional.DE": {"data": {"values": {"2021": 11.0, "2022": 11.9, "2023": 13.0, "2024": 12.0, "2025": 11.2}}, "first_seen": "2026-10-26", "hash": "a37922c89d68ff28", "last_seen": "2026-10-26", "revision": 0}
+}
+}

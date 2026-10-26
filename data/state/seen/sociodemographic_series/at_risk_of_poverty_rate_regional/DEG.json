@@ -1,0 +1,7 @@
+{
+"version": 1,
+"items": {
+"at_risk_of_poverty_rate_regional.DEG": {"data": {"values": {"2021": 19.1, "2022": 15.0, "2023": 15.8, "2024": 15.7, "2025": 17.4}}, "first_seen": "2026-10-26", "hash": "d2434f645fff94b2", "last_seen": "2026-10-26", "revision": 0},
+"at_risk_of_poverty_rate_regional.DEG0": {"data": {"values": {"2021": 19.1, "2022": 15.0, "2023": 15.8, "2024": 15.7, "2025": 17.4}}, "first_seen": "2026-10-26", "hash": "d2434f645fff94b2", "last_seen": "2026-10-26", "revision": 0}
+}
+}
