@@ -866,3 +866,59 @@ flow = "nama_10r_3empers"
 key = "A.THS.EMP.TOTAL.{geo}"
 geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
 added = 2026-10-26
+
+# =============================================================================================================
+# Crime and criminal justice (Eurostat, national data reported by the Bundeskriminalamt and the Statistisches
+# Bundesamt; ICCS: International Classification of Crime for Statistical Purposes)
+#
+# Eurostat publishes the crime statistics for countries only; the regional dataset crim_gen_reg ended in 2010.
+# Prisoners by citizenship (crim_pris_ctz) have no breakdown for Germany. Offences, suspects, convictions and
+# prisoners of the German statistics are collected as snapshots of GENESIS-Online (config/snapshots.toml).
+# =============================================================================================================
+
+[[series]]
+concept = "police_recorded_offences"
+name = "Offences recorded by the police by offence category"
+topic = "crime_and_justice"
+frequency = "A"
+unit = "offences"
+provider = "eurostat"
+flow = "crim_off_cat"
+key = "A.{iccs}.NR.{geo}"
+geo_levels = ["country"]
+breakdown.iccs = [
+    "ICCS0101", "ICCS0102", "ICCS020111", "ICCS020221", "ICCS0301", "ICCS03011", "ICCS03012", "ICCS0302",
+    "ICCS030221", "ICCS0401", "ICCS0501", "ICCS05012", "ICCS0502", "ICCS05021", "ICCS0601", "ICCS0701", "ICCS0703",
+    "ICCS07031", "ICCS07041", "ICCS0903"
+]
+notes = "ICCS0101 intentional homicide, ICCS0102 attempted intentional homicide, ICCS020111 serious assault, ICCS020221 kidnapping, ICCS0301 sexual violence, ICCS03011 rape, ICCS03012 sexual assault, ICCS0302 sexual exploitation, ICCS030221 child pornography, ICCS0401 robbery, ICCS0501 burglary, ICCS05012 burglary of private residential premises, ICCS0502 theft, ICCS05021 theft of a motorized land vehicle or parts thereof, ICCS0601 acts involving controlled drugs, ICCS0701 fraud, ICCS0703 corruption, ICCS07031 bribery, ICCS07041 money laundering, ICCS0903 participation in an organized criminal group"
+added = 2026-10-26
+
+[[series]]
+concept = "criminal_justice_persons_by_citizenship"
+name = "Persons suspected and convicted of offences by citizenship"
+topic = "crime_and_justice"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "crim_just_ctz"
+key = "A.{leg_stat}.{citizen}.NR.{geo}"
+geo_levels = ["country"]
+breakdown.leg_stat = ["PER_SUSP", "PER_CNV"]
+breakdown.citizen = ["TOTAL", "NAT", "FOR"]
+notes = "PER_SUSP suspected persons (police), PER_CNV convicted persons (courts); NAT German citizens, FOR foreign citizens; all offences (the dataset has no breakdown by offence)"
+added = 2026-10-26
+
+[[series]]
+concept = "prison_population"
+name = "Persons held in prisons and official prison capacity"
+topic = "crime_and_justice"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "crim_pris_cap"
+key = "A.{indic_cr}.NR.{geo}"
+geo_levels = ["country"]
+breakdown.indic_cr = ["PRIS_ACT_CAP", "PRIS_OFF_CAP"]
+notes = "PRIS_ACT_CAP actual number of persons held, PRIS_OFF_CAP official prison capacity (places)"
+added = 2026-10-26

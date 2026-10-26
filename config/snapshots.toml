@@ -577,3 +577,10 @@ name = "Open data Düsseldorf, church leavings since 1988"
 url = "https://opendata.duesseldorf.de/"
 checked = 2026-10-26
 reason = "ckan.open.nrw.de could not be reached (connection timeout), and opendata.duesseldorf.de offers no CKAN API at /api/3 (HTTP 404); the data set could not be located with the fetch rules."
+
+[[excluded]]
+id = "eurostat.crim_gen_reg"
+name = "Eurostat, crimes recorded by the police by NUTS 3 region"
+url = "https://ec.europa.eu/eurostat/databrowser/view/crim_gen_reg/default/table"
+checked = 2026-10-26
+reason = "Discontinued: the regional crime data of Eurostat end in 2010."

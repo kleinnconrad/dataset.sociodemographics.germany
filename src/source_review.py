@@ -98,7 +98,7 @@ CHECK_YEARS = 3
 STALE_DAYS: dict[str, int] = {"W": 180, "M": 120, "Q": 270, "A": 1100}
 # Prefixes of Eurostat dataset codes on the topics of the catalog; new datasets with them are candidates
 WATCHED_PREFIXES = ("demo_", "migr_", "edat_", "educ_", "trng_", "ilc_", "lfst_r_", "lfst_hh", "hlth_", "yth_",
-                    "nama_10r_", "cens_", "proj_", "hbs_", "icw_", "tus_", "urt_", "met_")
+                    "nama_10r_", "cens_", "proj_", "hbs_", "icw_", "tus_", "urt_", "met_", "crim_")
 MAX_CANDIDATES = 30
 MAX_SUCCESSORS = 3
 MAX_CODES_SHOWN = 30

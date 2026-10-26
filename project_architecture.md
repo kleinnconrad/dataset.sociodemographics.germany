@@ -105,7 +105,7 @@ A district key of five digits maps to one NUTS 3 code; the mapping table of the 
 
 ### 3.4 Concepts by Topic
 
-The catalog has 58 concepts that expand to about 34,000 series:
+The catalog has 61 concepts that expand to about 34,000 series:
 
 | Topic | Concepts | Levels | Provider |
 |---|---|---|---|
@@ -121,6 +121,7 @@ The catalog has 58 concepts that expand to about 34,000 series:
 | housing | tenure status; housing cost overburden (also by region); overcrowding | Germany, EU; overburden: government regions | Eurostat |
 | labour_market | employment, unemployment and activity rates by sex | government regions | Eurostat |
 | regional_economy | GDP per inhabitant; employment at the place of work | districts | Eurostat |
+| crime_and_justice | offences recorded by the police by offence category (ICCS); persons suspected and convicted by citizenship (German, foreign); prison population and capacity | Germany | Eurostat |
 
 Derived variables, e.g. the shares of men and women, the fertility rate by citizenship and the income classes, are described in the README (section Variables).
 
@@ -211,6 +212,7 @@ The dataset is designed for questions that need long series of comparable measur
 | Election results and polls by state | polls of dataset.politics.germany | state profiles of this dataset (age, citizenship, migration, poverty, education, unemployment) |
 | Revision behavior of statistics | revisions in `sociodemographic_series`; successive snapshots of GENESIS tables and of the weekly report on deaths | first release, census revisions, provider |
 | Final weekly deaths from the provisional figures | the final values of the weekly report (after about a year) | the provisional and estimated values of earlier editions in `source_snapshots` |
+| Crime and its regional context | `police_recorded_offences`, suspects of `criminal_justice_persons_by_citizenship`, the PKS tables in `source_snapshots` | age structure, citizenship, unemployment, poverty, urbanization |
 | Religious affiliation by region | the census shares of the churches | age structure, migration, urbanization, East and West Germany |
 
 ---
@@ -262,6 +264,8 @@ The snapshot sources are recorded with the day of the check in the `[[excluded]]
 | BBSR, INKAR | 2026-10-26 | The robots.txt of www.inkar.de could not be fetched in three checks (connection error). |
 | Open data Ruhr (church leavings in Dortmund) | 2026-10-26 | The robots.txt returned a server error or timed out in three checks. |
 | Open data Düsseldorf (church leavings since 1988) | 2026-10-26 | ckan.open.nrw.de not reachable; opendata.duesseldorf.de has no CKAN API at /api/3 (HTTP 404). |
+| Eurostat, crimes recorded by the police by NUTS 3 region (`crim_gen_reg`) | 2026-10-26 | Discontinued in 2010. |
+| Eurostat, prisoners by citizenship (`crim_pris_ctz`) | 2026-10-26 | Germany reports only the total, which equals `prison_population`. |
 | Eurostat census hub (Census 2021) | 2026-10-26 | Not available through the dissemination API; the census tables of Eurostat (`cens_21*`) are listed as candidates by the review. |
 
 ---
@@ -392,6 +396,7 @@ Changes of sources, keys, codes, units, regional classifications and counting ru
 | 2026-10-26 | `source_snapshots` | Zensus 2022 special evaluations on www.destatis.de, found on the Zensus page through the pattern of their address, verified live: religious affiliation per municipality, district, state and Germany in the Zensus 2022 and the Zensus 2011 (file `religionszugehoerigkeit_zenus2022_und_zensus2011_bundesland.xlsx`, sheets `Religion_Zensus2022` and `Religion_Zensus2011`, 10,793 rows each, header of three rows); per Bundestag constituency of 2025: religious affiliation, share of foreigners, German citizens in five age groups, marital status (299 rows each). The 2011 sheet stores the shares of Germany as fractions (0.3) and the other shares as percent text (25,1%), as the source formats them. |
 | 2026-10-26 | `source_snapshots` | Destatis, special evaluation of the Strafverfolgungsstatistik (10 November 2021): persons with pre-trial detention by citizenship (German, not German) and state for 2014, 2017 and 2019 (sheets `U-Haft 2014`, `U-Haft 2017`, `U-Haft 2019`, 18 rows each), verified live. |
 | 2026-10-26 | `source_snapshots` | Die Bundeswahlleiterin, structural data of the constituencies of the Bundestag elections 2017, 2021 and 2025 (CSV, 316 rows each: constituencies plus state and federal totals, 48 indicators), found on the pages of the elections through the pattern of their address, verified live. The editions differ in notation: 2021 writes constituency numbers with leading zeros (`001`) and thousands separators (`2.124,3`), 2017 and 2025 do not; the share of foreigners is named `Ausländer (%)` in 2017 and `Ausländer/-innen (%)` from 2021. |
+| 2026-10-26 | `series_catalog` | Crime and criminal justice (Eurostat, Germany), verified live: `police_recorded_offences` (`crim_off_cat`, `A.{iccs}.NR.{geo}`, 20 ICCS codes; Germany reports serious assault as `ICCS020111` and the theft of motor vehicles as `ICCS05021`, not `ICCS02011` and `ICCS050211`), `criminal_justice_persons_by_citizenship` (`crim_just_ctz` with the dimensions freq, leg_stat, citizen, unit, geo; Germany reports suspected and convicted persons, `PER_SUSP` and `PER_CNV`, as `TOTAL`, `NAT` and `FOR`, without prosecuted persons and without an offence breakdown), `prison_population` (`crim_pris_cap`, `PRIS_ACT_CAP` and `PRIS_OFF_CAP`). Not added: `crim_pris_ctz` (Germany reports only the total) and `crim_gen_reg` (regional data end in 2010). |
 | 2026-10-26 | `source_snapshots` | Checked and not admitted (Section 6): Polizeiliche Kriminalstatistik on www.bka.de (crawl delay 180 s), Kirchliche Statistik of the Deutsche Bischofskonferenz (HTTP 401), Kirchenmitgliederzahlen of the EKD (terms forbid further use), Statistik der Bundesagentur für Arbeit (HTTP 403, robots.txt of the data API), BAMF (robots.txt not reachable), INKAR (robots.txt not reachable), open data Ruhr and Düsseldorf (not reachable). |
 | 2026-10-26 | `source_snapshots` | Fetch rules of the snapshot items: a host with a crawl delay of more than 120 seconds is not fetched; an item whose source answers with HTTP 401 or 403 or a challenge is not requested again for 30 days; HTTP 401 of a GENESIS web service counts as `no_access`. |
 
@@ -404,12 +409,12 @@ Changes of sources, keys, codes, units, regional classifications and counting ru
 | Statistical series of Eurostat and the ECB as vintages, with skipping of unchanged datasets | implemented |
 | Series catalog, region registry and provider configuration with their datasets | implemented |
 | Monthly source review with live checks, probes, table of contents, region check and terms hashes, as a pull request | implemented |
-| Live verification of the keys of the catalog (source review in report mode) | implemented: all 58 entries verified on 2026-10-26 |
+| Live verification of the keys of the catalog (source review in report mode) | implemented: all 61 entries verified on 2026-10-26 |
 | Snapshots of volatile sources (`source_snapshots`, `snapshot_catalog`), collectors `files` and `genesis`, review of the snapshot items, probe of candidate sources | implemented |
 | GENESIS-Online, Regionaldatenbank and Zensus database with optional free accounts (fertility by citizenship and state, Mikrozensus income classes and migration background, foreigners by district, persons seeking protection, police crime statistics, convictions, prisoners, unemployment by district, religion) | implemented; the table codes are verified with the first review after the secrets are set |
 | Structural data of the Bundestag constituencies (Bundeswahlleiterin) and Zensus 2022 evaluations per constituency, to join with dataset.politics.germany | implemented |
 | Religious affiliation (Zensus 2011 and 2022 by municipality, district, state and constituency) | implemented; annual church statistics excluded (Section 3.6) |
-| Crime and criminal justice (PKS, Strafverfolgung and Strafvollzug of GENESIS-Online) | implemented; PKS tables by state and district of the BKA excluded (crawl delay) |
+| Crime and criminal justice (Eurostat for Germany; PKS, Strafverfolgung and Strafvollzug of GENESIS-Online) | implemented; PKS tables by state and district of the BKA excluded (crawl delay) |
 | Monthly labour market by district (Bundesagentur für Arbeit) | excluded (HTTP 403, robots.txt); annual unemployment by district from the Regionaldatenbank |
 | Mapping of the districts to their official keys (Kreisschlüssel) and of the constituencies of every election to districts | planned |
 | Population projections (EUROPOP2023, regional projections) as vintages | planned |
