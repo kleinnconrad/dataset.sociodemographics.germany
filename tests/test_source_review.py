@@ -21,6 +21,7 @@ from source_review import (
     check_snapshot,
     check_terms,
     eurostat_dimensions,
+    first_row_labels,
     genesis_candidates,
     is_stale,
     page_text,
@@ -283,3 +284,12 @@ def test_report_lists_snapshot_problems_and_excluded_sources() -> None:
     assert "| zensus2022 | `1000A-1019` | Personen: Alter |" in report
     assert "| c0 ; c1 ; c2 ; c3 ; c4 ; c5 ; c6 ; c7 ; ... (10 cells) | 01 ; |" in report
     assert "| DBK (`dbk.x`) | 2025-06-01 (due) | HTTP 401 |" in report
+
+
+def test_first_row_labels_name_the_codes_of_a_genesis_table() -> None:
+    columns = ["time_code", "time", "1_variable_code", "1_variable_attribute_code", "2_variable_code",
+               "2_variable_attribute_code", "value"]
+    row = ["STAG", "2022-05-15", "GEOBL1", "05", "RELZG2", None, "100,0"]
+    labels = {"GEOBL1": "Bundesländer", "GEOBL1:05": "Nordrhein-Westfalen", "RELZG2": "Religion"}
+    assert first_row_labels(columns, row, labels) == ["Bundesländer: Nordrhein-Westfalen", "Religion: total"]
+    assert first_row_labels(["Wkr-Nr.", "Name"], ["1", "Flensburg"], {}) == []

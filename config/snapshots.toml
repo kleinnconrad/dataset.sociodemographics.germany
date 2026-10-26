@@ -338,6 +338,126 @@ geo_scheme = "ags"
 check_days = 30
 added = 2026-10-26
 
+[[snapshot]]
+id = "zensus2022.1000A-2E22"
+name = "Persons by religion and migration history per regional church of the EKD (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2E22"
+expect = "Religion.*Einwanderungsgeschichte"
+geo_scheme = "regional_church"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2E31"
+name = "Persons by religion and citizenship groups per regional church of the EKD (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2E31"
+expect = "Religion.*Staatsangehörigkeit"
+geo_scheme = "regional_church"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2E28"
+name = "Persons by religion and sex per regional church of the EKD (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2E28"
+expect = "Religion.*Geschlecht"
+geo_scheme = "regional_church"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2E10"
+name = "Persons by religion and five-year age group per regional church of the EKD (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2E10"
+expect = "Religion.*Alter"
+geo_scheme = "regional_church"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1E18"
+name = "Persons by religion per regional church of the EKD (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1E18"
+expect = "Religion"
+geo_scheme = "regional_church"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1K18"
+name = "Persons by religion per Catholic diocese (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1K18"
+expect = "Religion"
+geo_scheme = "diocese"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2K22"
+name = "Persons by religion and migration history per Catholic diocese (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2K22"
+expect = "Religion.*Einwanderungsgeschichte"
+geo_scheme = "diocese"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2K31"
+name = "Persons by religion and citizenship groups per Catholic diocese (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2K31"
+expect = "Religion.*Staatsangehörigkeit"
+geo_scheme = "diocese"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2K28"
+name = "Persons by religion and sex per Catholic diocese (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2K28"
+expect = "Religion.*Geschlecht"
+geo_scheme = "diocese"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-2K10"
+name = "Persons by religion and five-year age group per Catholic diocese (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-2K10"
+expect = "Religion.*Alter"
+geo_scheme = "diocese"
+check_days = 30
+added = 2026-10-26
+
 # =============================================================================================================
 # Structural data of the Bundestag constituencies (Die Bundeswahlleiterin); join key: constituency number
 # =============================================================================================================

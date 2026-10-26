@@ -660,6 +660,9 @@ def check_snapshot(web: WebClient, source: SnapshotSource, stored: Optional[Seen
         return check
     check.rows, check.title, check.url = len(content.rows), content.title, content.url
     check.columns, check.first_row = content.columns, content.rows[0] if content.rows else []
+    first_labels = first_row_labels(content.columns, check.first_row, content.labels)
+    if first_labels:
+        check.notes.append("labels of the first row: " + "; ".join(first_labels))
     if source.format != "pdf" and not content.rows:
         check.problems.append("the published content has no rows")
     if stored is None:
@@ -680,6 +683,29 @@ def check_snapshot(web: WebClient, source: SnapshotSource, stored: Optional[Seen
     if check.problems:
         check.status = "attention"
     return check
+
+
+def first_row_labels(columns: Sequence[str], row: Sequence[Optional[str]], labels: dict[str, str]) -> list[str]:
+    """Returns the labels of the variables and attributes in the first row of a GENESIS table.
+
+    Args:
+        columns: Column names of the flat table.
+        row: The first row.
+        labels: The labels of the codes (see ``parse_genesis_flat``).
+
+    Returns:
+        list[str]: ``<variable label>: <attribute label>`` per classifying variable; empty for other tables.
+    """
+    values = dict(zip(columns, row))
+    result: list[str] = []
+    for column in columns:
+        if not column.endswith("_variable_code"):
+            continue
+        variable = values.get(column) or ""
+        attribute = values.get(column.replace("_variable_code", "_variable_attribute_code")) or ""
+        if variable:
+            result.append(f"{labels.get(variable, variable)}: {labels.get(f'{variable}:{attribute}', attribute or 'total')}")
+    return result
 
 
 def genesis_candidates(web: WebClient, sources: Sequence[SnapshotSource]) -> tuple[list[tuple[str, str, str]],
