@@ -1,7 +1,7 @@
 # German Sociodemographics Dataset
 [![CI](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml)
 
-Building a dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs twice a week (Tuesdays and Fridays) for at most 30 minutes. Its main purpose is to persist volatile data: tables and files that their sources overwrite, delete, publish only as the current state or revise without versions, such as the tables of GENESIS-Online, the weekly provisional death counts, the special evaluations of the Zensus 2022 on religious affiliation and the structural data of the Bundestag constituencies. The pipeline stores what such a source published at every observation and thereby builds the history that the source does not keep. The stable backbone are the series of Eurostat and the ECB on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing, the regional labour market and crime, for Germany, its 16 states, 38 government regions and 400 districts; they are stored as vintages, so that every past state of a revised series can be reconstructed. All records are partitioned JSON files in this repository. A monthly review checks every data source and proposes changes as a pull request.
+Building a dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs once a week (Wednesdays) for at most 30 minutes. Its main purpose is to persist volatile data: tables and files that their sources overwrite, delete, publish only as the current state or revise without versions, such as the tables of GENESIS-Online, the weekly provisional death counts, the special evaluations of the Zensus 2022 on religious affiliation and the structural data of the Bundestag constituencies. The pipeline stores what such a source published at every observation and thereby builds the history that the source does not keep. The stable backbone are the series of Eurostat and the ECB on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing, the regional labour market and crime, for Germany, its 16 states, 38 government regions and 400 districts; they are stored as vintages, so that every past state of a revised series can be reconstructed. All records are partitioned JSON files in this repository. A monthly review checks every data source and proposes changes as a pull request.
 
 ## Table of Contents
 - [Dataset Overview](#dataset-overview)
@@ -792,7 +792,7 @@ sequenceDiagram
     participant Eurostat as Eurostat
     participant Store as storage.py / state.py
 
-    Action->>Run: Pipeline run (Tuesdays and Fridays, 02:07 Europe/Berlin)
+    Action->>Run: Pipeline run (Wednesdays, 02:07 Europe/Berlin)
     Run->>Store: New and changed entries of the series catalog, the region registry and the snapshot catalog
     loop Every file item that is due
         Run->>Web: Page with the file link, then the file (robots.txt, TDMRep, conditional request)
@@ -845,7 +845,7 @@ series = duckdb.sql("""
 
 | Workflow | Schedule | Purpose |
 |---|---|---|
-| `pipeline.yml` | Tuesdays and Fridays, 02:07 Europe/Berlin | Runs the collectors (timeout 30 minutes), updates the overview and commits `data/` and `README.md` |
+| `pipeline.yml` | Wednesdays, 02:07 Europe/Berlin | Runs the collectors (timeout 30 minutes), updates the overview and commits `data/` and `README.md` |
 | `notify.yml` | After each `normal` or `backfill` run of `pipeline.yml` | Posts a summary of the run (status and records per collector, new and revised series, entries without data) as a commit comment that mentions the repository owner |
 | `source_review.yml` | First day of every month, 07:17 Europe/Berlin | Reviews the data sources and opens a pull request with the report in `reviews/` and changed terms hashes in `config/providers.toml` |
 | `ci.yml` | Pull requests, pushes to `main` | Lint, tests and commit message checks |

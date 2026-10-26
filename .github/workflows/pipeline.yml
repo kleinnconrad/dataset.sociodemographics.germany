@@ -3,8 +3,10 @@ run-name: German sociodemographics pipeline (${{ inputs.mode || 'normal' }})
 
 on:
   schedule:
-    # Tuesdays and Fridays 02:07 Berlin time; GitHub delays schedules at the full hour
-    - cron: '7 2 * * 2,5'
+    # Wednesdays 02:07 Berlin time, in the middle of the weekly cycle of the Destatis report on deaths (the observed
+    # edition was published on a Tuesday), so that a failed run can be repeated before the next edition replaces it;
+    # GitHub delays schedules at the full hour
+    - cron: '7 2 * * 3'
       timezone: 'Europe/Berlin'
   workflow_dispatch:
     inputs:
