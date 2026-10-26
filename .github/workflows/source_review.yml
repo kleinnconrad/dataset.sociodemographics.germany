@@ -1,0 +1,98 @@
+name: Source Review
+run-name: Source review (${{ (github.event_name == 'workflow_dispatch' && inputs.pull_request == false) && 'report only' || 'pull request' }})
+
+on:
+  schedule:
+    # First day of every month, 07:17 Berlin time; GitHub delays schedules at the full hour
+    - cron: '17 7 1 * *'
+      timezone: 'Europe/Berlin'
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: 'Open a pull request with the report; off writes the report to the job summary only'
+        type: boolean
+        default: true
+      concepts:
+        description: 'Comma-separated catalog entries to check, e.g. population,median_age; empty checks all'
+        type: string
+        required: false
+        default: ''
+
+concurrency:
+  group: source-review
+  cancel-in-progress: false
+
+jobs:
+  review-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      # Starts the CI workflow on the review branch
+      actions: write
+    env:
+      OPEN_PR: ${{ (github.event_name == 'workflow_dispatch' && inputs.pull_request == false) && 'off' || 'on' }}
+      CONCEPTS: ${{ inputs.concepts }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: uv sync --frozen
+
+    - name: Review Sources
+      run: |
+        report="reviews/$(date -u +%Y-%m).md"
+        if [ "$OPEN_PR" = "off" ]; then
+          report="$RUNNER_TEMP/source_review.md"
+        fi
+        args=(--report "$report")
+        if [ -n "$CONCEPTS" ]; then
+          args+=(--concepts "$CONCEPTS")
+        fi
+        uv run python src/source_review.py "${args[@]}"
+        cat "$report"
+        cat "$report" >> "$GITHUB_STEP_SUMMARY"
+        echo "REPORT=$report" >> "$GITHUB_ENV"
+
+    # One review pull request at a time: the branch is rebuilt from the base branch every month
+    - name: Open or Update Pull Request
+      if: env.OPEN_PR == 'on'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BASE: ${{ github.ref_name }}
+        OWNER: ${{ github.repository_owner }}
+      run: |
+        month=$(date -u +%Y-%m)
+        branch="source-review"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git switch -C "$branch"
+        git add reviews/ config/providers.toml
+        if git diff --staged --quiet; then
+          echo "The review wrote no changes."
+          exit 0
+        fi
+        git commit -m "chore(sources): source review $month"
+        git push --force origin "$branch"
+        # The description of a pull request is limited to 65,536 characters; the full report is in the branch
+        { echo "@$OWNER"; echo; head -c 60000 "$REPORT"; } > "$RUNNER_TEMP/pr_body.md"
+        number=$(gh pr list --head "$branch" --base "$BASE" --state open --json number --jq '.[0].number // empty')
+        if [ -n "$number" ]; then
+          gh pr edit "$number" --title "Source review $month" --body-file "$RUNNER_TEMP/pr_body.md"
+        else
+          gh pr create --base "$BASE" --head "$branch" --title "Source review $month" \
+            --body-file "$RUNNER_TEMP/pr_body.md"
+        fi
+        # Pull requests opened with the GITHUB_TOKEN start no workflows; the checks are started here
+        gh workflow run ci.yml --ref "$branch"

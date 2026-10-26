@@ -1,0 +1,2859 @@
+# Registry of the German regions collected by the sociodemographics dataset.
+#
+# Every [[region]] entry is one region of the NUTS classification of the European Union:
+#   geo             NUTS code: DE (Germany), DE1 to DEG (the 16 states, NUTS 1), four characters for the
+#                   38 government regions and statistical regions (NUTS 2), five characters for the districts
+#                   and district-free cities (NUTS 3)
+#   name            name of the region in the NUTS classification
+#   nuts            versions of the classification (2016, 2021, 2024) that contain the code with this territory
+#   added           day on which the region was added; start of collection
+#   removed         optional day on which the region was removed, with removed_reason
+#   notes           optional remarks
+# The level, the parent region and the ISO 3166-2 code of the state follow from the code (src/regions.py).
+#
+# Codes of earlier versions keep their entries: Eurostat datasets that still use an earlier version publish
+# their data under them. NUTS 2024 gave six districts of Thüringen new codes because their territories changed,
+# among others by the merger of Eisenach (DEG0N) into the Wartburgkreis in 2021: DEG04, DEG0B, DEG0F, DEG0H, DEG0I
+# and DEG0P became DEG0S, DEG0Q, DEG0T, DEG0V, DEG0U and DEG0R. All thirteen codes are collected.
+#
+# Rules (CLAUDE.md, section 9): codes are never changed or reused; a region that is no longer collected keeps
+# its entry with removed = <date> and removed_reason = "..."; new codes are taken from the NUTS
+# classification published by Eurostat (github.com/eurostat/Nuts2json, files pub/v2/<version>/4326/nutspt_*.json).
+#
+# All entries were taken from the NUTS 2016, 2021 and 2024 files of Eurostat on 2026-10-26.
+
+[[region]]
+geo = "DE"
+name = "Deutschland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Baden-Württemberg
+# =============================================================================
+
+[[region]]
+geo = "DE1"
+name = "Baden-Württemberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11"
+name = "Stuttgart"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE111"
+name = "Stuttgart, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE112"
+name = "Böblingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE113"
+name = "Esslingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE114"
+name = "Göppingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE115"
+name = "Ludwigsburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE116"
+name = "Rems-Murr-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE117"
+name = "Heilbronn, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE118"
+name = "Heilbronn, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE119"
+name = "Hohenlohekreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11A"
+name = "Schwäbisch Hall"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11B"
+name = "Main-Tauber-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11C"
+name = "Heidenheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11D"
+name = "Ostalbkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE12"
+name = "Karlsruhe"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE121"
+name = "Baden-Baden, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE122"
+name = "Karlsruhe, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE123"
+name = "Karlsruhe, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE124"
+name = "Rastatt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE125"
+name = "Heidelberg, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE126"
+name = "Mannheim, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE127"
+name = "Neckar-Odenwald-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE128"
+name = "Rhein-Neckar-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE129"
+name = "Pforzheim, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE12A"
+name = "Calw"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE12B"
+name = "Enzkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE12C"
+name = "Freudenstadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE13"
+name = "Freiburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE131"
+name = "Freiburg im Breisgau, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE132"
+name = "Breisgau-Hochschwarzwald"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE133"
+name = "Emmendingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE134"
+name = "Ortenaukreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE135"
+name = "Rottweil"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE136"
+name = "Schwarzwald-Baar-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE137"
+name = "Tuttlingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE138"
+name = "Konstanz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE139"
+name = "Lörrach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE13A"
+name = "Waldshut"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE14"
+name = "Tübingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE141"
+name = "Reutlingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE142"
+name = "Tübingen, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE143"
+name = "Zollernalbkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE144"
+name = "Ulm, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE145"
+name = "Alb-Donau-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE146"
+name = "Biberach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE147"
+name = "Bodenseekreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE148"
+name = "Ravensburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE149"
+name = "Sigmaringen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Bayern
+# =============================================================================
+
+[[region]]
+geo = "DE2"
+name = "Bayern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21"
+name = "Oberbayern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE211"
+name = "Ingolstadt, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE212"
+name = "München, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE213"
+name = "Rosenheim, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE214"
+name = "Altötting"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE215"
+name = "Berchtesgadener Land"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE216"
+name = "Bad Tölz-Wolfratshausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE217"
+name = "Dachau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE218"
+name = "Ebersberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE219"
+name = "Eichstätt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21A"
+name = "Erding"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21B"
+name = "Freising"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21C"
+name = "Fürstenfeldbruck"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21D"
+name = "Garmisch-Partenkirchen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21E"
+name = "Landsberg am Lech"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21F"
+name = "Miesbach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21G"
+name = "Mühldorf a. Inn"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21H"
+name = "München, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21I"
+name = "Neuburg-Schrobenhausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21J"
+name = "Pfaffenhofen a. d. Ilm"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21K"
+name = "Rosenheim, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21L"
+name = "Starnberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21M"
+name = "Traunstein"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21N"
+name = "Weilheim-Schongau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE22"
+name = "Niederbayern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE221"
+name = "Landshut, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE222"
+name = "Passau, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE223"
+name = "Straubing, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE224"
+name = "Deggendorf"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE225"
+name = "Freyung-Grafenau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE226"
+name = "Kelheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE227"
+name = "Landshut, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE228"
+name = "Passau, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE229"
+name = "Regen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE22A"
+name = "Rottal-Inn"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE22B"
+name = "Straubing-Bogen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE22C"
+name = "Dingolfing-Landau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE23"
+name = "Oberpfalz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE231"
+name = "Amberg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE232"
+name = "Regensburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE233"
+name = "Weiden i. d. Opf, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE234"
+name = "Amberg-Sulzbach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE235"
+name = "Cham"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE236"
+name = "Neumarkt i. d. OPf."
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE237"
+name = "Neustadt a. d. Waldnaab"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE238"
+name = "Regensburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE239"
+name = "Schwandorf"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE23A"
+name = "Tirschenreuth"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE24"
+name = "Oberfranken"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE241"
+name = "Bamberg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE242"
+name = "Bayreuth, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE243"
+name = "Coburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE244"
+name = "Hof, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE245"
+name = "Bamberg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE246"
+name = "Bayreuth, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE247"
+name = "Coburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE248"
+name = "Forchheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE249"
+name = "Hof, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE24A"
+name = "Kronach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE24B"
+name = "Kulmbach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE24C"
+name = "Lichtenfels"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE24D"
+name = "Wunsiedel i. Fichtelgebirge"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE25"
+name = "Mittelfranken"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE251"
+name = "Ansbach, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE252"
+name = "Erlangen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE253"
+name = "Fürth, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE254"
+name = "Nürnberg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE255"
+name = "Schwabach, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE256"
+name = "Ansbach, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE257"
+name = "Erlangen-Höchstadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE258"
+name = "Fürth, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE259"
+name = "Nürnberger Land"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE25A"
+name = "Neustadt a. d. Aisch-Bad Windsheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE25B"
+name = "Roth"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE25C"
+name = "Weißenburg-Gunzenhausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE26"
+name = "Unterfranken"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE261"
+name = "Aschaffenburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE262"
+name = "Schweinfurt, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE263"
+name = "Würzburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE264"
+name = "Aschaffenburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE265"
+name = "Bad Kissingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE266"
+name = "Rhön-Grabfeld"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE267"
+name = "Haßberge"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE268"
+name = "Kitzingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE269"
+name = "Miltenberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE26A"
+name = "Main-Spessart"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE26B"
+name = "Schweinfurt, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE26C"
+name = "Würzburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27"
+name = "Schwaben"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE271"
+name = "Augsburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE272"
+name = "Kaufbeuren, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE273"
+name = "Kempten (Allgäu), Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE274"
+name = "Memmingen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE275"
+name = "Aichach-Friedberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE276"
+name = "Augsburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE277"
+name = "Dillingen a.d. Donau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE278"
+name = "Günzburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE279"
+name = "Neu-Ulm"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27A"
+name = "Lindau (Bodensee)"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27B"
+name = "Ostallgäu"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27C"
+name = "Unterallgäu"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27D"
+name = "Donau-Ries"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE27E"
+name = "Oberallgäu"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Berlin
+# =============================================================================
+
+[[region]]
+geo = "DE3"
+name = "Berlin"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE30"
+name = "Berlin"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE300"
+name = "Berlin"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Brandenburg
+# =============================================================================
+
+[[region]]
+geo = "DE4"
+name = "Brandenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40"
+name = "Brandenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE401"
+name = "Brandenburg an der Havel, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE402"
+name = "Cottbus, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE403"
+name = "Frankfurt (Oder), Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE404"
+name = "Potsdam, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE405"
+name = "Barnim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE406"
+name = "Dahme-Spreewald"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE407"
+name = "Elbe-Elster"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE408"
+name = "Havelland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE409"
+name = "Märkisch-Oderland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40A"
+name = "Oberhavel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40B"
+name = "Oberspreewald-Lausitz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40C"
+name = "Oder-Spree"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40D"
+name = "Ostprignitz-Ruppin"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40E"
+name = "Potsdam-Mittelmark"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40F"
+name = "Prignitz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40G"
+name = "Spree-Neiße"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40H"
+name = "Teltow-Fläming"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE40I"
+name = "Uckermark"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Bremen
+# =============================================================================
+
+[[region]]
+geo = "DE5"
+name = "Bremen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE50"
+name = "Bremen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE501"
+name = "Bremen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE502"
+name = "Bremerhaven, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Hamburg
+# =============================================================================
+
+[[region]]
+geo = "DE6"
+name = "Hamburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE60"
+name = "Hamburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE600"
+name = "Hamburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Hessen
+# =============================================================================
+
+[[region]]
+geo = "DE7"
+name = "Hessen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71"
+name = "Darmstadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE711"
+name = "Darmstadt, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE712"
+name = "Frankfurt am Main, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE713"
+name = "Offenbach am Main, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE714"
+name = "Wiesbaden, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE715"
+name = "Bergstraße"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE716"
+name = "Darmstadt-Dieburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE717"
+name = "Groß-Gerau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE718"
+name = "Hochtaunuskreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE719"
+name = "Main-Kinzig-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71A"
+name = "Main-Taunus-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71B"
+name = "Odenwaldkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71C"
+name = "Offenbach, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71D"
+name = "Rheingau-Taunus-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE71E"
+name = "Wetteraukreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE72"
+name = "Gießen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE721"
+name = "Gießen, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE722"
+name = "Lahn-Dill-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE723"
+name = "Limburg-Weilburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE724"
+name = "Marburg-Biedenkopf"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE725"
+name = "Vogelsbergkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE73"
+name = "Kassel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE731"
+name = "Kassel, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE732"
+name = "Fulda"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE733"
+name = "Hersfeld-Rotenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE734"
+name = "Kassel, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE735"
+name = "Schwalm-Eder-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE736"
+name = "Waldeck-Frankenberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE737"
+name = "Werra-Meißner-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Mecklenburg-Vorpommern
+# =============================================================================
+
+[[region]]
+geo = "DE8"
+name = "Mecklenburg-Vorpommern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80"
+name = "Mecklenburg-Vorpommern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE803"
+name = "Rostock, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE804"
+name = "Schwerin, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80J"
+name = "Mecklenburgische Seenplatte"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80K"
+name = "Landkreis Rostock"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80L"
+name = "Vorpommern-Rügen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80M"
+name = "Nordwestmecklenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80N"
+name = "Vorpommern-Greifswald"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE80O"
+name = "Ludwigslust-Parchim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Niedersachsen
+# =============================================================================
+
+[[region]]
+geo = "DE9"
+name = "Niedersachsen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE91"
+name = "Braunschweig"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE911"
+name = "Braunschweig, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE912"
+name = "Salzgitter, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE913"
+name = "Wolfsburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE914"
+name = "Gifhorn"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE916"
+name = "Goslar"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE917"
+name = "Helmstedt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE918"
+name = "Northeim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE91A"
+name = "Peine"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE91B"
+name = "Wolfenbüttel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE91C"
+name = "Göttingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE92"
+name = "Hannover"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE922"
+name = "Diepholz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE923"
+name = "Hameln-Pyrmont"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE925"
+name = "Hildesheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE926"
+name = "Holzminden"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE927"
+name = "Nienburg (Weser)"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE928"
+name = "Schaumburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE929"
+name = "Region Hannover"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE93"
+name = "Lüneburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE931"
+name = "Celle"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE932"
+name = "Cuxhaven"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE933"
+name = "Harburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE934"
+name = "Lüchow-Dannenberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE935"
+name = "Lüneburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE936"
+name = "Osterholz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE937"
+name = "Rotenburg (Wümme)"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE938"
+name = "Heidekreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE939"
+name = "Stade"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE93A"
+name = "Uelzen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE93B"
+name = "Verden"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94"
+name = "Weser-Ems"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE941"
+name = "Delmenhorst, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE942"
+name = "Emden, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE943"
+name = "Oldenburg (Oldenburg), Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE944"
+name = "Osnabrück, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE945"
+name = "Wilhelmshaven, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE946"
+name = "Ammerland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE947"
+name = "Aurich"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE948"
+name = "Cloppenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE949"
+name = "Emsland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94A"
+name = "Friesland (DE)"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94B"
+name = "Grafschaft Bentheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94C"
+name = "Leer"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94D"
+name = "Oldenburg, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94E"
+name = "Osnabrück, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94F"
+name = "Vechta"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94G"
+name = "Wesermarsch"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE94H"
+name = "Wittmund"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Nordrhein-Westfalen
+# =============================================================================
+
+[[region]]
+geo = "DEA"
+name = "Nordrhein-Westfalen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1"
+name = "Düsseldorf"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA11"
+name = "Düsseldorf, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA12"
+name = "Duisburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA13"
+name = "Essen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA14"
+name = "Krefeld, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA15"
+name = "Mönchengladbach, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA16"
+name = "Mülheim an der Ruhr, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA17"
+name = "Oberhausen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA18"
+name = "Remscheid, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA19"
+name = "Solingen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1A"
+name = "Wuppertal, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1B"
+name = "Kleve"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1C"
+name = "Mettmann"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1D"
+name = "Rhein-Kreis Neuss"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1E"
+name = "Viersen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA1F"
+name = "Wesel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA2"
+name = "Köln"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA22"
+name = "Bonn, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA23"
+name = "Köln, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA24"
+name = "Leverkusen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA26"
+name = "Düren"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA27"
+name = "Rhein-Erft-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA28"
+name = "Euskirchen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA29"
+name = "Heinsberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA2A"
+name = "Oberbergischer Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA2B"
+name = "Rheinisch-Bergischer Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA2C"
+name = "Rhein-Sieg-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA2D"
+name = "Städteregion Aachen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA3"
+name = "Münster"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA31"
+name = "Bottrop, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA32"
+name = "Gelsenkirchen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA33"
+name = "Münster, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA34"
+name = "Borken"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA35"
+name = "Coesfeld"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA36"
+name = "Recklinghausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA37"
+name = "Steinfurt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA38"
+name = "Warendorf"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA4"
+name = "Detmold"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA41"
+name = "Bielefeld, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA42"
+name = "Gütersloh"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA43"
+name = "Herford"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA44"
+name = "Höxter"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA45"
+name = "Lippe"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA46"
+name = "Minden-Lübbecke"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA47"
+name = "Paderborn"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA5"
+name = "Arnsberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA51"
+name = "Bochum, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA52"
+name = "Dortmund, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA53"
+name = "Hagen, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA54"
+name = "Hamm, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA55"
+name = "Herne, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA56"
+name = "Ennepe-Ruhr-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA57"
+name = "Hochsauerlandkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA58"
+name = "Märkischer Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA59"
+name = "Olpe"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA5A"
+name = "Siegen-Wittgenstein"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA5B"
+name = "Soest"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEA5C"
+name = "Unna"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Rheinland-Pfalz
+# =============================================================================
+
+[[region]]
+geo = "DEB"
+name = "Rheinland-Pfalz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB1"
+name = "Koblenz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB11"
+name = "Koblenz, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB12"
+name = "Ahrweiler"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB13"
+name = "Altenkirchen (Westerwald)"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB14"
+name = "Bad Kreuznach"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB15"
+name = "Birkenfeld"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB17"
+name = "Mayen-Koblenz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB18"
+name = "Neuwied"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB1A"
+name = "Rhein-Lahn-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB1B"
+name = "Westerwaldkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB1C"
+name = "Cochem-Zell"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB1D"
+name = "Rhein-Hunsrück-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB2"
+name = "Trier"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB21"
+name = "Trier, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB22"
+name = "Bernkastel-Wittlich"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB23"
+name = "Eifelkreis Bitburg-Prüm"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB24"
+name = "Vulkaneifel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB25"
+name = "Trier-Saarburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3"
+name = "Rheinhessen-Pfalz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB31"
+name = "Frankenthal (Pfalz), Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB32"
+name = "Kaiserslautern, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB33"
+name = "Landau in der Pfalz, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB34"
+name = "Ludwigshafen am Rhein, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB35"
+name = "Mainz, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB36"
+name = "Neustadt an der Weinstraße, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB37"
+name = "Pirmasens, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB38"
+name = "Speyer, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB39"
+name = "Worms, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3A"
+name = "Zweibrücken, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3B"
+name = "Alzey-Worms"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3C"
+name = "Bad Dürkheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3D"
+name = "Donnersbergkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3E"
+name = "Germersheim"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3F"
+name = "Kaiserslautern, Landkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3G"
+name = "Kusel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3H"
+name = "Südliche Weinstraße"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3I"
+name = "Rhein-Pfalz-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3J"
+name = "Mainz-Bingen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEB3K"
+name = "Südwestpfalz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Saarland
+# =============================================================================
+
+[[region]]
+geo = "DEC"
+name = "Saarland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC0"
+name = "Saarland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC01"
+name = "Regionalverband Saarbrücken"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC02"
+name = "Merzig-Wadern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC03"
+name = "Neunkirchen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC04"
+name = "Saarlouis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC05"
+name = "Saarpfalz-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEC06"
+name = "St. Wendel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Sachsen
+# =============================================================================
+
+[[region]]
+geo = "DED"
+name = "Sachsen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED2"
+name = "Dresden"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED21"
+name = "Dresden, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED2C"
+name = "Bautzen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED2D"
+name = "Görlitz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED2E"
+name = "Meißen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED2F"
+name = "Sächsische Schweiz-Osterzgebirge"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED4"
+name = "Chemnitz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED41"
+name = "Chemnitz, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED42"
+name = "Erzgebirgskreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED43"
+name = "Mittelsachsen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED44"
+name = "Vogtlandkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED45"
+name = "Zwickau"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED5"
+name = "Leipzig"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED51"
+name = "Leipzig, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED52"
+name = "Leipzig"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DED53"
+name = "Nordsachsen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Sachsen-Anhalt
+# =============================================================================
+
+[[region]]
+geo = "DEE"
+name = "Sachsen-Anhalt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0"
+name = "Sachsen-Anhalt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE01"
+name = "Dessau-Roßlau, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE02"
+name = "Halle (Saale), Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE03"
+name = "Magdeburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE04"
+name = "Altmarkkreis Salzwedel"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE05"
+name = "Anhalt-Bitterfeld"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE06"
+name = "Jerichower Land"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE07"
+name = "Börde"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE08"
+name = "Burgenlandkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE09"
+name = "Harz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0A"
+name = "Mansfeld-Südharz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0B"
+name = "Saalekreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0C"
+name = "Salzlandkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0D"
+name = "Stendal"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEE0E"
+name = "Wittenberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Schleswig-Holstein
+# =============================================================================
+
+[[region]]
+geo = "DEF"
+name = "Schleswig-Holstein"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0"
+name = "Schleswig-Holstein"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF01"
+name = "Flensburg, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF02"
+name = "Kiel, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF03"
+name = "Lübeck, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF04"
+name = "Neumünster, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF05"
+name = "Dithmarschen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF06"
+name = "Herzogtum Lauenburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF07"
+name = "Nordfriesland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF08"
+name = "Ostholstein"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF09"
+name = "Pinneberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0A"
+name = "Plön"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0B"
+name = "Rendsburg-Eckernförde"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0C"
+name = "Schleswig-Flensburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0D"
+name = "Segeberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0E"
+name = "Steinburg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEF0F"
+name = "Stormarn"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+# =============================================================================
+# Thüringen
+# =============================================================================
+
+[[region]]
+geo = "DEG"
+name = "Thüringen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0"
+name = "Thüringen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG01"
+name = "Erfurt, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG02"
+name = "Gera, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG03"
+name = "Jena, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG04"
+name = "Suhl, Kreisfreie Stadt"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG05"
+name = "Weimar, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG06"
+name = "Eichsfeld"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG07"
+name = "Nordhausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG09"
+name = "Unstrut-Hainich-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0A"
+name = "Kyffhäuserkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0B"
+name = "Schmalkalden-Meiningen"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0C"
+name = "Gotha"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0D"
+name = "Sömmerda"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0E"
+name = "Hildburghausen"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0F"
+name = "Ilm-Kreis"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0G"
+name = "Weimarer Land"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0H"
+name = "Sonneberg"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0I"
+name = "Saalfeld-Rudolstadt"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0J"
+name = "Saale-Holzland-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0K"
+name = "Saale-Orla-Kreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0L"
+name = "Greiz"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0M"
+name = "Altenburger Land"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0N"
+name = "Eisenach, Kreisfreie Stadt"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0P"
+name = "Wartburgkreis"
+nuts = ["2016", "2021"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0Q"
+name = "Schmalkalden-Meiningen"
+nuts = ["2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0R"
+name = "Wartburgkreis"
+nuts = ["2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0S"
+name = "Suhl, Kreisfreie Stadt"
+nuts = ["2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0T"
+name = "Ilm-Kreis"
+nuts = ["2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0U"
+name = "Saalfeld-Rudolstadt"
+nuts = ["2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DEG0V"
+name = "Sonneberg"
+nuts = ["2024"]
+added = 2026-10-26

@@ -1,0 +1,45 @@
+name: Run Notification
+
+# Posts a summary of each pipeline run as a commit comment that mentions the repository owner,
+# so that GitHub sends an email. The workflow name below must match the name in pipeline.yml.
+on:
+  workflow_run:
+    workflows: ["German Sociodemographics Pipeline"]
+    types:
+      - completed
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only runs that commit data (normal and backfill); the run name contains the mode (see pipeline.yml).
+    # Cancelled runs commit nothing; failed runs commit what was collected.
+    if: >-
+      ${{ (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure')
+      && (contains(github.event.workflow_run.display_title, '(normal)')
+      || contains(github.event.workflow_run.display_title, '(backfill)')) }}
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v7
+      with:
+        ref: ${{ github.event.workflow_run.head_branch }}
+
+    - name: Write Run Summary
+      env:
+        CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        RUN_URL: ${{ github.event.workflow_run.html_url }}
+        RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
+        OWNER: ${{ github.repository_owner }}
+      run: |
+        python3 scripts/run_summary.py --run-log data/state/run_log.jsonl --output "$RUNNER_TEMP/summary.md" \
+          --conclusion "$CONCLUSION" --run-url "$RUN_URL" --mention "$OWNER" --not-before "$RUN_STARTED_AT"
+
+    - name: Post Commit Comment
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPOSITORY: ${{ github.repository }}
+      run: |
+        gh api --method POST -H "Accept: application/vnd.github+json" \
+          "/repos/$REPOSITORY/commits/$(git rev-parse HEAD)/comments" -F body=@"$RUNNER_TEMP/summary.md"

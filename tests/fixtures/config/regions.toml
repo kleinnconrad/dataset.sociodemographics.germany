@@ -1,0 +1,51 @@
+# Test registry: Germany, two states, two government regions and three districts (one removed).
+
+[[region]]
+geo = "DE"
+name = "Deutschland"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE1"
+name = "Baden-Württemberg"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE11"
+name = "Stuttgart"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE111"
+name = "Stuttgart, Stadtkreis"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE2"
+name = "Bayern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE21"
+name = "Oberbayern"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE212"
+name = "München, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+
+[[region]]
+geo = "DE213"
+name = "Rosenheim, Kreisfreie Stadt"
+nuts = ["2016", "2021", "2024"]
+added = 2026-10-26
+removed = 2026-10-27
+removed_reason = "test of a removed region"

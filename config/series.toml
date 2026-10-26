@@ -1,0 +1,818 @@
+# Catalog of the statistical series collected by the sociodemographics dataset.
+#
+# Every [[series]] entry describes one concept at one provider:
+#   concept         what the series measure (lower-case snake_case); the first part of every series id
+#   name            name of the concept
+#   topic           topic group (SeriesTopic in src/schema.py)
+#   frequency       W weekly, M monthly, Q quarterly, A annual
+#   unit            unit of the values
+#   provider        eurostat or ecb (SDMX 2.1 REST)
+#   flow            dataset or dataflow of the provider
+#   key             SDMX key template: {geo} and one placeholder per breakdown dimension, the other positions
+#                   fixed codes of the provider
+#   geo_levels      levels of the German regions of config/regions.toml: country, nuts1 (states),
+#                   nuts2 (government regions), nuts3 (districts)
+#   geos            further areas for comparison: EU27_2020
+#   breakdown.<dim> codes of the provider for the placeholder {<dim>}; every combination is a series
+#   added           day on which the entry was added; start of collection
+#   notes           optional remarks, e.g. the meaning of codes
+# Each area and combination of breakdown codes is a series with the id <concept>.<geo>[.<code>...], e.g.
+# population_by_age_group.DE212.F.Y20-24, the join key series_id of the dataset sociodemographic_series.
+#
+# Rules (CLAUDE.md, section 9): concepts and series ids are never changed or reused for another meaning; an
+# entry that is no longer collected keeps its place with removed = <date> and removed_reason = "..."; every
+# new or changed key is verified against the live provider before it is committed; every change of a key,
+# unit, code or provider is recorded in the measurement log of project_architecture.md.
+
+# =============================================================================================================
+# Population structure (Eurostat, population on 1 January)
+# =============================================================================================================
+
+[[series]]
+concept = "population"
+name = "Population on 1 January by broad age group and sex"
+topic = "population_structure"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "demo_r_pjanaggr3"
+key = "A.NR.{sex}.{age}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.sex = ["T", "M", "F"]
+breakdown.age = ["TOTAL", "Y_LT15", "Y15-64", "Y_GE65"]
+notes = "T total, M males, F females; the shares of men and women follow from the three series of a region"
+added = 2026-10-26
+
+[[series]]
+concept = "population_by_age_group"
+name = "Population on 1 January by five-year age group and sex (age pyramid)"
+topic = "population_structure"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "demo_r_pjangrp3"
+key = "A.NR.{sex}.{age}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.sex = ["M", "F"]
+breakdown.age = [
+    "Y_LT5", "Y5-9", "Y10-14", "Y15-19", "Y20-24", "Y25-29", "Y30-34", "Y35-39", "Y40-44", "Y45-49", "Y50-54",
+    "Y55-59", "Y60-64", "Y65-69", "Y70-74", "Y75-79", "Y80-84", "Y_GE85"
+]
+added = 2026-10-26
+
+[[series]]
+concept = "population_by_single_age"
+name = "Population on 1 January by single year of age and sex"
+topic = "population_structure"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "demo_pjan"
+key = "A.NR.{age}.{sex}.{geo}"
+geo_levels = ["country"]
+breakdown.age = [
+    "Y_LT1", "Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "Y9", "Y10", "Y11", "Y12", "Y13", "Y14", "Y15", "Y16",
+    "Y17", "Y18", "Y19", "Y20", "Y21", "Y22", "Y23", "Y24", "Y25", "Y26", "Y27", "Y28", "Y29", "Y30", "Y31", "Y32",
+    "Y33", "Y34", "Y35", "Y36", "Y37", "Y38", "Y39", "Y40", "Y41", "Y42", "Y43", "Y44", "Y45", "Y46", "Y47", "Y48",
+    "Y49", "Y50", "Y51", "Y52", "Y53", "Y54", "Y55", "Y56", "Y57", "Y58", "Y59", "Y60", "Y61", "Y62", "Y63", "Y64",
+    "Y65", "Y66", "Y67", "Y68", "Y69", "Y70", "Y71", "Y72", "Y73", "Y74", "Y75", "Y76", "Y77", "Y78", "Y79", "Y80",
+    "Y81", "Y82", "Y83", "Y84", "Y85", "Y86", "Y87", "Y88", "Y89", "Y90", "Y91", "Y92", "Y93", "Y94", "Y95", "Y96",
+    "Y97", "Y98", "Y99", "Y_OPEN"
+]
+breakdown.sex = ["M", "F"]
+notes = "Y_OPEN: 100 years and over"
+added = 2026-10-26
+
+[[series]]
+concept = "median_age"
+name = "Median age of the population"
+topic = "population_structure"
+frequency = "A"
+unit = "years"
+provider = "eurostat"
+flow = "demo_r_pjanind3"
+key = "A.MEDAGEPOP.YR.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26
+
+[[series]]
+concept = "age_dependency_ratio"
+name = "Age dependency ratios"
+topic = "population_structure"
+frequency = "A"
+unit = "percent of the population aged 15 to 64"
+provider = "eurostat"
+flow = "demo_r_pjanind3"
+key = "A.{indicator}.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.indicator = ["DEPRATIO1", "OLDDEP1", "YOUNGDEP1"]
+notes = "DEPRATIO1 population aged 0-14 and 65 and over, OLDDEP1 aged 65 and over, YOUNGDEP1 aged 0-14, each relative to the population aged 15-64"
+added = 2026-10-26
+
+[[series]]
+concept = "population_density"
+name = "Population density"
+topic = "population_structure"
+frequency = "A"
+unit = "persons per square kilometre"
+provider = "eurostat"
+flow = "demo_r_d3dens"
+key = "A.PER_KM2.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Population change (Eurostat, demographic balance)
+# =============================================================================================================
+
+[[series]]
+concept = "demographic_balance"
+name = "Demographic balance: population, live births, deaths, natural change, net migration"
+topic = "population_change"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "demo_r_gind3"
+key = "A.{indicator}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.indicator = ["JAN", "LBIRTH", "DEATH", "NATGROW", "CNMIGRAT", "GROW"]
+notes = "JAN population on 1 January, LBIRTH live births, DEATH deaths, NATGROW natural change, CNMIGRAT net migration plus statistical adjustment, GROW total change"
+added = 2026-10-26
+
+[[series]]
+concept = "demographic_rates"
+name = "Crude rates of births, deaths, natural change, net migration and population change"
+topic = "population_change"
+frequency = "A"
+unit = "per 1,000 persons of the average population"
+provider = "eurostat"
+flow = "demo_r_gind3"
+key = "A.{indicator}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.indicator = ["GBIRTHRT", "GDEATHRT", "NATGROWRT", "CNMIGRATRT", "GROWRT"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Births and fertility (Eurostat)
+#
+# The total fertility rate by citizenship of the mother is not published as a series; it follows from
+# live_births_by_mother_age_citizenship and women_by_age_citizenship as five times the sum of the
+# age-specific rates (births per woman of each five-year age group).
+# =============================================================================================================
+
+[[series]]
+concept = "total_fertility_rate"
+name = "Total fertility rate (children per woman)"
+topic = "births_and_fertility"
+frequency = "A"
+unit = "live births per woman"
+provider = "eurostat"
+flow = "demo_r_find3"
+key = "A.NR.TOTFERRT.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26
+
+[[series]]
+concept = "mean_age_at_birth"
+name = "Mean age of women at childbirth"
+topic = "births_and_fertility"
+frequency = "A"
+unit = "years"
+provider = "eurostat"
+flow = "demo_r_find3"
+key = "A.YR.AGEMOTH.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26
+
+[[series]]
+concept = "live_births_by_mother_age_citizenship"
+name = "Live births by age group and citizenship of the mother"
+topic = "births_and_fertility"
+frequency = "A"
+unit = "live births"
+provider = "eurostat"
+flow = "demo_faczc"
+key = "A.{age}.{citizen}.NR.{geo}"
+geo_levels = ["country"]
+breakdown.age = ["TOTAL", "Y15-19", "Y20-24", "Y25-29", "Y30-34", "Y35-39", "Y40-44", "Y45-49"]
+breakdown.citizen = ["TOTAL", "NAT", "FOR"]
+notes = "NAT German citizens, FOR foreign citizens"
+added = 2026-10-26
+
+[[series]]
+concept = "women_by_age_citizenship"
+name = "Women on 1 January by age group and citizenship"
+topic = "births_and_fertility"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "migr_pop1ctz"
+key = "A.{citizen}.{age}.NR.F.{geo}"
+geo_levels = ["country"]
+breakdown.citizen = ["TOTAL", "NAT", "FOR"]
+breakdown.age = ["Y15-19", "Y20-24", "Y25-29", "Y30-34", "Y35-39", "Y40-44", "Y45-49"]
+notes = "denominators of the age-specific fertility rates by citizenship"
+added = 2026-10-26
+
+# =============================================================================================================
+# Mortality and health (Eurostat)
+# =============================================================================================================
+
+[[series]]
+concept = "life_expectancy"
+name = "Life expectancy at birth and at age 65 by sex"
+topic = "mortality_and_health"
+frequency = "A"
+unit = "years"
+provider = "eurostat"
+flow = "demo_r_mlifexp"
+key = "A.YR.{sex}.{age}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+breakdown.sex = ["T", "M", "F"]
+breakdown.age = ["Y_LT1", "Y65"]
+notes = "Y_LT1 life expectancy at birth, Y65 at the age of 65"
+added = 2026-10-26
+
+[[series]]
+concept = "deaths_weekly"
+name = "Deaths by week and sex"
+topic = "mortality_and_health"
+frequency = "W"
+unit = "deaths"
+provider = "eurostat"
+flow = "demo_r_mwk_ts"
+key = "W.NR.{sex}.{geo}"
+geo_levels = ["country"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "deaths_weekly_regional"
+name = "Deaths by week, states and government regions"
+topic = "mortality_and_health"
+frequency = "W"
+unit = "deaths"
+provider = "eurostat"
+flow = "demo_r_mwk2_ts"
+key = "W.NR.{sex}.{geo}"
+geo_levels = ["nuts1", "nuts2"]
+breakdown.sex = ["T"]
+added = 2026-10-26
+
+[[series]]
+concept = "death_rate_by_cause"
+name = "Standardised death rate by main cause of death"
+topic = "mortality_and_health"
+frequency = "A"
+unit = "deaths per 100,000 inhabitants, standardised (three-year average)"
+provider = "eurostat"
+flow = "hlth_cd_asdr2"
+key = "A.RT.T.TOTAL.{cause}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+breakdown.cause = ["A-R_V-Y", "C", "I", "J", "F", "X60-X84_Y870"]
+notes = "ICD-10: A-R_V-Y all causes, C malignant neoplasms, I circulatory system, J respiratory system, F mental and behavioural disorders, X60-X84_Y870 intentional self-harm"
+added = 2026-10-26
+
+# =============================================================================================================
+# Migration and citizenship (Eurostat)
+# =============================================================================================================
+
+[[series]]
+concept = "population_by_citizenship"
+name = "Population on 1 January by citizenship and sex"
+topic = "migration_and_citizenship"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "migr_pop1ctz"
+key = "A.{citizen}.TOTAL.NR.{sex}.{geo}"
+geo_levels = ["country"]
+breakdown.citizen = ["TOTAL", "NAT", "FOR", "EU27_2020_FOR", "NEU27_2020_FOR"]
+breakdown.sex = ["T", "M", "F"]
+notes = "NAT German citizens, FOR foreign citizens, EU27_2020_FOR citizens of other EU countries, NEU27_2020_FOR citizens of non-EU countries"
+added = 2026-10-26
+
+[[series]]
+concept = "population_by_country_of_birth"
+name = "Population on 1 January by country of birth"
+topic = "migration_and_citizenship"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "migr_pop3ctb"
+key = "A.{birth}.TOTAL.NR.T.{geo}"
+geo_levels = ["country"]
+breakdown.birth = ["TOTAL", "NAT", "FOR", "EU27_2020_FOR", "NEU27_2020_FOR"]
+notes = "NAT born in Germany, FOR born abroad"
+added = 2026-10-26
+
+[[series]]
+concept = "immigration"
+name = "Immigration by citizenship"
+topic = "migration_and_citizenship"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_imm1ctz"
+key = "A.{citizen}.COMPLET.TOTAL.NR.T.{geo}"
+geo_levels = ["country"]
+breakdown.citizen = ["TOTAL", "NAT", "EU27_2020_FOR", "NEU27_2020_FOR"]
+added = 2026-10-26
+
+[[series]]
+concept = "emigration"
+name = "Emigration by citizenship"
+topic = "migration_and_citizenship"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_emi1ctz"
+key = "A.{citizen}.COMPLET.TOTAL.NR.T.{geo}"
+geo_levels = ["country"]
+breakdown.citizen = ["TOTAL", "NAT", "EU27_2020_FOR", "NEU27_2020_FOR"]
+added = 2026-10-26
+
+[[series]]
+concept = "citizenship_acquisitions"
+name = "Acquisitions of German citizenship by previous citizenship"
+topic = "migration_and_citizenship"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_acq"
+key = "A.{citizen}.COMPLET.TOTAL.NR.T.{geo}"
+geo_levels = ["country"]
+breakdown.citizen = ["TOTAL", "EU27_2020_FOR", "NEU27_2020_FOR"]
+added = 2026-10-26
+
+[[series]]
+concept = "asylum_applicants"
+name = "Asylum applicants and first-time applicants by month"
+topic = "migration_and_citizenship"
+frequency = "M"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_asyappctzm"
+key = "M.PER.TOTAL.T.{applicant}.TOTAL.{geo}"
+geo_levels = ["country"]
+breakdown.applicant = ["ASY_APP", "NASY_APP"]
+notes = "ASY_APP all applicants, NASY_APP first-time applicants"
+added = 2026-10-26
+
+[[series]]
+concept = "asylum_decisions"
+name = "First-instance decisions on asylum applications by quarter"
+topic = "migration_and_citizenship"
+frequency = "Q"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_asydcfstq"
+key = "Q.PER.TOTAL.T.TOTAL.{decision}.{geo}"
+geo_levels = ["country"]
+breakdown.decision = ["TOTAL", "TOTAL_POS", "REJECTED"]
+added = 2026-10-26
+
+[[series]]
+concept = "temporary_protection_beneficiaries"
+name = "Beneficiaries of temporary protection at the end of the month"
+topic = "migration_and_citizenship"
+frequency = "M"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_asytpsm"
+key = "M.PER.TOTAL.T.TOTAL.{geo}"
+geo_levels = ["country"]
+notes = "mainly persons displaced from Ukraine since March 2022"
+added = 2026-10-26
+
+# =============================================================================================================
+# Households and families (Eurostat)
+# =============================================================================================================
+
+[[series]]
+concept = "average_household_size"
+name = "Average household size"
+topic = "households_and_families"
+frequency = "A"
+unit = "persons per household"
+provider = "eurostat"
+flow = "ilc_lvph01"
+key = "A.AVG.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "young_adults_living_with_parents"
+name = "Share of young adults aged 18 to 34 living with their parents"
+topic = "households_and_families"
+frequency = "A"
+unit = "percent of the population aged 18 to 34"
+provider = "eurostat"
+flow = "ilc_lvps08"
+key = "A.{sex}.Y18-34.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "age_leaving_parental_home"
+name = "Estimated average age of young people leaving the parental household"
+topic = "households_and_families"
+frequency = "A"
+unit = "years"
+provider = "eurostat"
+flow = "yth_demo_030"
+key = "A.{sex}.YR.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "crude_marriage_rate"
+name = "Crude marriage rate"
+topic = "households_and_families"
+frequency = "A"
+unit = "marriages per 1,000 persons"
+provider = "eurostat"
+flow = "demo_nind"
+key = "A.GNUPRT.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "crude_divorce_rate"
+name = "Crude divorce rate"
+topic = "households_and_families"
+frequency = "A"
+unit = "divorces per 1,000 persons"
+provider = "eurostat"
+flow = "demo_ndivind"
+key = "A.GDIVRT.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Education (Eurostat, labour force survey)
+# =============================================================================================================
+
+[[series]]
+concept = "educational_attainment"
+name = "Population aged 25 to 64 by educational attainment level and sex"
+topic = "education"
+frequency = "A"
+unit = "percent of the population aged 25 to 64"
+provider = "eurostat"
+flow = "edat_lfse_04"
+key = "A.PC.{sex}.Y25-64.{isced}.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+breakdown.isced = ["ED0-2", "ED3_4", "ED5-8"]
+notes = "ISCED 2011: ED0-2 less than upper secondary, ED3_4 upper secondary and post-secondary non-tertiary, ED5-8 tertiary"
+added = 2026-10-26
+
+[[series]]
+concept = "early_leavers_from_education"
+name = "Early leavers from education and training aged 18 to 24"
+topic = "education"
+frequency = "A"
+unit = "percent of the population aged 18 to 24"
+provider = "eurostat"
+flow = "edat_lfse_16"
+key = "A.{sex}.Y18-24.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "neet_rate"
+name = "Young people aged 15 to 29 neither in employment nor in education and training"
+topic = "education"
+frequency = "A"
+unit = "percent of the population aged 15 to 29"
+provider = "eurostat"
+flow = "edat_lfse_22"
+key = "A.{sex}.Y15-29.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "adult_learning"
+name = "Participation of adults aged 25 to 64 in education and training (last four weeks)"
+topic = "education"
+frequency = "A"
+unit = "percent of the population aged 25 to 64"
+provider = "eurostat"
+flow = "trng_lfse_04"
+key = "A.PC.{sex}.Y25-64.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+geos = ["EU27_2020"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Income and poverty (Eurostat, regional accounts and EU-SILC)
+#
+# EU-SILC refers to the income of the previous calendar year: the period 2025 holds the income of 2024.
+# =============================================================================================================
+
+[[series]]
+concept = "disposable_income_per_inhabitant"
+name = "Net disposable income of private households per inhabitant"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "euro per inhabitant"
+provider = "eurostat"
+flow = "nama_10r_2hhinc"
+key = "A.EUR_HAB.BAL.B6N.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+added = 2026-10-26
+
+[[series]]
+concept = "primary_income_per_inhabitant"
+name = "Net primary income of private households per inhabitant"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "euro per inhabitant"
+provider = "eurostat"
+flow = "nama_10r_2hhinc"
+key = "A.EUR_HAB.BAL.B5N.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+added = 2026-10-26
+
+[[series]]
+concept = "income_decile_shares"
+name = "Share of each income decile in the total equivalised disposable income"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the total equivalised disposable income"
+provider = "eurostat"
+flow = "ilc_di01"
+key = "A.{decile}.SHARE.EUR.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.decile = ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10"]
+notes = "D1 the tenth of the population with the lowest income, D10 the tenth with the highest"
+added = 2026-10-26
+
+[[series]]
+concept = "income_decile_cut_offs"
+name = "Upper limits of the income deciles of equivalised disposable income"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "euro per year"
+provider = "eurostat"
+flow = "ilc_di01"
+key = "A.{decile}.TC.EUR.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.decile = ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9"]
+added = 2026-10-26
+
+[[series]]
+concept = "median_equivalised_income"
+name = "Mean and median equivalised net income"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "euro per year"
+provider = "eurostat"
+flow = "ilc_di03"
+key = "A.TOTAL.T.{indicator}.EUR.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.indicator = ["MED_E", "MEI_E"]
+notes = "MED_E median, MEI_E mean"
+added = 2026-10-26
+
+[[series]]
+concept = "gini_coefficient"
+name = "Gini coefficient of equivalised disposable income"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "index from 0 to 100"
+provider = "eurostat"
+flow = "ilc_di12"
+key = "A.GINI_HND.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "income_quintile_share_ratio"
+name = "Income quintile share ratio S80/S20"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "ratio of the income of the top and the bottom fifth"
+provider = "eurostat"
+flow = "ilc_di11"
+key = "A.T.TOTAL.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "at_risk_of_poverty_rate"
+name = "At-risk-of-poverty rate (60 percent of the median income) by age group"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_li02"
+key = "A.LI_R_MD60.T.{age}.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.age = ["TOTAL", "Y_LT18", "Y18-64", "Y_GE65"]
+added = 2026-10-26
+
+[[series]]
+concept = "at_risk_of_poverty_rate_regional"
+name = "At-risk-of-poverty rate by region"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_li41"
+key = "A.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+added = 2026-10-26
+
+[[series]]
+concept = "poverty_or_social_exclusion_rate_regional"
+name = "People at risk of poverty or social exclusion by region"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_peps11n"
+key = "A.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+added = 2026-10-26
+
+[[series]]
+concept = "poverty_or_social_exclusion_by_citizenship"
+name = "People aged 18 and over at risk of poverty or social exclusion by citizenship"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the population aged 18 and over"
+provider = "eurostat"
+flow = "ilc_peps05n"
+key = "A.{citizen}.T.Y_GE18.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.citizen = ["NAT", "FOR", "EU27_2020_FOR", "NEU27_2020_FOR"]
+added = 2026-10-26
+
+[[series]]
+concept = "severe_material_social_deprivation"
+name = "Severe material and social deprivation rate"
+topic = "income_and_poverty"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_mdsd11"
+key = "A.T.TOTAL.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Wealth (ECB Distributional Wealth Accounts)
+# =============================================================================================================
+
+[[series]]
+concept = "net_wealth_share"
+name = "Share of the net wealth of households held by the wealthiest and the poorest households"
+topic = "wealth"
+frequency = "Q"
+unit = "percent of the total net wealth of households"
+provider = "ecb"
+flow = "DWA"
+key = "Q.{geo}.S14._Z._Z.NWA.{group}.PT.S.N"
+geo_levels = ["country"]
+breakdown.group = ["T10", "T5", "B50"]
+notes = "T10 wealthiest 10 percent, T5 wealthiest 5 percent, B50 poorest 50 percent of the households by net wealth; experimental statistics of the ECB"
+added = 2026-10-26
+
+# =============================================================================================================
+# Housing (Eurostat, EU-SILC)
+# =============================================================================================================
+
+[[series]]
+concept = "housing_tenure"
+name = "Population by tenure status of the dwelling"
+topic = "housing"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_lvho02"
+key = "A.TOTAL.TOTAL.{tenure}.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+breakdown.tenure = ["OWN", "OWN_L", "OWN_NL", "RENT", "RENT_MKT", "RENT_FR"]
+notes = "OWN owners, OWN_L with mortgage or loan, OWN_NL without, RENT tenants, RENT_MKT at market price, RENT_FR at reduced price or free"
+added = 2026-10-26
+
+[[series]]
+concept = "housing_cost_overburden_rate"
+name = "Housing cost overburden rate"
+topic = "housing"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_lvho07a"
+key = "A.TOTAL.TOTAL.T.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "overcrowding_rate"
+name = "Overcrowding rate"
+topic = "housing"
+frequency = "A"
+unit = "percent of the population"
+provider = "eurostat"
+flow = "ilc_lvho05a"
+key = "A.TOTAL.TOTAL.T.PC.{geo}"
+geo_levels = ["country"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Labour market by region (Eurostat, labour force survey)
+# =============================================================================================================
+
+[[series]]
+concept = "employment_rate"
+name = "Employment rate of the population aged 20 to 64 by sex"
+topic = "labour_market"
+frequency = "A"
+unit = "percent of the population aged 20 to 64"
+provider = "eurostat"
+flow = "lfst_r_lfe2emprt"
+key = "A.PC.{sex}.Y20-64.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "unemployment_rate"
+name = "Unemployment rate of the population aged 15 to 74 by sex"
+topic = "labour_market"
+frequency = "A"
+unit = "percent of the labour force aged 15 to 74"
+provider = "eurostat"
+flow = "lfst_r_lfu3rt"
+key = "A.TOTAL.{sex}.Y15-74.PC.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "activity_rate"
+name = "Economic activity rate of the population aged 15 to 64 by sex"
+topic = "labour_market"
+frequency = "A"
+unit = "percent of the population aged 15 to 64"
+provider = "eurostat"
+flow = "lfst_r_lfp2actrt"
+key = "A.PC.{sex}.Y15-64.{geo}"
+geo_levels = ["country", "nuts1", "nuts2"]
+breakdown.sex = ["T", "M", "F"]
+added = 2026-10-26
+
+# =============================================================================================================
+# Regional economy (Eurostat, regional accounts)
+# =============================================================================================================
+
+[[series]]
+concept = "gdp_per_inhabitant"
+name = "Gross domestic product at current prices per inhabitant"
+topic = "regional_economy"
+frequency = "A"
+unit = "euro per inhabitant"
+provider = "eurostat"
+flow = "nama_10r_3gdp"
+key = "A.EUR_HAB.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26
+
+[[series]]
+concept = "employment_by_place_of_work"
+name = "Employment (persons) at the place of work"
+topic = "regional_economy"
+frequency = "A"
+unit = "thousand persons"
+provider = "eurostat"
+flow = "nama_10r_3empers"
+key = "A.THS.EMP.TOTAL.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+added = 2026-10-26

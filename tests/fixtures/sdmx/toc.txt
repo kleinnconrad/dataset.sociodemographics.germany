@@ -1,0 +1,6 @@
+"title"	"code"	"type"	"last update of data"	"last table structure change"	"data start"	"data end"	"values"
+"Database by themes"	"data"	"folder"	" "	" "	" "	" "	" "
+"    Population on 1 January by broad age group, sex and NUTS 3 region"	"demo_r_pjanaggr3"	"dataset"	"14.03.2026"	"14.03.2026"	"1990"	"2025"	"2000000"
+"    Fertility indicators by NUTS 3 region"	"demo_r_find3"	"dataset"	"20.04.2026"	"20.04.2026"	"2013"	"2024"	"30000"
+"    Population by educational attainment level and NUTS 3 region"	"edat_lfse_r3"	"dataset"	"15.10.2026"	"15.10.2026"	"2021"	"2025"	"9000"
+"    Asylum applicants by citizenship, age and sex - monthly data"	"migr_asyappctzm"	"dataset"	"20.10.2026"	"01.01.2024"	"2008-01"	"2026-08"	"9000000"

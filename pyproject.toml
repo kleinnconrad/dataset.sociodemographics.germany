@@ -1,0 +1,27 @@
+[project]
+name = "sociodemographics-dataset"
+version = "0.1.0"
+description = "A long-term dataset of German sociodemographics (population by age, sex and region, fertility, mortality, migration, households, education, income, poverty, wealth, housing and regional labour market) for analysis and prediction"
+requires-python = ">=3.11"
+# Same versions as in dataset.economics.germany, so that the shared modules run on a tested set
+dependencies = [
+    "httpx==0.28.1",
+    "pydantic==2.14.1",
+    "python-dotenv==1.2.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "ruff==0.17.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# The modules in src/ import each other as top-level modules (e.g. `from schema import ...`)
+pythonpath = ["src"]
+
+[tool.ruff.lint]
+# Pyflakes and the pycodestyle error rules. Listed explicitly because the default
+# rule set changes between ruff releases, which would break CI on version bumps.
+select = ["E4", "E7", "E9", "F"]

@@ -1,0 +1,67 @@
+# Test catalog: Eurostat entries with and without breakdown, one ECB entry and one removed entry.
+
+[[series]]
+concept = "population"
+name = "Population on 1 January by sex"
+topic = "population_structure"
+frequency = "A"
+unit = "persons on 1 January"
+provider = "eurostat"
+flow = "demo_r_pjanaggr3"
+key = "A.NR.{sex}.TOTAL.{geo}"
+geo_levels = ["country", "nuts1", "nuts2", "nuts3"]
+breakdown.sex = ["M", "F"]
+added = 2026-10-26
+
+[[series]]
+concept = "total_fertility_rate"
+name = "Total fertility rate"
+topic = "births_and_fertility"
+frequency = "A"
+unit = "live births per woman"
+provider = "eurostat"
+flow = "demo_r_find3"
+key = "A.NR.TOTFERRT.{geo}"
+geo_levels = ["country", "nuts1"]
+geos = ["EU27_2020"]
+added = 2026-10-26
+
+[[series]]
+concept = "asylum_applicants"
+name = "Asylum applicants by month"
+topic = "migration_and_citizenship"
+frequency = "M"
+unit = "persons"
+provider = "eurostat"
+flow = "migr_asyappctzm"
+key = "M.PER.TOTAL.T.{applicant}.TOTAL.{geo}"
+geo_levels = ["country"]
+breakdown.applicant = ["ASY_APP", "NASY_APP"]
+added = 2026-10-26
+
+[[series]]
+concept = "net_wealth_share"
+name = "Share of net wealth"
+topic = "wealth"
+frequency = "Q"
+unit = "percent of the total net wealth of households"
+provider = "ecb"
+flow = "DWA"
+key = "Q.{geo}.S14._Z._Z.NWA.{group}.PT.S.N"
+geo_levels = ["country"]
+breakdown.group = ["T10", "B50"]
+added = 2026-10-26
+
+[[series]]
+concept = "old_concept"
+name = "A removed concept"
+topic = "population_structure"
+frequency = "A"
+unit = "persons"
+provider = "eurostat"
+flow = "demo_old"
+key = "A.NR.{geo}"
+geo_levels = ["country"]
+added = 2026-10-26
+removed = 2026-10-27
+removed_reason = "test of a removed entry"

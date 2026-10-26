@@ -1,0 +1,108 @@
+name: German Sociodemographics Pipeline
+run-name: German sociodemographics pipeline (${{ inputs.mode || 'normal' }})
+
+on:
+  schedule:
+    # Tuesdays and Fridays 02:07 Berlin time; GitHub delays schedules at the full hour
+    - cron: '7 2 * * 2,5'
+      timezone: 'Europe/Berlin'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'normal: collect and commit the data; backfill: fetch every catalog entry, also those whose dataset is unchanged, and commit the data; shadow: collect into a temporary folder and upload it as an artifact; dry-run: run the collectors without writing data'
+        type: choice
+        options:
+          - normal
+          - backfill
+          - shadow
+          - dry-run
+        default: normal
+      collectors:
+        description: 'Comma-separated collectors to run, e.g. eurostat; empty runs all due collectors'
+        type: string
+        required: false
+        default: ''
+
+# Data-writing workflows share this group, so that they never push at the same time
+concurrency:
+  group: data-writes
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    # The pipeline starts no new work after RUN_DEADLINE_MINUTES, so that the data is committed before the timeout
+    timeout-minutes: ${{ inputs.mode == 'backfill' && 90 || 30 }}
+    permissions:
+      contents: write
+    env:
+      MODE: ${{ inputs.mode || 'normal' }}
+      COLLECTORS: ${{ inputs.collectors }}
+      RUN_DEADLINE_MINUTES: ${{ inputs.mode == 'backfill' && '85' || '25' }}
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v7
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
+    - name: Set up Python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: uv sync --frozen
+
+    # Shadow and dry runs work on a copy of the state, so that they compare with the same stored series as a normal run
+    - name: Prepare Output Folder
+      if: env.MODE == 'shadow' || env.MODE == 'dry-run'
+      run: |
+        mkdir -p "$RUNNER_TEMP/$MODE"
+        if [ -d data/state ]; then
+          cp -r data/state "$RUNNER_TEMP/$MODE/"
+        fi
+
+    - name: Execute Pipeline
+      run: |
+        case "$MODE" in
+          normal) uv run python src/main.py ;;
+          backfill) uv run python src/main.py --backfill ;;
+          shadow) uv run python src/main.py --output-dir "$RUNNER_TEMP/shadow" ;;
+          dry-run) uv run python src/main.py --dry-run --output-dir "$RUNNER_TEMP/dry-run" ;;
+          *) echo "Unknown mode: $MODE"; exit 1 ;;
+        esac
+
+    # The next two steps also run after a failed pipeline step, so that the collected data is kept
+    - name: Update Dataset Overview
+      if: ${{ !cancelled() && (env.MODE == 'normal' || env.MODE == 'backfill') }}
+      run: uv run python src/generate_dataset_overview.py
+
+    - name: Commit and Push Data
+      if: ${{ !cancelled() && (env.MODE == 'normal' || env.MODE == 'backfill') }}
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/ README.md
+        if git diff --staged --quiet; then
+          echo "No changes to commit."
+          exit 0
+        fi
+        git commit -m "chore: add sociodemographic data"
+        for attempt in 1 2 3; do
+          if git pull --rebase && git push; then
+            exit 0
+          fi
+          echo "Push attempt $attempt failed; retrying."
+          sleep $((attempt * 15))
+        done
+        exit 1
+
+    - name: Upload Run Output
+      if: ${{ !cancelled() && (env.MODE == 'shadow' || env.MODE == 'dry-run') }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: pipeline-${{ env.MODE }}-${{ github.run_id }}
+        path: ${{ runner.temp }}/${{ env.MODE }}
+        retention-days: 14

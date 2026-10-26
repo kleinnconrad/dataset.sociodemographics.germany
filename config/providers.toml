@@ -1,0 +1,34 @@
+# Providers of the statistical series and their terms of use.
+#
+# Every [[provider]] entry describes one organization and interface:
+#   id                 provider id of config/series.toml and of the records (field provider)
+#   name               name of the organization
+#   api                base URL of the interface
+#   license            terms of reuse as stored in the field license of the records
+#   attribution        attribution required when the data is reused
+#   terms_url          page with the terms of reuse; the monthly source review fetches it
+#   terms_hash         hash of the text of the terms page as last reviewed; set by the source review
+#   terms_hash_since   day on which the source review recorded terms_hash
+#   notes              optional remarks
+#
+# The monthly source review (src/source_review.py) compares the text of every terms page with terms_hash.
+# A changed text is reported in the review pull request together with the new hash; read the terms before
+# merging, and record a change of the license in the measurement log of project_architecture.md.
+
+[[provider]]
+id = "eurostat"
+name = "Eurostat"
+api = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1"
+license = "Eurostat (reuse authorised with acknowledgement of the source)"
+attribution = "Source: Eurostat"
+terms_url = "https://ec.europa.eu/eurostat/help/copyright-notice"
+notes = "Statistical data, metadata and publications may be reused for commercial or non-commercial purposes provided the source is acknowledged; data that Eurostat marks as belonging to third parties is excluded."
+
+[[provider]]
+id = "ecb"
+name = "European Central Bank"
+api = "https://data-api.ecb.europa.eu/service"
+license = "ECB (reuse free of charge with acknowledgement of the source)"
+attribution = "Source: ECB statistics"
+terms_url = "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html"
+notes = "Policy regarding the reuse of ESCB statistics: free of charge for commercial and non-commercial use, provided the source is quoted and the data are not altered."

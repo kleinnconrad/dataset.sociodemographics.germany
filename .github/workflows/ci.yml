@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to a pull request cancels its previous run; runs on main always complete
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.12.17"
+          enable-cache: true
+
+      # The pipeline installs with `uv sync --frozen`, which silently installs
+      # the old versions if uv.lock does not match pyproject.toml
+      - name: Verify uv.lock matches pyproject.toml
+        run: uv lock --check
+
+      - name: Lint Python code
+        run: uv run --locked --only-group dev ruff check --output-format=github .
+
+      # Includes shellcheck for the run: scripts
+      - name: Lint GitHub Actions workflows
+        run: |
+          docker run --rm -v "$PWD:/repo" --workdir /repo \
+            rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -color
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # Lowest supported version (requires-python, pipeline) and the newest one
+        python-version: ["3.11", "3.14"]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.12.17"
+          enable-cache: true
+
+      # Offline tests; no API keys or network access required
+      - name: Run tests
+        run: uv run --locked --python ${{ matrix.python-version }} pytest -q
+
+  commit-messages:
+    name: Conventional Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      # Keeps the history in the Conventional Commits format used in this repository
+      - name: Check commit messages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          pattern='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?!?: .+'
+          invalid=0
+          while read -r sha subject; do
+            if ! grep -qE "$pattern" <<< "$subject"; then
+              echo "::error::Commit $sha does not follow Conventional Commits: $subject"
+              invalid=1
+            fi
+          done < <(git log --no-merges --format='%h %s' "$BASE_SHA..$HEAD_SHA")
+          exit "$invalid"
+
+  # Single status for branch protection, so the required check does not change
+  # when jobs or matrix entries are added
+  ci-passed:
+    name: CI passed
+    if: always()
+    needs: [lint, test, commit-messages]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check job results
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
