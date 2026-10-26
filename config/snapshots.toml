@@ -458,6 +458,102 @@ geo_scheme = "diocese"
 check_days = 30
 added = 2026-10-26
 
+[[snapshot]]
+id = "zensus2022.1000A-1W04"
+name = "Persons by five-year age group per Bundestag constituency (Zensus 2022)"
+topic = "population_structure"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W04"
+expect = "Alter"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W11"
+name = "Persons by migration history per Bundestag constituency (Zensus 2022)"
+topic = "migration_and_citizenship"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W11"
+expect = "Einwanderungsgeschichte"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W12"
+name = "Persons by marital status per Bundestag constituency (Zensus 2022)"
+topic = "households_and_families"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W12"
+expect = "Familienstand"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W14"
+name = "Persons by country of birth (groups) per Bundestag constituency (Zensus 2022)"
+topic = "migration_and_citizenship"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W14"
+expect = "Geburtsland"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W17"
+name = "Persons by sex per Bundestag constituency (Zensus 2022)"
+topic = "population_structure"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W17"
+expect = "Geschlecht"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W18"
+name = "Persons by religion per Bundestag constituency (Zensus 2022)"
+topic = "religion"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W18"
+expect = "Religion"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W20"
+name = "Persons by citizenship (groups) per Bundestag constituency (Zensus 2022)"
+topic = "migration_and_citizenship"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W20"
+expect = "Staatsangehörigkeit"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
+[[snapshot]]
+id = "zensus2022.1000A-1W21"
+name = "Persons by citizenship (most frequent countries) per Bundestag constituency (Zensus 2022)"
+topic = "migration_and_citizenship"
+provider = "zensus2022"
+format = "genesis"
+table = "1000A-1W21"
+expect = "Staatsangehörigkeit"
+geo_scheme = "constituency"
+check_days = 30
+added = 2026-10-26
+
 # =============================================================================================================
 # Structural data of the Bundestag constituencies (Die Bundeswahlleiterin); join key: constituency number
 # =============================================================================================================
