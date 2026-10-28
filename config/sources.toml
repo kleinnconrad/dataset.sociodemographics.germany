@@ -61,6 +61,7 @@ fetch_pages = true
 added = 2026-10-28
 
 # feeds Topthemen and Politik: check of dataset.politics.germany on 2026-10-19; feed Bildung: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+# source review 2026-10-28: feed https://rss.sueddeutsche.de/rss/Bildung removed: newest item from 2023-12-05
 [[outlet]]
 id = "sueddeutsche"
 name = "Süddeutsche Zeitung"
@@ -68,7 +69,7 @@ homepage = "https://www.sueddeutsche.de/"
 outlet_type = "national_daily"
 owner_group = "Südwestdeutsche Medienholding"
 paywall_model = "mixed"
-feeds = ["https://rss.sueddeutsche.de/rss/Topthemen", "https://rss.sueddeutsche.de/rss/Politik", "https://rss.sueddeutsche.de/rss/Bildung"]
+feeds = ["https://rss.sueddeutsche.de/rss/Topthemen", "https://rss.sueddeutsche.de/rss/Politik"]
 fetch_pages = false
 added = 2026-10-28
 
@@ -914,6 +915,51 @@ topic_filter = true
 fetch_pages = true
 added = 2026-10-28
 
+# source review 2026-10-28: 16 items in the last 60 days; the robots.txt of www.bamf.de was reachable again
+[[press_source]]
+id = "bamf"
+name = "Bundesamt für Migration und Flüchtlinge"
+homepage = "https://www.bamf.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen.xml?nn=282672", "https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Publikationen_EMN.xml?nn=282672", "https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Publikationen_Forschungszentrum.xml?nn=282672"]
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: 3 items in the last 60 days; the feed of the publication server edoc.rki.de (reports and articles, among them the Journal of Health Monitoring); robots.txt crawl-delay 30 s
+[[press_source]]
+id = "rki"
+name = "Robert Koch-Institut"
+homepage = "https://www.rki.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://edoc.rki.de/feed/atom_1.0/site"]
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: 11 items in the last 60 days
+[[press_source]]
+id = "mpidr"
+name = "Max-Planck-Institut für demografische Forschung"
+homepage = "https://www.demogr.mpg.de/de"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://www.demogr.mpg.de/de/presse.rss", "https://www.demogr.mpg.de/de/presse_news.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: background articles (Hintergrund aktuell, 75 items since January 2025), the series Migrationspolitik im Fokus and the Dossier Bildung; the feed of the press releases has no item after 2026-06-18 and announces events; most background articles are on other topics, therefore topic_filter = true
+[[press_source]]
+id = "bpb"
+name = "Bundeszentrale für politische Bildung"
+homepage = "https://www.bpb.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://www.bpb.de/rss-feed/230153.rss", "https://www.bpb.de/rss-feed/325589.rss", "https://www.bpb.de/rss-feed/518453.rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
 # Candidates that were checked and not admitted. The source review does not propose them again (see the header).
 
 [[excluded]]
@@ -997,18 +1043,6 @@ reason = "no feed link on the homepage; /rss returns HTTP 404"
 checked = 2026-10-28
 
 [[excluded]]
-id = "rki"
-name = "Robert Koch-Institut"
-homepage = "https://www.rki.de/"
-kind = "press_source"
-actor_type = "public_agency"
-jurisdiction = "DE"
-feeds = ["https://www.rki.de/SiteGlobals/Functions/RSS/RSS-neue-Dokumente.xml?nn=16776976"]
-status = "robots"
-reason = "robots.txt disallows /SiteGlobals/, where the feeds are (RSS-neue-Dokumente.xml), and sets a crawl-delay of 30 s"
-checked = 2026-10-28
-
-[[excluded]]
 id = "bib"
 name = "Bundesinstitut für Bevölkerungsforschung"
 homepage = "https://www.bib.bund.de/"
@@ -1018,17 +1052,6 @@ jurisdiction = "DE"
 status = "robots"
 reason = "no feed link on the homepage; robots.txt disallows /DE/Service/ except the podcast feeds"
 checked = 2026-10-28
-
-[[excluded]]
-id = "bamf"
-name = "Bundesamt für Migration und Flüchtlinge"
-homepage = "https://www.bamf.de/"
-kind = "press_source"
-actor_type = "public_agency"
-jurisdiction = "DE"
-status = "robots"
-reason = "the robots.txt of www.bamf.de could not be fetched in three checks (see the excluded snapshot sources)"
-checked = 2026-10-26
 
 [[excluded]]
 id = "bka"
@@ -1216,17 +1239,6 @@ reason = "no feed link on the homepage and the press page"
 checked = 2026-10-28
 
 [[excluded]]
-id = "mpidr"
-name = "Max-Planck-Institut für demografische Forschung"
-homepage = "https://www.demogr.mpg.de/de"
-kind = "press_source"
-actor_type = "research_institute"
-jurisdiction = "DE"
-status = "no_feed"
-reason = "no feed link on the homepage"
-checked = 2026-10-28
-
-[[excluded]]
 id = "dezim"
 name = "Deutsches Zentrum für Integrations- und Migrationsforschung"
 homepage = "https://www.dezim-institut.de/"
@@ -1346,4 +1358,201 @@ jurisdiction = "DE"
 feeds = ["https://mieterbund.de/feed/"]
 status = "inactive"
 reason = "the feed /feed/ has no items (1 kB)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dipf"
+name = "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation"
+homepage = "https://www.dipf.de/de"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: its feeds list the elements of the home page (banners, greetings, links to the media library), not press releases"
+checked = 2026-10-28
+
+[[excluded]]
+id = "sozialpolitik_aktuell"
+name = "Sozialpolitik aktuell"
+homepage = "https://www.sozialpolitik-aktuell.de/"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: the feed neu_eingestellt.xml lists reports of other institutions and links them to anchors of a few section pages; the URL without the anchor identifies an item, so most items would be dropped as duplicates"
+checked = 2026-10-28
+
+[[excluded]]
+id = "die_bonn"
+name = "Deutsches Institut für Erwachsenenbildung - Leibniz-Zentrum für Lebenslanges Lernen"
+homepage = "https://www.die-bonn.de/"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: 355 items in 60 days, a volume of literature and publication notices rather than press releases"
+checked = 2026-10-28
+
+[[excluded]]
+id = "ifo"
+name = "ifo Institut"
+homepage = "https://www.ifo.de/"
+status = "not_relevant"
+reason = "passes the checks; economic research, collected by dataset.economics.germany"
+checked = 2026-10-28
+
+[[excluded]]
+id = "rwi"
+name = "RWI - Leibniz-Institut für Wirtschaftsforschung"
+homepage = "https://www.rwi-essen.de/"
+status = "not_relevant"
+reason = "passes the checks; economic research, collected by dataset.economics.germany"
+checked = 2026-10-28
+
+[[excluded]]
+id = "baulinks"
+name = "Baulinks.de"
+homepage = "https://www.baulinks.de/"
+status = "not_relevant"
+reason = "passes the checks; news of the construction trade, not on housing as a living condition"
+checked = 2026-10-28
+
+[[excluded]]
+id = "integrationsbeauftragte"
+name = "Die Beauftragte der Bundesregierung für Migration, Flüchtlinge und Integration"
+homepage = "https://www.integrationsbeauftragte.de"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "diw"
+name = "DIW Berlin (Deutsches Institut für Wirtschaftsforschung)"
+homepage = "https://www.diw.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "igmetall"
+name = "IG Metall"
+homepage = "https://www.igmetall.de/"
+kind = "press_source"
+actor_type = "trade_union"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "gesis"
+name = "GESIS - Leibniz-Institut für Sozialwissenschaften"
+homepage = "https://www.gesis.org/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "awo"
+name = "Arbeiterwohlfahrt Bundesverband"
+homepage = "https://www.awo.org/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-10-28
+
+[[excluded]]
+id = "drk"
+name = "Deutsches Rotes Kreuz"
+homepage = "https://www.drk.de/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "bagso"
+name = "Bundesarbeitsgemeinschaft der Seniorenorganisationen (BAGSO)"
+homepage = "https://www.bagso.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "iwh"
+name = "Leibniz-Institut für Wirtschaftsforschung Halle (IWH)"
+homepage = "https://www.iwh-halle.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "zew"
+name = "ZEW - Leibniz-Zentrum für Europäische Wirtschaftsforschung"
+homepage = "https://www.zew.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dguv"
+name = "Deutsche Gesetzliche Unfallversicherung"
+homepage = "https://www.dguv.de/de/index.jsp"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "inactive"
+reason = "4 recent items, fewer than 5"
+checked = 2026-10-28
+
+[[excluded]]
+id = "aerztezeitung"
+name = "Ärzte Zeitung"
+homepage = "https://www.aerztezeitung.de/"
+status = "tdm_reserved"
+reason = "TDM reservation (tdmrep.json)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "senioren_nachrichten"
+name = "Senioren Nachrichten"
+homepage = "https://senioren-nachrichten.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Older people and ageing"
+paywall_model = "free"
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-10-28
+
+[[excluded]]
+id = "springerpflege"
+name = "Springer Pflege"
+homepage = "https://www.springerpflege.de/"
+status = "tdm_reserved"
+reason = "TDM reservation (tdmrep.json)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "mehrfamilienhaus_magazin"
+name = "Mehrfamilienhaus Magazin"
+homepage = "https://www.mehrfamilienhaus-magazin.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Housing and rents"
+paywall_model = "free"
+status = "inactive"
+reason = "no feed with recent items"
 checked = 2026-10-28

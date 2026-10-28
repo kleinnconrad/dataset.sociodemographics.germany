@@ -1,7 +1,7 @@
 # German Sociodemographics Dataset
 [![CI](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kleinnconrad/dataset.sociodemographics.germany/actions/workflows/ci.yml)
 
-Building a dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs on Wednesdays (all collectors) and Saturdays (news and press feeds). Its main purpose is to persist volatile data: tables and files that their sources overwrite, delete, publish only as the current state or revise without versions, such as the tables of GENESIS-Online, the weekly provisional death counts, the special evaluations of the Zensus 2022 on religious affiliation and the structural data of the Bundestag constituencies. The pipeline stores what such a source published at every observation and thereby builds the history that the source does not keep. The stable backbone are the series of Eurostat and the ECB on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing, the regional labour market and crime, for Germany, its 16 states, 38 government regions and 400 districts; they are stored as vintages, so that every past state of a revised series can be reconstructed. Next to the statistics, the pipeline collects the press coverage of these topics: the news articles of 43 national and regional outlets and specialist publications and the press releases of 25 federal and state institutions, statistical offices, research institutes and associations, read from their RSS feeds and news sitemaps, stored with their metadata (no texts) and labelled by Google Gemini (topic, population groups, reported indicators and their direction, tone, frame), so that the attention of the public to a topic can be compared with its statistics. All records are partitioned JSON files in this repository. A monthly review checks every data source and proposes changes as a pull request.
+Building a dataset of German sociodemographics for analysis and prediction. A pipeline in GitHub Actions runs on Wednesdays (all collectors) and Saturdays (news and press feeds). Its main purpose is to persist volatile data: tables and files that their sources overwrite, delete, publish only as the current state or revise without versions, such as the tables of GENESIS-Online, the weekly provisional death counts, the special evaluations of the Zensus 2022 on religious affiliation and the structural data of the Bundestag constituencies. The pipeline stores what such a source published at every observation and thereby builds the history that the source does not keep. The stable backbone are the series of Eurostat and the ECB on the population by age, sex and region (age pyramid, shares of men and women), births and fertility, mortality, migration and citizenship, households, education, income classes and poverty, the distribution of wealth, housing, the regional labour market and crime, for Germany, its 16 states, 38 government regions and 400 districts; they are stored as vintages, so that every past state of a revised series can be reconstructed. Next to the statistics, the pipeline collects the press coverage of these topics: the news articles of 43 national and regional outlets and specialist publications and the press releases of 29 federal and state institutions, statistical offices, research institutes and associations, read from their RSS feeds and news sitemaps, stored with their metadata (no texts) and labelled by Google Gemini (topic, population groups, reported indicators and their direction, tone, frame), so that the attention of the public to a topic can be compared with its statistics. All records are partitioned JSON files in this repository. A monthly review checks every data source and proposes changes as a pull request.
 
 ## Table of Contents
 - [Variable Overview](#variable-overview)
@@ -76,7 +76,7 @@ The table lists the variables that carry content and the dataset (table) that st
 
 ## Dataset Overview
 <!-- DATASET_OVERVIEW_START -->
-**Last updated:** 2026-10-28 07:36 UTC
+**Last updated:** 2026-10-28 08:33 UTC
 
 | Dataset | Records | Items | Files | Observed | Content |
 |---|---|---|---|---|---|
@@ -197,7 +197,7 @@ The table lists the variables that carry content and the dataset (table) that st
 **News and press sources**
 
 - **News outlets:** 43 configured (43 active)
-- **Press-release sources:** 25 configured (25 active)
+- **Press-release sources:** 29 configured (29 active)
 
 <details>
 <summary>News outlets: items per source</summary>
@@ -257,6 +257,7 @@ The table lists the variables that carry content and the dataset (table) that st
 |---|---|---|---|---|---|---|---|
 | Bayerische Staatsregierung | state government | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bertelsmann Stiftung | civil society organization | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
+| Bundesamt für Migration und Flüchtlinge | public agency | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bundesministerium der Justiz und für Verbraucherschutz | federal ministry | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bundesministerium des Innern | federal ministry | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bundesministerium für Bildung, Familie, Senioren, Frauen und Jugend | federal ministry | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
@@ -264,14 +265,17 @@ The table lists the variables that carry content and the dataset (table) that st
 | Bundesministerium für Wohnen, Stadtentwicklung und Bauwesen | federal ministry | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bundesrat | parliament | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Bundesregierung | federal government | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
+| Bundeszentrale für politische Bildung | public agency | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Der Paritätische Gesamtverband | welfare association | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Deutscher Bundestag | parliament | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Deutscher Gewerkschaftsbund | trade union | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Deutscher Landkreistag | municipal association | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Deutsches Jugendinstitut | research institute | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Institut für Arbeitsmarkt- und Berufsforschung | research institute | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
+| Max-Planck-Institut für demografische Forschung | research institute | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Niedersächsische Landesregierung | state government | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | PRO ASYL | civil society organization | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
+| Robert Koch-Institut | public agency | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Sachverständigenrat für Integration und Migration | research institute | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Senatskanzlei Berlin | state government | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Statistisches Amt für Hamburg und Schleswig-Holstein | statistical office | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
@@ -455,7 +459,7 @@ The table lists the variables that carry content and the dataset (table) that st
 | `series_catalog` | The catalog of the concepts with unit, frequency, provider, key template, regional levels and breakdown codes, recorded when an entry appears or changes | `config/series.toml` | change |
 | `regions` | The registry of the 462 German NUTS regions (Germany, states, government regions, districts) with level, parent region, ISO 3166-2 code of the state and NUTS versions, recorded when an entry appears or changes | `config/regions.toml` | change |
 | `news_items` | Metadata of the news articles on sociodemographic topics of 43 outlets (public broadcasters, national and regional dailies, magazines, online outlets, specialist publications): title, URL, publication time, section, keywords and page metadata; no texts | RSS feeds and news sitemaps of the outlets | event |
-| `press_releases` | Metadata of the press releases of 25 issuers (federal government, parliaments, ministries, statistical offices, state governments, research institutes, associations): title, URL, publication time; no texts | RSS feeds of the issuers | event |
+| `press_releases` | Metadata of the press releases of 29 issuers (federal government, parliaments, ministries, federal agencies, statistical offices, state governments, research institutes, associations): title, URL, publication time; no texts | RSS feeds of the issuers | event |
 | `text_annotations` | Labels of the news articles and press releases: relevance, topic, population groups and their tone, reported indicators and their direction, institutions, countries and states, events, tone, frame | Google Gemini (`gemini-2.5-flash`) | event |
 | `press_catalog` | The configuration of the outlets and press sources with type, publisher, state, topic, feeds and topic filter, recorded when an entry appears or changes | `config/sources.toml` | change |
 
@@ -550,10 +554,10 @@ The statistics show how the population changes; the press shows how these change
 | Regional public broadcasters | 8 | BR24, NDR, WDR, MDR, SWR, rbb24, hessenschau, buten un binnen |
 | Regional dailies | 20 | at least one per state, e.g. Augsburger Allgemeine, Freie Presse, Volksstimme, Thüringer Allgemeine |
 | Specialist outlets | 3 | News4teachers (education), evangelisch.de and DOMRADIO.DE (religion) |
-| Federal institutions and parliaments | 9 | Bundesregierung, Bundestag, Bundesrat, the ministries of the interior, of family and education, of health, of housing and of justice, Statistisches Bundesamt |
+| Federal institutions and parliaments | 12 | Bundesregierung, Bundestag, Bundesrat, the ministries of the interior, of family and education, of health, of housing and of justice, Statistisches Bundesamt, BAMF, Robert Koch-Institut, Bundeszentrale für politische Bildung |
 | Statistical offices of the states | 4 | Hamburg and Schleswig-Holstein, Mecklenburg-Vorpommern, Rheinland-Pfalz, Sachsen-Anhalt |
 | State governments | 3 | Bayern, Niedersachsen, Berlin |
-| Research institutes, associations and organizations | 9 | IAB, DJI, Sachverständigenrat für Integration und Migration, WZB, Bertelsmann Stiftung, Der Paritätische, PRO ASYL, Deutscher Landkreistag, DGB |
+| Research institutes, associations and organizations | 10 | IAB, DJI, Max-Planck-Institut für demografische Forschung, Sachverständigenrat für Integration und Migration, WZB, Bertelsmann Stiftung, Der Paritätische, PRO ASYL, Deutscher Landkreistag, DGB |
 
 - **Selection.** Items of the general outlets and of issuers whose releases cover many other topics (`topic_filter = true`) are stored only if they come from a feed of a sociodemographic section (e.g. `gesellschaft`, `bildung`, `familie`) or contain a sociodemographic term in title, teaser, categories or keywords (`SOCIAL_TERMS` in [src/collectors/feeds.py](src/collectors/feeds.py): population, births, deaths, migration and asylum, citizenship, families and households, children, youth and older people, education, income, poverty, social benefits and pensions, housing and rents, religion, crime as a phenomenon, statistics). Items of the specialist outlets and of the other press sources are stored without this filter. Reports on single crimes and accidents are not selected by the terms.
 - **Coverage.** Feeds list only recent items (a news sitemap covers 48 hours, many feeds a few days). With runs every three or four days and a lookback of 96 hours, the collector stores what the feeds list at run time, so the press coverage is a sample, not a complete record. The coverage period of every source is known from `added` and `removed` in `press_catalog`.
