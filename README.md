@@ -59,26 +59,26 @@ The table lists the variables that carry content and the dataset (table) that st
 
 ## Dataset Overview
 <!-- DATASET_OVERVIEW_START -->
-**Last updated:** 2026-10-26 13:16 UTC
+**Last updated:** 2026-10-28 06:46 UTC
 
 | Dataset | Records | Items | Files | Observed | Content |
 |---|---|---|---|---|---|
 | `sociodemographic_series` | 34,441 | 34,441 | 1 | 2026-10-26 to 2026-10-26 | A vintage of a statistical series: all values at the first observation, then the added, revised and removed periods. |
 | `series_catalog` | 61 | 61 | 1 | 2026-10-26 to 2026-10-26 | An entry of the series catalog, recorded when it appears or changes. |
 | `regions` | 462 | 462 | 1 | 2026-10-26 to 2026-10-26 | An entry of the region registry, recorded when it appears or changes. |
-| `source_snapshots` | 54 | 54 | 1 | 2026-10-26 to 2026-10-26 | The content that a source without a reliable history published at one observation, stored again only when it changes. |
+| `source_snapshots` | 55 | 54 | 2 | 2026-10-26 to 2026-10-28 | The content that a source without a reliable history published at one observation, stored again only when it changes. |
 | `snapshot_catalog` | 54 | 54 | 1 | 2026-10-26 to 2026-10-26 | An entry of the snapshot configuration, recorded when it appears or changes. |
 
 **Runs**
 
-- **Latest run:** 2026-10-26 12:55 UTC (normal)
-  - `ecb`: ok (sociodemographic_series 3)
-  - `eurostat`: ok (sociodemographic_series 34,438)
-  - `files`: ok (source_snapshots 15)
-  - `genesis`: ok (source_snapshots 39)
-  - `regions`: ok (regions 462)
-  - `series_catalog`: ok (series_catalog 61)
-  - `snapshot_catalog`: ok (snapshot_catalog 54)
+- **Latest run:** 2026-10-28 06:44 UTC (normal)
+  - `ecb`: ok
+  - `eurostat`: ok
+  - `files`: ok (source_snapshots 1)
+  - `genesis`: ok
+  - `regions`: ok
+  - `series_catalog`: ok
+  - `snapshot_catalog`: ok
 
 **Statistical series**
 
@@ -272,33 +272,33 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Field | Description | Filled | Distinct values |
 |---|---|---|---|
-| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (54) | 54 |
-| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (54) | 1 |
-| `dataset` | Name of the dataset. | 100.0% (54) | 1 |
-| `schema_version` | Version of the record schema. | 100.0% (54) | 1 |
-| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (54) | 52 |
-| `source_id` | Id of the source (API or configuration file). | 100.0% (54) | 4 |
-| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (54) | 49 |
-| `license` | License or terms of the source. | 100.0% (54) | 1 |
-| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (54) | 1 |
-| `snapshot_id` | Stable id of the published item: provider and item, e.g. 'zensus2022.religion_wahlkreise' or 'destatis.12612-0002'. | 100.0% (54) | 54 |
-| `name` | Name of the item in the snapshot configuration. | 100.0% (54) | 54 |
-| `topic` | Topic group of the item. | 100.0% (54) | 10 |
-| `provider` | Provider id of config/providers.toml. | 100.0% (54) | 4 |
-| `item` | Id of the item at the provider: the table code, or the name of the fetched file. | 100.0% (54) | 49 |
-| `format` | Format of the published content: genesis, csv, xlsx, json, html or pdf. | 100.0% (54) | 3 |
-| `geo_scheme` | Region codes used in the content: nuts, ags (official keys of states, districts and municipalities), constituency (numbers of the Bundestag constituencies), state_name (names of the states), diocese, regional_church or none (Germany only). | 100.0% (54) | 6 |
-| `page_url` | Page from which the address of the published file was read; null for a fixed address or an API. | 27.8% (15) | 6 |
-| `source_title` | Title of the item as the source states it, e.g. the title of a GENESIS table or the file name. | 100.0% (54) | 47 |
-| `source_updated` | Last change of the item as the source states it (UTC), e.g. the Last-Modified header; null if not stated. | 27.8% (15) | 6 |
-| `content_hash` | Hash of the columns and rows (or of the file of an archived document). A record is written only when it differs from the previous observation. | 100.0% (54) | 54 |
-| `previous_hash` | content_hash of the previous record of the item; null for the first observation. | 0.0% (0) | 0 |
-| `columns` | Column names of the rows. For GENESIS tables: time and the codes of the variables and their attributes, value, value_unit, value_variable_code. | 100.0% (54) | 210 |
-| `rows` | The published rows as text, exactly as the source wrote the cells (numbers keep their notation, e.g. decimal commas); null for an empty cell. Empty for an archived document. | 100.0% (54) | not counted |
-| `row_count` | Number of rows. | 100.0% (54) | 40 |
-| `labels` | Labels of the codes in the rows, e.g. {'KREISE:08222': 'Mannheim, Stadtkreis'} for GENESIS tables; empty if the rows hold the labels. | 72.2% (39) | not counted |
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (55) | 54 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (55) | 2 |
+| `dataset` | Name of the dataset. | 100.0% (55) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (55) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (55) | 53 |
+| `source_id` | Id of the source (API or configuration file). | 100.0% (55) | 4 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (55) | 50 |
+| `license` | License or terms of the source. | 100.0% (55) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (55) | 1 |
+| `snapshot_id` | Stable id of the published item: provider and item, e.g. 'zensus2022.religion_wahlkreise' or 'destatis.12612-0002'. | 100.0% (55) | 54 |
+| `name` | Name of the item in the snapshot configuration. | 100.0% (55) | 54 |
+| `topic` | Topic group of the item. | 100.0% (55) | 10 |
+| `provider` | Provider id of config/providers.toml. | 100.0% (55) | 4 |
+| `item` | Id of the item at the provider: the table code, or the name of the fetched file. | 100.0% (55) | 49 |
+| `format` | Format of the published content: genesis, csv, xlsx, json, html or pdf. | 100.0% (55) | 3 |
+| `geo_scheme` | Region codes used in the content: nuts, ags (official keys of states, districts and municipalities), constituency (numbers of the Bundestag constituencies), state_name (names of the states), diocese, regional_church or none (Germany only). | 100.0% (55) | 6 |
+| `page_url` | Page from which the address of the published file was read; null for a fixed address or an API. | 29.1% (16) | 6 |
+| `source_title` | Title of the item as the source states it, e.g. the title of a GENESIS table or the file name. | 100.0% (55) | 47 |
+| `source_updated` | Last change of the item as the source states it (UTC), e.g. the Last-Modified header; null if not stated. | 29.1% (16) | 7 |
+| `content_hash` | Hash of the columns and rows (or of the file of an archived document). A record is written only when it differs from the previous observation. | 100.0% (55) | 55 |
+| `previous_hash` | content_hash of the previous record of the item; null for the first observation. | 1.8% (1) | 1 |
+| `columns` | Column names of the rows. For GENESIS tables: time and the codes of the variables and their attributes, value, value_unit, value_variable_code. | 100.0% (55) | 210 |
+| `rows` | The published rows as text, exactly as the source wrote the cells (numbers keep their notation, e.g. decimal commas); null for an empty cell. Empty for an archived document. | 100.0% (55) | not counted |
+| `row_count` | Number of rows. | 100.0% (55) | 40 |
+| `labels` | Labels of the codes in the rows, e.g. {'KREISE:08222': 'Mannheim, Stadtkreis'} for GENESIS tables; empty if the rows hold the labels. | 70.9% (39) | not counted |
 | `archived_file` | Path of the published file in this repository (data/files/...) if the file itself is archived, e.g. a PDF document. | 0.0% (0) | 0 |
-| `byte_size` | Size of the published file in bytes. | 100.0% (54) | 49 |
+| `byte_size` | Size of the published file in bytes. | 100.0% (55) | 50 |
 
 </details>
 
