@@ -50,7 +50,9 @@ concurrency:
 jobs:
   review-sources:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # A full review takes about 30 minutes for the statistical sources and up to 20 minutes for the news and
+    # press sources (REVIEW_TIME_BUDGET_S in src/press_review.py)
+    timeout-minutes: 90
     permissions:
       contents: write
       pull-requests: write

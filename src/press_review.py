@@ -889,7 +889,8 @@ def _feed_order(url: str, outlet: bool) -> tuple[int, str]:
 
 def evaluate_candidate(web: WebClient, category: SearchCategory, candidate: SearchCandidate, gaps: Gaps,
                        now: datetime, taken: set[str], known: set[str], known_feeds: dict[str, str],
-                       source_id: Optional[str] = None) -> tuple[Optional[NewEntry], Optional[Rejection]]:
+                       source_id: Optional[str] = None, out_of_time: Callable[[], bool] = lambda: False,
+                       ) -> tuple[Optional[NewEntry], Optional[Rejection]]:
     """Checks a candidate with the fetch rules of the pipeline and builds its entry.
 
     The feeds are the proposed ones and those linked on the homepage; an HTML
@@ -912,6 +913,9 @@ def evaluate_candidate(web: WebClient, category: SearchCategory, candidate: Sear
         known: Hosts of the listed sources.
         known_feeds: Source id by normalized URL of every listed feed and news sitemap.
         source_id: Id of the new entry; built from the host if omitted.
+        out_of_time: Tells whether the time budget of the review is used up; checked before every feed,
+            so that a host with a long crawl delay cannot hold the review. A check stopped this way ends
+            with a rejection without a status, which leaves the configuration unchanged.
 
     Returns:
         tuple: The new entry, or the rejection.
@@ -986,6 +990,8 @@ def evaluate_candidate(web: WebClient, category: SearchCategory, candidate: Sear
     queued = set(urls)
     checked = 0
     while queue and len(feeds) < MAX_FEEDS_PER_SOURCE and checked < MAX_FEEDS_CHECKED_PER_CANDIDATE:
+        if out_of_time():
+            return reject("time budget of the review reached before the check ended")
         url, expand = queue.popleft()
         listed = _listed_feed(known_feeds, url)
         if listed is not None:
@@ -1189,6 +1195,7 @@ def run_press_review(settings: Settings, config_path: Path, web: WebClient, mode
         if clock() - started > REVIEW_TIME_BUDGET_S:
             result.notes.append(f"Time budget reached: {len(sources) - position} sources not checked")
             break
+        logger.info("Checking the press source %s.", source.id)
         changes, notes, summary = review_source(web, source, health.get(source.id), counts.get(source.id, 0), now)
         result.changes.extend(changes)
         result.notes.extend(notes)
@@ -1272,8 +1279,10 @@ def _recheck_exclusions(web: WebClient, config: SourceConfig, result: ReviewResu
             return
         result.rechecked += 1
         own_host = domain_id(exclusion.homepage)
+        logger.info("Checking the excluded candidate %s again.", exclusion.id)
         entry, rejection = evaluate_candidate(web, category, candidate, result.gaps, now, state.taken,
-                                              state.known - {own_host}, state.known_feeds, source_id=exclusion.id)
+                                              state.known - {own_host}, state.known_feeds, source_id=exclusion.id,
+                                              out_of_time=lambda: clock() - started > REVIEW_TIME_BUDGET_S)
         if entry is not None:
             if _admit(result, state, entry, key, candidate):
                 result.changes.append(Change("drop_exclusion", exclusion.id, "admitted"))
@@ -1310,8 +1319,10 @@ def _search(web: WebClient, model: Any, config: SourceConfig, result: ReviewResu
             break
         seen_hosts.add(host)
         result.candidates += 1
+        logger.info("Checking the candidate %s (%s, search %s).", candidate.name, host, category)
         entry, rejection = evaluate_candidate(web, category, candidate, result.gaps, now, state.taken, state.known,
-                                              state.known_feeds)
+                                              state.known_feeds,
+                                              out_of_time=lambda: clock() - started > REVIEW_TIME_BUDGET_S)
         if entry is not None:
             _admit(result, state, entry, key, candidate)
             continue

@@ -505,3 +505,19 @@ def test_repository_configuration_is_valid() -> None:
     assert {entry.id for entry in config.excluded} >= {"faz", "zeit", "ekd"}
     assert all(topic in press_review.SPECIALIST_TOPICS or topic is None
                for topic in (source.topic for source in config.outlets))
+
+
+
+def test_candidate_check_stops_at_the_time_budget_without_a_status(fake_web) -> None:
+    fake_web.add("https://slow.example/", "<html></html>")
+    fake_web.add("https://slow.example/rss", social_feed("slow.example", 2), content_type="application/rss+xml")
+    candidate = press_review.PressCandidate(name="Langsames Institut", homepage="https://slow.example/",
+                                            feeds=["https://slow.example/rss"], actor_type="research_institute")
+
+    entry, rejection = press_review.evaluate_candidate(
+        fake_web.client(), "associations", candidate, press_review.Gaps(), NOW, set(), set(), {},
+        out_of_time=lambda: True)
+
+    assert entry is None and rejection is not None
+    assert rejection.status is None and "time budget" in rejection.reason
+    assert "https://slow.example/" in fake_web.requested and "https://slow.example/rss" not in fake_web.requested
