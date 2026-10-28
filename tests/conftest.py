@@ -18,6 +18,7 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 CATALOG_FIXTURE = FIXTURES_DIR / "config" / "series.toml"
 REGIONS_FIXTURE = FIXTURES_DIR / "config" / "regions.toml"
 PROVIDERS_FIXTURE = FIXTURES_DIR / "config" / "providers.toml"
+SOURCES_FIXTURE = FIXTURES_DIR / "config" / "sources.toml"
 RUN_STARTED = datetime(2026, 10, 27, 1, 7, tzinfo=timezone.utc)
 
 Body = Union[bytes, str, dict, list]

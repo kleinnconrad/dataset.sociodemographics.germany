@@ -5,9 +5,14 @@ Every record written to disk is a subclass of ``RecordBase``. The statistical
 series of the SDMX providers are stored as vintages
 (``SociodemographicSeriesRecord``); sources that overwrite or remove what they
 published are stored as snapshots of their published content
-(``SnapshotRecord``). Vocabularies are
-``Literal`` aliases, so that the stored values are validated and the README
-can list them.
+(``SnapshotRecord``); news articles and press releases are stored as events
+with their metadata, and their Gemini labels separately
+(``TextAnnotationRecord``). Vocabularies are ``Literal`` aliases, so that the
+stored values are validated and the README can list them; google-genai drops
+the field descriptions of ``Enum`` classes when it builds the response schema.
+The models that Gemini fills (``ItemAnnotation`` and its parts) are separate
+from the stored records. All their fields are required; absence is expressed
+with "Not stated", "Not applicable", an empty list or null.
 """
 import types
 import typing
@@ -39,6 +44,147 @@ SnapshotFormat = Literal["genesis", "csv", "xlsx", "json", "html", "pdf"]
 # (Amtlicher Gemeindeschlüssel or Regionalschlüssel), numbers of the Bundestag constituencies, names of the
 # states, dioceses, regional churches of the EKD, or none (Germany only)
 GeoScheme = Literal["nuts", "ags", "constituency", "state_name", "diocese", "regional_church", "none"]
+# Level of an issuer of press releases: Germany, a state, the European Union or an international organization
+Jurisdiction = Literal["DE", StateCode, "EU", "INT"]
+
+# ---------------------------------------------------------------------------
+# News, press releases and their annotation
+# ---------------------------------------------------------------------------
+
+OutletType = Literal["public_broadcaster_national", "public_broadcaster_regional", "national_daily",
+                     "weekly_magazine", "regional_daily", "tabloid", "online_only", "specialist_press"]
+PaywallModel = Literal["free", "mixed", "hard"]
+ActorType = Literal["federal_government", "federal_ministry", "parliament", "state_government", "statistical_office",
+                    "public_agency", "eu_institution", "international_organization", "research_institute",
+                    "welfare_association", "religious_community", "civil_society_organization", "trade_union",
+                    "municipal_association"]
+ContentBasis = Literal["title_only", "title_teaser", "lead_text"]
+Channel = Literal["rss", "news_sitemap"]
+ItemDataset = Literal["news_items", "press_releases"]
+
+# Topics of the press coverage. project_architecture.md maps them to the topic groups of the series (SeriesTopic).
+SocialTopic = Literal["Population and demographic change", "Births and fertility", "Mortality and life expectancy",
+                      "Health and care", "Migration and asylum", "Integration and citizenship",
+                      "Families and households", "Children and youth", "Older people and ageing",
+                      "Gender and equality", "Education and schools", "Higher education and vocational training",
+                      "Income, poverty and social benefits", "Wealth and inequality", "Pensions", "Housing and rents",
+                      "Labour market and employment", "Religion and churches", "Crime and justice",
+                      "Regional disparities and rural areas", "Other"]
+# Groups of the population; the annotation labels groups, never single persons
+PopulationGroup = Literal["Children", "Young people", "Students", "Families", "Single parents", "Women", "Men",
+                          "Older people", "Pensioners", "Persons in need of care", "Persons with disabilities",
+                          "Migrants", "Refugees and asylum seekers", "Foreign nationals", "Naturalised citizens",
+                          "Ethnic minorities", "Religious minorities", "LGBTQ people", "Low-income households",
+                          "Recipients of social benefits", "Unemployed persons", "Employees", "Homeless people",
+                          "Tenants", "Rural population", "Urban population", "Victims of crime",
+                          "Suspects and offenders", "Other"]
+SocialIndicator = Literal["Population size", "Births", "Fertility rate", "Deaths", "Life expectancy", "Immigration",
+                          "Emigration", "Net migration", "Asylum applications", "Persons seeking protection",
+                          "Deportations", "Naturalisations", "Foreign population", "Marriages", "Divorces",
+                          "Households", "Childcare places", "School leavers", "Students", "Teachers",
+                          "Educational attainment", "Poverty", "Income", "Inequality", "Wealth",
+                          "Recipients of social benefits", "Pensions", "Rents", "House prices",
+                          "Housing construction", "Homelessness", "Unemployment", "Employment",
+                          "Shortage of skilled workers", "Church membership", "Church leavings", "Crime", "Prisoners",
+                          "Persons in need of care", "Illness", "Other"]
+Direction = Literal["Rising", "Falling", "Unchanged", "Not stated"]
+# Institutions by function, so that the values stay valid when ministries are renamed or merged
+Institution = Literal["Federal government", "Federal ministry of the interior",
+                      "Federal ministry of family, education or youth", "Federal ministry of labour and social affairs",
+                      "Federal ministry of health", "Federal ministry of housing", "Federal ministry of justice",
+                      "Other federal ministry", "Bundestag or Bundesrat", "Federal Constitutional Court",
+                      "Other court", "Federal Statistical Office", "State statistical office",
+                      "Federal Office for Migration and Refugees", "Federal Employment Agency",
+                      "Federal Criminal Police Office", "Police", "State government", "Municipality",
+                      "Eurostat", "European Commission", "Other EU institution", "UN agency", "OECD",
+                      "Research institute", "Welfare association", "Church or religious community", "Trade union",
+                      "Employers' association", "Political party", "Other"]
+EventType = Literal["Statistical release", "Study or report", "Survey or poll", "Legislation or regulation",
+                    "Government decision", "Court ruling", "Budget or funding decision", "Benefit change",
+                    "Policy proposal or demand", "Parliamentary debate or vote", "Election or campaign",
+                    "Protest or demonstration", "Strike or labour dispute", "Crime or violent incident",
+                    "Accident or disaster", "Arrival or reception of refugees", "Deportation", "Border control",
+                    "Epidemic or health crisis", "Church event or decision", "Commemoration or anniversary", "Other"]
+EventStatus = Literal["Announced or planned", "Ongoing", "Concluded", "Not applicable"]
+PolicyLevel = Literal["Municipal", "State", "Federal", "European Union", "International", "Not applicable"]
+ArticleType = Literal["News", "Opinion", "Interview", "Analysis", "Live blog", "Explainer", "Press release",
+                      "Other"]
+Tone = Literal["Positive", "Neutral", "Negative", "Mixed"]
+# Generic news frames of Semetko and Valkenburg (2000), as in dataset.politics.germany and dataset.economics.germany
+Frame = Literal["Conflict", "Economic consequences", "Responsibility", "Human interest", "Morality",
+                "No dominant frame"]
+CommunicationType = Literal["Statistical release", "Study or report", "Policy proposal or position",
+                            "Legislation or government decision", "Funding or programme", "Statement or reaction",
+                            "Event or service information", "Personnel", "Other", "Not applicable"]
+
+
+# ---------------------------------------------------------------------------
+# Models filled by Gemini
+# ---------------------------------------------------------------------------
+# Long vocabularies are plain strings in these models, with the allowed values in the description:
+# a response schema with many enumerations exceeds the limit of constrained decoding of the Gemini API.
+# The annotation keeps only values of the vocabulary (annotation.clean_annotation); the stored
+# records validate them against the Literal types.
+
+def allowed(vocabulary: object) -> str:
+    """Returns the values of a Literal vocabulary as text for a field description.
+
+    Args:
+        vocabulary: A ``Literal`` alias.
+
+    Returns:
+        str: For example ``Allowed values: Positive; Neutral; Negative; Mixed.``
+    """
+    return "Allowed values: " + "; ".join(str(value) for value in typing.get_args(vocabulary)) + "."
+
+
+class GroupMention(BaseModel):
+    """A group of the population that the text is about, as filled by the model."""
+    group: str = Field(description="The group. Only groups, never single persons. " + allowed(PopulationGroup))
+    tone: Tone = Field(description="How the text presents this group.")
+
+
+class IndicatorMention(BaseModel):
+    """A sociodemographic indicator whose value or development the text reports."""
+    indicator: str = Field(description="The indicator. " + allowed(SocialIndicator))
+    direction: Direction = Field(description="Development of the indicator as reported in the text.")
+
+
+class UpcomingEvent(BaseModel):
+    """A future event that the text names with a date."""
+    event_type: str = Field(description="Type of the upcoming event. " + allowed(EventType))
+    date: str = Field(description="Date of the event (YYYY-MM-DD). Only events with a stated day.")
+
+
+class ItemAnnotation(BaseModel):
+    """The labels of one article or press release."""
+    item_number: int = Field(description="Number of the item in the request, starting at 1.")
+    is_sociodemographic: bool = Field(description="True if the item is about the population of Germany, its structure or its living conditions: population and demographic change, births, deaths and health, migration and integration, families and households, children, youth and older people, education, income, poverty and wealth, social benefits and pensions, housing, employment, religion, and crime and justice as social phenomena. False for reports on a single crime, accident or court case about individuals.")
+    topic: SocialTopic = Field(description="Main topic of the item. 'Other' if the item is not sociodemographic.")
+    topics_secondary: list[str] = Field(description="Further clearly addressed topics, at most two, with the values of topic. Empty list if none.")
+    issue_detail: Optional[str] = Field(description="The specific issue in one to five words, e.g. 'Kita places' or 'Deportations to Afghanistan'. Null if not sociodemographic.")
+    article_type: ArticleType = Field(description="Form of the item, judged from the title and text, e.g. 'Opinion' for commentaries, 'Interview' for interviews.")
+    population_groups: list[GroupMention] = Field(description="Groups of the population the item is mainly about, each once, at most five. Empty list if the item concerns no particular group.")
+    indicators: list[IndicatorMention] = Field(description="Sociodemographic indicators whose current value or development the item reports, each once.")
+    reports_statistics: bool = Field(description="True if the item reports figures of an official statistic, a register, a census or a survey, e.g. of the Statistisches Bundesamt, a state statistical office, Eurostat, the BAMF, the Bundesagentur für Arbeit or the police crime statistics.")
+    institutions: list[str] = Field(description="Public institutions and organizations that act, decide, publish or comment in the item, each once. " + allowed(Institution))
+    countries: list[str] = Field(description="Countries the item is mainly about, as ISO 3166-1 alpha-2 codes, e.g. DE, SY, UA; for migration also the countries of origin. Empty list if no country is concerned.")
+    states_concerned: list[str] = Field(description="German states the item is mainly about, as ISO 3166-2 codes (DE-BW, DE-BY, DE-BE, DE-BB, DE-HB, DE-HH, DE-HE, DE-MV, DE-NI, DE-NW, DE-RP, DE-SL, DE-SN, DE-ST, DE-SH, DE-TH). Empty list for national or international items.")
+    event_types: list[str] = Field(description="Types of events the item reports. Empty list if none. " + allowed(EventType))
+    event_status: EventStatus = Field(description="Whether the main event is announced or planned, ongoing or concluded. 'Not applicable' without an event.")
+    overall_tone: Tone = Field(description="Overall tone of the item.")
+    mentions_demographic_change: bool = Field(description="True if the text refers to demographic change: ageing, a shrinking or growing population, low birth rates, or migration as a driver of the population (e.g. 'demografischer Wandel', 'Überalterung', 'Geburtenrückgang').")
+    mentions_inequality: bool = Field(description="True if the text refers to social inequality or a social divide (e.g. 'soziale Ungleichheit', 'Schere zwischen Arm und Reich', 'Chancengleichheit', 'soziale Spaltung').")
+    policy_level: PolicyLevel = Field(description="Main level of policy the item addresses. 'Not applicable' if no policy is addressed.")
+    government_involved: bool = Field(description="True if the federal government, a state government or one of their members acts or is addressed.")
+    frame: Frame = Field(description="Dominant frame of the item.")
+    upcoming_events: list[UpcomingEvent] = Field(description="Future events named with a date (statistical releases, laws taking effect, benefit changes, court hearings, elections, deadlines, school or semester start). Empty list if none.")
+    communication_type: CommunicationType = Field(description="For press releases: the main purpose of the release. 'Not applicable' for news articles.")
+
+
+class AnnotationBatch(BaseModel):
+    """The model response for a batch of items."""
+    items: list[ItemAnnotation] = Field(description="One entry per item of the request, in the order of the request.")
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +200,7 @@ class RecordBase(BaseModel):
     dataset: str = Field(description="Name of the dataset.")
     schema_version: str = Field(default=SCHEMA_VERSION, description="Version of the record schema.")
     observed_at: datetime = Field(description="UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t.")
-    source_id: str = Field(description="Id of the source (API or configuration file).")
+    source_id: str = Field(description="Id of the source (API, configuration file, outlet or press source).")
     source_url: Optional[str] = Field(description="URL of the item or of the API resource it was read from.")
     license: str = Field(description="License or terms of the source.")
     backfilled: bool = Field(description="True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public.")
@@ -150,13 +296,113 @@ class SnapshotCatalogRecord(RecordBase):
     removed_reason: Optional[str] = Field(description="Why the item was removed.")
 
 
+class NewsItemRecord(RecordBase):
+    """Metadata of one news article. The text is not stored."""
+    outlet_id: str = Field(description="Id of the outlet in config/sources.toml.")
+    outlet_type: OutletType = Field(description="Type of the outlet.")
+    owner_group: str = Field(description="Publisher group of the outlet, or 'public' for public broadcasters.")
+    home_state: Optional[StateCode] = Field(description="State of a regional outlet; null for national outlets.")
+    outlet_topic: Optional[SocialTopic] = Field(description="Topic of a specialist outlet, e.g. 'Migration and asylum'; null for general outlets.")
+    channel: Channel = Field(description="Where the article was found: RSS/Atom feed or news sitemap.")
+    url: str = Field(description="URL of the article.")
+    canonical_url: Optional[str] = Field(description="Canonical URL declared by the article page.")
+    title: str = Field(description="Title of the article.")
+    published_at: Optional[datetime] = Field(description="Publication time (UTC).")
+    updated_at: Optional[datetime] = Field(description="Last modification time from the article page (UTC).")
+    section: Optional[str] = Field(description="Section of the outlet, from the page or the feed.")
+    feed_categories: list[str] = Field(description="Categories of the item in the feed.")
+    keywords: list[str] = Field(description="Keywords from the article page or the news sitemap.")
+    jsonld_type: Optional[str] = Field(description="schema.org type of the article page, e.g. NewsArticle or OpinionNewsArticle.")
+    is_agency_copy: Optional[bool] = Field(description="True if the article is credited to a news agency (dpa, AFP, Reuters, epd, KNA, AP). Null without page data.")
+    author_count: Optional[int] = Field(description="Number of named authors. Author names are not stored. Null without page data.")
+    word_count: Optional[int] = Field(description="Word count from the article page. Null if not given.")
+    is_paywalled: Optional[bool] = Field(description="True if the page marks the article as not accessible for free. Null without page data.")
+    has_video: Optional[bool] = Field(description="True if the article page embeds a video. Null without page data.")
+    content_basis: ContentBasis = Field(description="Text available for the annotation: title only, title and teaser, or lead text of the page.")
+
+
+class PressReleaseRecord(RecordBase):
+    """Metadata of one press release. The text is not stored."""
+    press_source_id: str = Field(description="Id of the press source in config/sources.toml.")
+    actor_type: ActorType = Field(description="Type of the issuing actor.")
+    jurisdiction: Jurisdiction = Field(description="Level of the issuer: DE, a state (ISO 3166-2), EU or INT.")
+    url: str = Field(description="URL of the press release.")
+    canonical_url: Optional[str] = Field(description="Canonical URL declared by the page.")
+    title: str = Field(description="Title of the press release.")
+    published_at: Optional[datetime] = Field(description="Publication time (UTC).")
+    feed_categories: list[str] = Field(description="Categories of the item in the feed.")
+    content_basis: ContentBasis = Field(description="Text available for the annotation.")
+
+
+class TextAnnotationRecord(RecordBase):
+    """Gemini labels of one news article or press release."""
+    item_dataset: ItemDataset = Field(description="Dataset of the annotated item.")
+    item_id: str = Field(description="record_id of the annotated item.")
+    model: str = Field(description="Gemini model that produced the labels.")
+    extraction_hash: str = Field(description="Hash of the prompt, response schema and model settings. Labels with the same hash were produced under the same conditions.")
+    content_basis: ContentBasis = Field(description="Text the model saw: title only, title and teaser, or lead text.")
+    is_sociodemographic: bool = Field(description="Whether the item is about the population, its structure or its living conditions.")
+    topic: SocialTopic = Field(description="Main topic.")
+    topics_secondary: list[SocialTopic] = Field(description="Further topics, at most two.")
+    issue_detail: Optional[str] = Field(description="Specific issue in a few words.")
+    article_type: ArticleType = Field(description="Form of the item.")
+    population_groups: list[PopulationGroup] = Field(description="Groups of the population the item is mainly about.")
+    group_tone: dict[PopulationGroup, Tone] = Field(description="How the item presents each of its population groups.")
+    indicators: dict[SocialIndicator, Direction] = Field(description="Reported indicators with their reported direction.")
+    reports_statistics: bool = Field(description="Whether the item reports figures of an official statistic, a register, a census or a survey.")
+    institutions: list[Institution] = Field(description="Institutions and organizations that act, decide, publish or comment.")
+    countries: list[str] = Field(description="Countries the item is mainly about (ISO 3166-1 alpha-2), for migration also the countries of origin.")
+    states_concerned: list[StateCode] = Field(description="German states the item is mainly about.")
+    event_types: list[EventType] = Field(description="Types of events reported.")
+    event_status: EventStatus = Field(description="Stage of the main event.")
+    overall_tone: Tone = Field(description="Overall tone of the item.")
+    mentions_demographic_change: bool = Field(description="Whether the item refers to demographic change (ageing, shrinking or growing population, low birth rates).")
+    mentions_inequality: bool = Field(description="Whether the item refers to social inequality or a social divide.")
+    policy_level: PolicyLevel = Field(description="Main level of policy addressed.")
+    government_involved: bool = Field(description="Whether a government or its members act or are addressed.")
+    frame: Frame = Field(description="Dominant news frame (Semetko and Valkenburg).")
+    upcoming_events: list[dict[str, str]] = Field(description="Future events with event_type and date (YYYY-MM-DD).")
+    communication_type: CommunicationType = Field(description="Purpose of a press release; 'Not applicable' for news.")
+
+
+class PressCatalogRecord(RecordBase):
+    """An entry of the press configuration (news outlets and issuers of press releases), recorded when it appears or changes."""
+    press_id: str = Field(description="Stable id of the outlet or press source; the outlet_id of news_items and the press_source_id of press_releases.")
+    kind: Literal["outlet", "press_source"] = Field(description="outlet for a news outlet, press_source for an issuer of press releases.")
+    name: str = Field(description="Name of the outlet or issuer.")
+    homepage: str = Field(description="Homepage URL.")
+    outlet_type: Optional[OutletType] = Field(description="Type of an outlet; null for press sources.")
+    owner_group: Optional[str] = Field(description="Publisher group of an outlet, or 'public'; null for press sources.")
+    home_state: Optional[StateCode] = Field(description="State of a regional outlet; null otherwise.")
+    outlet_topic: Optional[SocialTopic] = Field(description="Topic of a specialist outlet; null otherwise.")
+    paywall_model: Optional[PaywallModel] = Field(description="Paywall model of an outlet (free, mixed, hard); null for press sources.")
+    actor_type: Optional[ActorType] = Field(description="Type of the issuer of a press source; null for outlets.")
+    jurisdiction: Optional[Jurisdiction] = Field(description="Level of the issuer of a press source (DE, a state, EU, INT); null for outlets.")
+    feeds: list[str] = Field(description="RSS or Atom feeds that are read.")
+    news_sitemap: Optional[str] = Field(description="News sitemap of an outlet that is read; null if none.")
+    topic_filter: bool = Field(description="True if items need a sociodemographic section or term to be stored; false if every item of the source is stored.")
+    fetch_pages: bool = Field(description="Whether article pages are fetched for metadata and lead text.")
+    added: date = Field(description="Day on which the source was added to the configuration; start of collection.")
+    removed: Optional[date] = Field(description="Day on which the source was removed from the configuration; end of collection.")
+    removed_reason: Optional[str] = Field(description="Why the source was removed.")
+
+
 DATASET_MODELS: dict[str, type[RecordBase]] = {
     "sociodemographic_series": SociodemographicSeriesRecord,
     "series_catalog": SeriesCatalogRecord,
     "regions": RegionRecord,
     "source_snapshots": SnapshotRecord,
     "snapshot_catalog": SnapshotCatalogRecord,
+    "news_items": NewsItemRecord,
+    "press_releases": PressReleaseRecord,
+    "text_annotations": TextAnnotationRecord,
+    "press_catalog": PressCatalogRecord,
 }
+
+# Models whose text form goes into the extraction hash
+ANNOTATION_MODELS: tuple[type[BaseModel], ...] = (
+    GroupMention, IndicatorMention, UpcomingEvent, ItemAnnotation, AnnotationBatch,
+)
 
 
 def _describe_type(annotation: object) -> str:
@@ -187,7 +433,8 @@ def describe_models(models: typing.Iterable[type[BaseModel]], include_descriptio
     """Returns a canonical text form of models.
 
     The text lists every field with its type and whether it is required. It is
-    used for the schema snapshot test (all models, without descriptions).
+    used for the extraction hash (annotation models, with descriptions) and for
+    the schema snapshot test (all models, without descriptions).
 
     Args:
         models: The models to describe.

@@ -1,7 +1,7 @@
-"""Tests of the collectors that write the series catalog and the region registry."""
-from collectors.registries import RegionsCollector, SeriesCatalogCollector
-from conftest import CATALOG_FIXTURE, REGIONS_FIXTURE, read_dataset
-from schema import RegionRecord, SeriesCatalogRecord
+"""Tests of the collectors that write the series catalog, the region registry and the press configuration."""
+from collectors.registries import PressCatalogCollector, RegionsCollector, SeriesCatalogCollector
+from conftest import CATALOG_FIXTURE, REGIONS_FIXTURE, SOURCES_FIXTURE, read_dataset
+from schema import PressCatalogRecord, RegionRecord, SeriesCatalogRecord
 from state import CollectorEntry
 
 
@@ -39,3 +39,21 @@ def test_regions_are_written_with_level_parent_and_state(make_ctx, tmp_path) -> 
                                                                                                "DE-BY")
     assert records["DE"]["parent"] is None and records["DE"]["state"] is None
     assert records["DE213"]["removed_reason"] == "test of a removed region"
+
+
+def test_press_sources_are_written_with_their_attributes(make_ctx, tmp_path) -> None:
+    ctx = make_ctx()
+    entry = CollectorEntry(first_run=ctx.today)
+    result = PressCatalogCollector(SOURCES_FIXTURE).collect(ctx, entry)
+    assert result.counters == {"items": 4, "new": 4, "changed": 0}
+    records = {record["press_id"]: record for record in read_dataset(tmp_path / "data", "press_catalog")}
+    for record in records.values():
+        PressCatalogRecord.model_validate(record)
+    assert records["news_example"]["kind"] == "outlet" and records["news_example"]["topic_filter"] is True
+    assert records["news_example"]["news_sitemap"] == "https://news.example/sitemap-news.xml"
+    assert records["school_example"]["outlet_topic"] == "Education and schools"
+    assert records["school_example"]["topic_filter"] is False
+    assert records["stat_office"]["actor_type"] == "statistical_office" and records["stat_office"]["outlet_type"] is None
+    assert records["government"]["jurisdiction"] == "DE-BY" and records["government"]["topic_filter"] is True
+
+    assert PressCatalogCollector(SOURCES_FIXTURE).collect(make_ctx(), entry).counters["new"] == 0

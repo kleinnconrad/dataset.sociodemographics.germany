@@ -1,11 +1,12 @@
 """
-Writes the entries of the series catalog, the region registry and the snapshot configuration to their datasets.
+Writes the entries of the series catalog, the region registry, the snapshot configuration and the press
+configuration to their datasets.
 
-``config/series.toml``, ``config/regions.toml`` and ``config/snapshots.toml`` are the slowly
-changing dimensions of the dataset: every entry is written when it appears and again, with
+``config/series.toml``, ``config/regions.toml``, ``config/snapshots.toml`` and ``config/sources.toml`` are the
+slowly changing dimensions of the dataset: every entry is written when it appears and again, with
 the next revision, when one of its fields changes, so that the definition of a concept,
-region or snapshot item at time t can be reconstructed from the data alone. The collectors
-send no requests.
+region, snapshot item or news source at time t can be reconstructed from the data alone. The
+collectors send no requests.
 """
 import logging
 from collections.abc import Callable, Sequence
@@ -17,9 +18,11 @@ from catalog import CatalogEntry, load_catalog
 from collectors.base import Collector, CollectorResult, RunContext
 from regions import CONFIG_PATH as REGIONS_PATH
 from regions import Region, load_regions
-from schema import RecordBase, RegionRecord, SeriesCatalogRecord, SnapshotCatalogRecord
+from schema import PressCatalogRecord, RecordBase, RegionRecord, SeriesCatalogRecord, SnapshotCatalogRecord
 from snapshots import CONFIG_PATH as SNAPSHOTS_PATH
 from snapshots import SnapshotSource, load_snapshot_config
+from sources import CONFIG_PATH as SOURCES_PATH
+from sources import Outlet, Source, load_config
 from state import CollectorEntry, content_hash
 
 logger = logging.getLogger(__name__)
@@ -77,6 +80,33 @@ def snapshot_fields(source: SnapshotSource) -> dict[str, Any]:
         "format": source.format, "address": source.address, "geo_scheme": source.geo_scheme,
         "archive": source.archive, "added": source.added, "removed": source.removed,
         "removed_reason": source.removed_reason,
+    }
+
+
+def press_fields(source: Source) -> dict[str, Any]:
+    """Returns the dataset fields of an outlet or press source.
+
+    Args:
+        source: The entry of the press configuration.
+
+    Returns:
+        dict: The fields of a ``PressCatalogRecord`` without the common fields.
+
+    Raises:
+        ValueError: If the entry has no ``added`` date.
+    """
+    if source.added is None:
+        raise ValueError(f"Source {source.id} has no added date")
+    outlet = source if isinstance(source, Outlet) else None
+    return {
+        "press_id": source.id, "kind": "outlet" if outlet else "press_source", "name": source.name,
+        "homepage": source.homepage, "outlet_type": outlet.outlet_type if outlet else None,
+        "owner_group": outlet.owner_group if outlet else None, "home_state": outlet.home_state if outlet else None,
+        "outlet_topic": outlet.topic if outlet else None, "paywall_model": outlet.paywall_model if outlet else None,
+        "actor_type": None if outlet else source.actor_type, "jurisdiction": None if outlet else source.jurisdiction,
+        "feeds": list(source.feeds), "news_sitemap": outlet.news_sitemap if outlet else None,
+        "topic_filter": source.topic_filter, "fetch_pages": source.fetch_pages, "added": source.added,
+        "removed": source.removed, "removed_reason": source.removed_reason,
     }
 
 
@@ -196,3 +226,31 @@ class SnapshotCatalogCollector(Collector):
         items = [(source.id, snapshot_fields(source)) for source in sources]
         return CollectorResult(counters=emit_changes(ctx, "snapshot_catalog", items, SnapshotCatalogRecord,
                                                      REPOSITORY_URL + "config/snapshots.toml"))
+
+
+class PressCatalogCollector(Collector):
+    """Writes new and changed entries of the press configuration (news outlets and press sources)."""
+    name = "press_catalog"
+    datasets = ("press_catalog",)
+
+    def __init__(self, config_path: Path = SOURCES_PATH) -> None:
+        """Initializes the collector.
+
+        Args:
+            config_path: The press configuration.
+        """
+        self._config_path = config_path
+
+    def collect(self, ctx: RunContext, entry: CollectorEntry) -> CollectorResult:
+        """Emits a record for every outlet and press source that is new or changed.
+
+        Args:
+            ctx: The run context.
+            entry: Run history of this collector.
+
+        Returns:
+            CollectorResult: Counters.
+        """
+        items = [(source.id, press_fields(source)) for source in load_config(self._config_path).sources]
+        return CollectorResult(counters=emit_changes(ctx, "press_catalog", items, PressCatalogRecord,
+                                                     REPOSITORY_URL + "config/sources.toml"))

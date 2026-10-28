@@ -83,3 +83,26 @@ def test_text_filter_selects_passages_of_json_documents(fake_web) -> None:
     lines = probe_url(fake_web.client(), "https://api.example/v3/api-docs", text_filter="username")
     assert lines[-2] == "passages matching the text filter (1):"
     assert '"name": "username"' in lines[-1]
+
+
+def test_probe_describes_feeds_and_news_sitemaps(fake_web) -> None:
+    fake_web.add("https://stats.example/presse.rss",
+                 '<?xml version="1.0"?><rss version="2.0"><channel><title>Presse</title>'
+                 "<item><title>Bevölkerung wächst</title><link>https://stats.example/p/1</link>"
+                 "<pubDate>Tue, 27 Oct 2026 10:00:00 +0100</pubDate></item>"
+                 "<item><title>Geburten sinken</title><link>https://stats.example/p/2</link>"
+                 "<pubDate>Mon, 26 Oct 2026 10:00:00 +0100</pubDate></item></channel></rss>",
+                 content_type="text/html")
+    fake_web.add("https://stats.example/sitemap-news.xml",
+                 '<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+                 'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"><url><loc>https://stats.example/a</loc>'
+                 "<news:news><news:publication_date>2026-10-27T10:00:00+01:00</news:publication_date>"
+                 "<news:title>Asyl</news:title></news:news></url></urlset>", content_type="application/xml")
+
+    feed = probe_url(fake_web.client(), "https://stats.example/presse.rss")
+    sitemap = probe_url(fake_web.client(), "https://stats.example/sitemap-news.xml")
+
+    assert any(line.startswith("feed (rss20) titled 'Presse' with 2 items; published 2026-10-26T09:00:00+00:00 "
+                               "to 2026-10-27T09:00:00+00:00") for line in feed)
+    assert "- 2026-10-27T09:00:00+00:00 Bevölkerung wächst -> https://stats.example/p/1" in feed
+    assert any(line.startswith("sitemap with 1 URLs, 1 with news data") for line in sitemap)

@@ -1,0 +1,46 @@
+# Sources of the feeds collector tests.
+
+[[outlet]]
+id = "news_example"
+name = "News Example"
+homepage = "https://news.example/"
+outlet_type = "national_daily"
+owner_group = "Example Group"
+paywall_model = "mixed"
+feeds = ["https://news.example/gesellschaft/index.rss"]
+news_sitemap = "https://news.example/sitemap-news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+[[outlet]]
+id = "school_example"
+name = "School Example"
+homepage = "https://school.example/"
+outlet_type = "specialist_press"
+owner_group = "School Media"
+topic = "Education and schools"
+paywall_model = "free"
+feeds = ["https://school.example/feed/"]
+fetch_pages = false
+added = 2026-10-28
+
+[[press_source]]
+id = "stat_office"
+name = "Statistisches Landesamt Beispiel"
+homepage = "https://stat.example/"
+actor_type = "statistical_office"
+jurisdiction = "DE-BY"
+feeds = ["https://stat.example/presse.rss"]
+fetch_pages = false
+added = 2026-10-28
+
+[[press_source]]
+id = "government"
+name = "Landesregierung Beispiel"
+homepage = "https://gov.example/"
+actor_type = "state_government"
+jurisdiction = "DE-BY"
+feeds = ["https://gov.example/presse.rss"]
+topic_filter = true
+fetch_pages = false
+added = 2026-10-28

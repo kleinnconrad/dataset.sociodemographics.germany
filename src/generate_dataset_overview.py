@@ -4,9 +4,11 @@ Writes the dataset overview into the README.
 The overview replaces the text between the markers DATASET_OVERVIEW_START and
 DATASET_OVERVIEW_END: record counts per dataset, the outcome of the latest
 run, the catalog entries per topic with their stored series and latest
-period, the regions per level, and the fields of every dataset with their
-descriptions from ``schema.py`` and their fill rates. Long tables are placed
-in collapsible sections.
+period, the regions per level, the status and output of every news and
+press-release source, the annotation coverage, the main topics of the last
+30 days, and the fields of every dataset with their descriptions from
+``schema.py`` and their fill rates. Long tables are placed in collapsible
+sections.
 
 Usage:
     uv run python src/generate_dataset_overview.py [--data-dir data] [--readme README.md]
@@ -17,7 +19,7 @@ import logging
 import sys
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -26,6 +28,8 @@ from catalog import CatalogError, load_catalog
 from regions import CONFIG_PATH as REGIONS_PATH
 from regions import RegistryError, active_regions
 from schema import DATASET_MODELS
+from sources import CONFIG_PATH as SOURCES_PATH
+from sources import SourceHealthStore, load_config
 from state import RUN_LOG_FILE
 from storage import iter_dataset_files, load_records
 
@@ -36,6 +40,9 @@ END_MARKER = "<!-- DATASET_OVERVIEW_END -->"
 SERIES_DATASET = "sociodemographic_series"
 # Fields whose distinct values are not counted: the published content of the snapshots
 UNCOUNTED_FIELDS = frozenset({"rows", "labels"})
+RECENT_WINDOW_DAYS = 30
+TOP_TOPICS = 10
+ITEM_DATASETS = ("news_items", "press_releases")
 
 
 @dataclass
@@ -243,8 +250,99 @@ def last_run_lines(state_dir: Path) -> list[str]:
     return rows
 
 
+def source_lines(state_dir: Path, config_path: Path, datasets: dict[str, DatasetData], now: datetime) -> list[str]:
+    """Summarizes the status of the sources and builds a collapsible table per source.
+
+    Args:
+        state_dir: Folder of the state files.
+        config_path: The source configuration.
+        datasets: Records per dataset.
+        now: Current UTC time.
+
+    Returns:
+        list[str]: Markdown lines.
+    """
+    if not config_path.exists():
+        return ["- No sources configured."]
+    config = load_config(config_path)
+    health = SourceHealthStore.load(state_dir)
+    items = [record for dataset in ITEM_DATASETS for record in datasets[dataset].records]
+    annotated = {record.get("item_id") for record in datasets["text_annotations"].records}
+    by_source: dict[str, list[dict[str, Any]]] = {}
+    for item in items:
+        by_source.setdefault(str(item.get("source_id")), []).append(item)
+    cutoff = (now - timedelta(days=RECENT_WINDOW_DAYS)).isoformat()
+    lines = []
+    tables: list[str] = []
+    groups = (("News outlets", config.outlets, "outlet_type"),
+              ("Press-release sources", config.press_sources, "actor_type"))
+    for label, sources, type_attribute in groups:
+        counts = Counter(health.status_of(source) for source in sources)
+        text = ", ".join(f"{count} {status}" for status, count in sorted(counts.items())) or "none"
+        lines.append(f"- **{label}:** {len(sources)} configured ({text})")
+        tables.extend([
+            "<details>",
+            f"<summary>{label}: items per source</summary>",
+            "",
+            "| Source | Type | Status | Items | Last 30 days | Annotated | With lead text | Latest publication |",
+            "|---|---|---|---|---|---|---|---|",
+        ])
+        for source in sorted(sources, key=lambda s: s.name.casefold()):
+            source_items = by_source.get(source.id, [])
+            recent = sum(1 for item in source_items if str(item.get("observed_at", "")) >= cutoff)
+            with_labels = sum(1 for item in source_items if item.get("record_id") in annotated)
+            with_lead = sum(1 for item in source_items if item.get("content_basis") == "lead_text")
+            published = [str(item["published_at"])[:10] for item in source_items if item.get("published_at")]
+            observed = [str(item["observed_at"])[:10] for item in source_items if item.get("observed_at")]
+            latest = max(published or observed, default="none")
+            tables.append(
+                f"| {_cell(source.name)} | {getattr(source, type_attribute).replace('_', ' ')} | "
+                f"{health.status_of(source)} | {len(source_items):,} | {recent:,} | "
+                f"{_share(with_labels, len(source_items))} | {_share(with_lead, len(source_items))} | {latest} |"
+            )
+        tables.extend(["", "</details>", ""])
+    return [*lines, "", *tables]
+
+
+def annotation_lines(datasets: dict[str, DatasetData], now: datetime) -> list[str]:
+    """Summarizes the annotation coverage and the main topics of recent sociodemographic items.
+
+    Args:
+        datasets: Records per dataset.
+        now: Current UTC time.
+
+    Returns:
+        list[str]: Markdown lines.
+    """
+    items = [record for dataset in ITEM_DATASETS for record in datasets[dataset].records]
+    annotations = datasets["text_annotations"].records
+    if not items:
+        return ["- No news articles or press releases yet."]
+    annotated_ids = {record.get("item_id") for record in annotations}
+    annotated = sum(1 for item in items if item.get("record_id") in annotated_ids)
+    basis = Counter(item.get("content_basis") for item in items)
+    lines = [
+        f"- **Annotated items:** {annotated:,} of {len(items):,} ({annotated / len(items):.1%})",
+        "- **Text seen by the model:** " + ", ".join(f"{name} {count:,}" for name, count in basis.most_common()),
+    ]
+    cutoff = (now - timedelta(days=RECENT_WINDOW_DAYS)).isoformat()
+    recent = [record for record in annotations
+              if record.get("is_sociodemographic") and str(record.get("observed_at", "")) >= cutoff]
+    if recent:
+        topics = Counter(record.get("topic") for record in recent).most_common(TOP_TOPICS)
+        lines.extend([
+            "",
+            f"**Main topics of sociodemographic items, last {RECENT_WINDOW_DAYS} days** ({len(recent):,} items)",
+            "",
+            "| Topic | Items | Share |",
+            "|---|---|---|",
+        ])
+        lines.extend(f"| {topic} | {count:,} | {count / len(recent):.1%} |" for topic, count in topics)
+    return lines
+
+
 def build_overview(data_dir: Path, now: Optional[datetime] = None, catalog_path: Path = CATALOG_PATH,
-                   regions_path: Path = REGIONS_PATH) -> str:
+                   regions_path: Path = REGIONS_PATH, sources_path: Path = SOURCES_PATH) -> str:
     """Builds the Markdown of the overview.
 
     Args:
@@ -252,6 +350,7 @@ def build_overview(data_dir: Path, now: Optional[datetime] = None, catalog_path:
         now: Current UTC time; defaults to now.
         catalog_path: The series catalog.
         regions_path: The region registry.
+        sources_path: The configuration of the news and press sources.
 
     Returns:
         str: The overview without the markers.
@@ -275,6 +374,13 @@ def build_overview(data_dir: Path, now: Optional[datetime] = None, catalog_path:
         "**Regions**",
         "",
         *region_lines(regions_path),
+        "",
+        "**News and press sources**",
+        "",
+        *source_lines(data_dir / "state", sources_path, datasets, now),
+        "**Annotations**",
+        "",
+        *annotation_lines(datasets, now),
     ]
     if fields:
         parts.extend(["", "**Fields** (Filled: records with a value that is not null and not empty)", "", *fields])

@@ -1,10 +1,14 @@
 [project]
 name = "sociodemographics-dataset"
 version = "0.1.0"
-description = "A long-term dataset of German sociodemographics (population by age, sex and region, fertility, mortality, migration, households, education, income, poverty, wealth, housing and regional labour market) for analysis and prediction"
+description = "A long-term dataset of German sociodemographics (population by age, sex and region, fertility, mortality, migration, households, education, income, poverty, wealth, housing, regional labour market and the press coverage of these topics) for analysis and prediction"
 requires-python = ">=3.11"
 # Same versions as in dataset.economics.germany, so that the shared modules run on a tested set
 dependencies = [
+    "beautifulsoup4==4.15.0",
+    "defusedxml==0.7.1",
+    "feedparser==6.0.14",
+    "google-genai==2.32.0",
     "httpx==0.28.1",
     "openpyxl==3.1.5",
     "pydantic==2.14.1",

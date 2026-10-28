@@ -22,6 +22,11 @@ on:
         type: string
         required: false
         default: ''
+      press_sources:
+        description: 'Comma-separated news and press sources of config/sources.toml to check, e.g. tagesschau,destatis; empty checks all with gaps and search (none if only concepts or snapshots is set)'
+        type: string
+        required: false
+        default: ''
       probe:
         description: 'URLs separated by spaces: check them with the fetch rules and describe them instead of the review'
         type: string
@@ -55,6 +60,7 @@ jobs:
       OPEN_PR: ${{ (github.event_name == 'workflow_dispatch' && (inputs.pull_request == false || inputs.probe != '')) && 'off' || 'on' }}
       CONCEPTS: ${{ inputs.concepts }}
       SNAPSHOTS: ${{ inputs.snapshots }}
+      PRESS_SOURCES: ${{ inputs.press_sources }}
       PROBE: ${{ inputs.probe }}
       PROBE_FILTER: ${{ inputs.probe_filter }}
       PROBE_TEXT: ${{ inputs.probe_text }}
@@ -74,8 +80,10 @@ jobs:
     - name: Install Dependencies
       run: uv sync --frozen
 
+    # The Gemini API key is optional; without it the review of the news and press sources runs without the search
     - name: Review Sources
       env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
         GENESIS_PASSWORD: ${{ secrets.GENESIS_PASSWORD }}
         REGIONALSTATISTIK_TOKEN: ${{ secrets.REGIONALSTATISTIK_TOKEN }}
@@ -103,6 +111,9 @@ jobs:
           if [ -n "$SNAPSHOTS" ]; then
             args+=(--snapshots "$SNAPSHOTS")
           fi
+          if [ -n "$PRESS_SOURCES" ]; then
+            args+=(--press-sources "$PRESS_SOURCES")
+          fi
         fi
         uv run python src/source_review.py "${args[@]}"
         cat "$report"
@@ -122,7 +133,7 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git switch -C "$branch"
-        git add reviews/ config/providers.toml
+        git add reviews/ config/providers.toml config/sources.toml
         if git diff --staged --quiet; then
           echo "The review wrote no changes."
           exit 0
