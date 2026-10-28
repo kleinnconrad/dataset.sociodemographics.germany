@@ -8,12 +8,15 @@ run date and the cursor of the previous run. Records are written through
 ``RunContext.emit``, which also saves the seen stores of the dataset, so that
 an interrupted run keeps what it has written.
 
-Two kinds of datasets share these helpers:
+Three kinds of datasets share these helpers:
 - vintage datasets (``sociodemographic_series``) store a statistical series
   in full when it appears and afterwards, with the next revision, only the
   periods that were added, revised or removed at the provider;
-- change datasets (``series_catalog``, ``regions``) store an item when it
-  appears and again, with the next revision, when a tracked field changes.
+- change datasets (``series_catalog``, ``regions``, ``press_catalog``) store
+  an item when it appears and again, with the next revision, when a tracked
+  field changes;
+- event datasets (news items, press releases, annotations) store an item
+  once when it is observed.
 """
 import logging
 from abc import ABC, abstractmethod

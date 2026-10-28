@@ -2,10 +2,11 @@
 Writes a Markdown summary of the latest pipeline run for the notification comment.
 
 The summary is built from the last line of ``data/state/run_log.jsonl``: the
-status and records of each collector and the new and revised statistical
-series, with the catalog entries that had no data or failed. The notification
-workflow posts it as a commit comment that mentions the repository owner, so
-that GitHub sends an email.
+status and records of each collector, the new and revised statistical series,
+with the catalog entries that had no data or failed, the counts of the feeds
+collector and the Gemini tokens with an estimate of their cost. The
+notification workflow posts it as a commit comment that mentions the
+repository owner, so that GitHub sends an email.
 
 Usage:
     python scripts/run_summary.py --run-log data/state/run_log.jsonl --output summary.md
@@ -23,6 +24,11 @@ logger = logging.getLogger(__name__)
 
 # Collectors that write vintages of statistical series
 SERIES_COLLECTORS = ("ecb", "eurostat")
+# List prices of the paid tier in USD per million tokens (input, output including thinking), as of
+# October 2026. Update them when Google changes the prices or the pipeline uses another model.
+GEMINI_PRICES_USD_PER_M: dict[str, tuple[float, float]] = {
+    "gemini-2.5-flash": (0.30, 2.50),
+}
 
 
 def last_entry(run_log: Path, not_before: Optional[datetime] = None) -> Optional[dict[str, Any]]:
@@ -53,6 +59,24 @@ def _duration_minutes(entry: dict[str, Any]) -> Optional[float]:
     started = datetime.fromisoformat(entry["started"])
     finished = datetime.fromisoformat(entry["finished"])
     return (finished - started).total_seconds() / 60
+
+
+def gemini_cost(model: Optional[str], usage: dict[str, Any]) -> Optional[float]:
+    """Estimates the cost of the Gemini tokens of a run.
+
+    Args:
+        model: The Gemini model id.
+        usage: Token counts as written by the feeds collector.
+
+    Returns:
+        Optional[float]: The cost in USD, or None if no price is known for the model.
+    """
+    prices = GEMINI_PRICES_USD_PER_M.get(model or "")
+    if prices is None:
+        return None
+    input_price, output_price = prices
+    output_tokens = usage.get("output_tokens", 0) + usage.get("thinking_tokens", 0)
+    return (usage.get("prompt_tokens", 0) * input_price + output_tokens * output_price) / 1_000_000
 
 
 def build_summary(entry: Optional[dict[str, Any]], conclusion: str, run_url: Optional[str],
@@ -102,6 +126,22 @@ def build_summary(entry: Optional[dict[str, Any]], conclusion: str, run_url: Opt
             lines.append("**Entries without data:** " + ", ".join(f"`{name}`" for name in not_found))
         if failed:
             lines.append("**Failed entries:** " + "; ".join(failed))
+    counters = collectors.get("feeds", {}).get("counters", {})
+    if counters:
+        lines.extend(["", f"**Feeds:** {counters.get('items_new', 0):,} new items from "
+                          f"{counters.get('sources_ok', 0)} sources; {counters.get('annotated', 0):,} annotated, "
+                          f"{counters.get('beyond_cap', 0) + counters.get('not_annotated', 0):,} stored without labels."])
+    usage = counters.get("gemini_usage")
+    if usage:
+        model = counters.get("gemini_model")
+        cost = gemini_cost(model, usage)
+        cost_text = (f"estimated cost ${cost:.2f} at the list prices of {model}" if cost is not None
+                     else f"no price known for {model}")
+        lines.append(f"**Gemini:** {usage.get('calls', 0)} calls; {usage.get('prompt_tokens', 0):,} input, "
+                     f"{usage.get('output_tokens', 0):,} output and {usage.get('thinking_tokens', 0):,} "
+                     f"thinking tokens; {cost_text}.")
+    elif counters.get("annotation"):
+        lines.append(f"**Gemini:** {counters['annotation']}.")
     return "\n".join(lines) + "\n"
 
 

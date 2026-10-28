@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from conftest import CATALOG_FIXTURE, REGIONS_FIXTURE
+from conftest import CATALOG_FIXTURE, REGIONS_FIXTURE, SOURCES_FIXTURE
 from generate_dataset_overview import END_MARKER, START_MARKER, build_overview, update_readme
 from state import append_run_log
 from storage import dumps_records, partition_file
@@ -18,7 +18,8 @@ def write(data_dir, dataset: str, records: list[dict]) -> None:
 
 
 def overview_of(data_dir) -> str:
-    return build_overview(data_dir, now=NOW, catalog_path=CATALOG_FIXTURE, regions_path=REGIONS_FIXTURE)
+    return build_overview(data_dir, now=NOW, catalog_path=CATALOG_FIXTURE, regions_path=REGIONS_FIXTURE,
+                          sources_path=SOURCES_FIXTURE)
 
 
 def test_build_overview_counts_records_series_and_regions(tmp_path) -> None:
@@ -61,3 +62,30 @@ def test_update_readme_replaces_only_the_marked_part(tmp_path) -> None:
     readme.write_text("no markers", encoding="utf-8")
     with pytest.raises(ValueError):
         update_readme(readme, "new")
+
+
+def test_overview_lists_press_sources_and_annotation_topics(tmp_path) -> None:
+    data_dir = tmp_path / "data"
+    write(data_dir, "news_items", [
+        {"record_id": f"news:{n}", "source_id": "news_example", "outlet_id": "news_example",
+         "observed_at": "2026-10-27T01:30:00Z", "published_at": "2026-10-26T20:00:00Z",
+         "content_basis": "lead_text" if n == 0 else "title_only"} for n in range(3)
+    ])
+    write(data_dir, "press_releases", [
+        {"record_id": "press:1", "source_id": "stat_office", "press_source_id": "stat_office",
+         "observed_at": "2026-10-27T01:30:00Z", "published_at": "2026-10-25T08:00:00Z", "content_basis": "title_only"},
+    ])
+    write(data_dir, "text_annotations", [
+        {"record_id": "annotation:news:0:h", "item_id": "news:0", "is_sociodemographic": True,
+         "topic": "Births and fertility", "observed_at": "2026-10-27T01:30:00Z"},
+        {"record_id": "annotation:press:1:h", "item_id": "press:1", "is_sociodemographic": True,
+         "topic": "Population and demographic change", "observed_at": "2026-10-27T01:30:00Z"},
+    ])
+
+    overview = overview_of(data_dir)
+
+    assert "- **News outlets:** 2 configured (2 active)" in overview
+    assert "- **Press-release sources:** 2 configured (2 active)" in overview
+    assert "| News Example | national daily | active | 3 | 3 | 33.3% (1) | 33.3% (1) | 2026-10-26 |" in overview
+    assert "- **Annotated items:** 2 of 4 (50.0%)" in overview
+    assert "| Births and fertility | 1 | 50.0% |" in overview

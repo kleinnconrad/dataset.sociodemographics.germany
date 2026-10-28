@@ -2,7 +2,8 @@
 Entry point of a pipeline run.
 
 Usage:
-    uv run python src/main.py [--dry-run | --backfill] [--collectors NAME,...] [--output-dir PATH]
+    uv run python src/main.py [--dry-run | --backfill] [--collectors NAME,...] [--max-annotations N]
+                              [--output-dir PATH]
 """
 import argparse
 import logging
@@ -13,10 +14,19 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
+from annotation import GeminiAnnotator
 from pipeline import COLLECTOR_ORDER, build_collectors, run_pipeline
 from settings import Settings
 
 logger = logging.getLogger(__name__)
+
+
+def _positive_int(value: str) -> int:
+    """Parses a command-line value as an integer of at least 1."""
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError(f"must be at least 1, got {number}")
+    return number
 
 
 def _collector_list(value: str) -> tuple[str, ...]:
@@ -39,11 +49,16 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="Runs the German sociodemographics dataset pipeline.")
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--dry-run", action="store_true", help="fetch the series without writing data or state")
+    mode.add_argument("--dry-run", action="store_true",
+                      help="fetch the series and read the feeds without fetching pages, calling Gemini or writing "
+                           "data or state")
     mode.add_argument("--backfill", action="store_true",
                       help="fetch every catalog entry, also those whose dataset is unchanged, without run intervals")
     parser.add_argument("--collectors", type=_collector_list,
                         help=f"comma-separated collectors to run (default: all due of {', '.join(COLLECTOR_ORDER)})")
+    parser.add_argument("--max-annotations", type=_positive_int,
+                        help="maximum number of news articles and press releases annotated in this run "
+                             "(overrides MAX_ANNOTATIONS_PER_RUN)")
     parser.add_argument("--output-dir", type=Path,
                         help="folder for datasets and state (default: data/ in GitHub Actions, "
                              "~/Downloads/german_sociodemographics_dataset locally)")
@@ -75,9 +90,18 @@ def main(argv: Optional[list[str]] = None) -> int:
         settings = replace(settings, output_dir=args.output_dir)
     if args.collectors is not None:
         settings = replace(settings, collectors=args.collectors)
+    if args.max_annotations is not None:
+        settings = replace(settings, max_annotations_per_run=args.max_annotations)
+    feeds_selected = settings.collectors is None or "feeds" in settings.collectors
+    annotator = None
+    if feeds_selected and not args.dry_run:
+        if settings.gemini_api_key:
+            annotator = GeminiAnnotator(settings)
+        else:
+            logger.warning("GEMINI_API_KEY is not set; news items and press releases are stored without labels.")
     logger.info("Output folder: %s; run deadline after %d minutes.", settings.output_dir.resolve(),
                 settings.run_deadline_minutes)
-    summary = run_pipeline(settings, build_collectors(), dry_run=args.dry_run, backfill=args.backfill)
+    summary = run_pipeline(settings, build_collectors(annotator), dry_run=args.dry_run, backfill=args.backfill)
     for name, outcome in summary.collectors.items():
         logger.info("%s: %s %s%s", name, outcome.status, outcome.records or "",
                     f" ({outcome.error})" if outcome.error else "")

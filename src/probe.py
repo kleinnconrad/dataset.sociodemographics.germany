@@ -7,7 +7,8 @@ robots.txt allows the request for the pipeline's user agent, the crawl delay,
 text-and-data-mining reservations (TDMRep file, header, meta tag and plain
 statements in robots.txt), the response (status, redirects, type, size, last
 modification) and a description of the content: the title, text and links of
-an HTML page, the first lines of a CSV or text file, the keys of a JSON
+an HTML page, the items of an RSS or Atom feed or a news sitemap (number, time
+span, first titles), the first lines of a CSV or text file, the keys of a JSON
 document, or the members of an archive (xlsx, zip). With a text filter, the
 passages of a page's text that match it are listed, e.g. the terms of reuse
 in an imprint. Pages are fetched like every website request of the pipeline;
@@ -17,13 +18,19 @@ The source review runs the probe when the workflow ``source_review.yml`` is
 started with URLs in the input ``probe``; the description goes to the job
 summary, so that sources can be checked live from GitHub Actions.
 """
+import calendar
 import io
 import json
 import re
+import xml.etree.ElementTree as ElementTree
 import zipfile
+from datetime import datetime, timezone
 from html.parser import HTMLParser
 from typing import Optional
 from urllib.parse import urljoin
+
+import feedparser
+from defusedxml import ElementTree as SafeElementTree
 
 from web import MAX_CRAWL_DELAY_S, BlockedError, FetchError, NotFoundError, Response, RobotsDisallowedError, WebClient
 
@@ -35,7 +42,14 @@ MAX_LINE_CHARS = 300
 MAX_EXCERPTS = 12
 MAX_SHEETS = 40
 MAX_SHEET_ROWS = 25
+MAX_FEED_ITEMS = 12
+SITEMAP_NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9",
+              "news": "http://www.google.com/schemas/sitemap-news/0.9"}
 EXCERPT_CONTEXT_CHARS = 250
+# The root element of a feed or sitemap after the XML declaration, processing instructions and comments; some
+# sources serve their feeds as text/html
+FEED_ROOT = re.compile(rb"^(?:\xef\xbb\xbf)?\s*(?:<\?[^>]*\?>\s*|<!--.*?-->\s*)*<(rss|feed|rdf:RDF|urlset|sitemapindex)\b",
+                       re.DOTALL | re.IGNORECASE)
 FILE_LINK_PATTERN = re.compile(r"\.(csv|xlsx?|ods|zip|json|pdf|txt|xml)(\?|#|$)", re.IGNORECASE)
 
 
@@ -179,6 +193,52 @@ def describe_workbook(content: bytes) -> list[str]:
     return lines
 
 
+def describe_feed(content: bytes) -> Optional[list[str]]:
+    """Describes an RSS or Atom feed or a news sitemap: number of items, time span and the first items.
+
+    Args:
+        content: The XML document.
+
+    Returns:
+        Optional[list[str]]: Lines of the description; None if the document is neither a feed nor a sitemap.
+    """
+    match = FEED_ROOT.match(content[:4000])
+    if match is None:
+        return None
+    if match.group(1).lower() in (b"urlset", b"sitemapindex"):
+        try:
+            root = SafeElementTree.fromstring(content)
+        except ElementTree.ParseError as e:
+            return [f"invalid sitemap XML: {e}"]
+        children = [loc.text.strip() for loc in root.findall("sm:sitemap/sm:loc", SITEMAP_NS) if loc.text]
+        if children:
+            return [f"sitemap index with {len(children)} sitemaps:"] + children[:MAX_FEED_ITEMS]
+        items = []
+        for url in root.findall("sm:url", SITEMAP_NS):
+            news = url.find("news:news", SITEMAP_NS)
+            if news is not None:
+                items.append((news.findtext("news:publication_date", default="", namespaces=SITEMAP_NS),
+                              news.findtext("news:title", default="", namespaces=SITEMAP_NS)))
+        dates = sorted(date for date, _title in items if date)
+        lines = [f"sitemap with {len(root.findall('sm:url', SITEMAP_NS))} URLs, {len(items)} with news data"
+                 + (f"; publication dates {dates[0]} to {dates[-1]}" if dates else "")]
+        return lines + [f"- {date} {' '.join(title.split())[:200]}" for date, title in items[:MAX_FEED_ITEMS]]
+    parsed = feedparser.parse(content)
+    if not parsed.entries and parsed.get("bozo"):
+        return [f"not a valid feed: {parsed.get('bozo_exception')!r}"]
+    items = []
+    for entry in parsed.entries:
+        moment = entry.get("published_parsed") or entry.get("updated_parsed")
+        published = (datetime.fromtimestamp(calendar.timegm(moment), tz=timezone.utc).isoformat()
+                     if moment else "no date")
+        items.append((published, " ".join(str(entry.get("title", "")).split())[:200], entry.get("link", "")))
+    dates = sorted(published for published, _title, _link in items if published != "no date")
+    lines = [f"feed ({parsed.get('version') or 'unknown version'}) titled "
+             f"{' '.join(str(parsed.feed.get('title', '')).split())!r} with {len(items)} items"
+             + (f"; published {dates[0]} to {dates[-1]} (UTC)" if dates else "")]
+    return lines + [f"- {published} {title} -> {link}" for published, title, link in items[:MAX_FEED_ITEMS]]
+
+
 def describe_content(response: Response, link_filter: Optional[re.Pattern[str]] = None,
                      text_filter: Optional[re.Pattern[str]] = None) -> list[str]:
     """Describes the content of a response according to its type.
@@ -216,6 +276,9 @@ def _describe(response: Response, link_filter: Optional[re.Pattern[str]],
         if any(name.startswith("xl/worksheets/") for name in names):
             return describe_workbook(content)
         return [f"zip archive with {len(names)} members: " + ", ".join(names[:40])]
+    feed = describe_feed(content)
+    if feed is not None:
+        return feed
     if "html" in kind or content.lstrip()[:15].lower().startswith((b"<!doctype html", b"<html")):
         return describe_html(response, link_filter, text_filter)
     if "json" in kind:

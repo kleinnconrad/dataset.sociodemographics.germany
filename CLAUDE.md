@@ -39,7 +39,7 @@ This file contains foundational instructions and conventions for developing in t
 - **Tone:** Maintain a sober, objective, and professional tone across all documentation (including `README.md`).
 - **Vocabulary:** Use only as many adjectives as strictly required. Do not use superlatives (e.g., "fastest", "best", "most") or filler words.
 - **Emojis:** Do not use emojis anywhere in the codebase, documentation, or user interfaces.
-- **Language:** Everything in the project must be written in English (documentation, markdown files, code comments, variable names, etc.). German proper names (institutions, regions, places) keep their original spelling.
+- **Language:** Everything in the project must be written in English (documentation, markdown files, code comments, variable names, etc.). German proper names (institutions, regions, places, outlets) keep their original spelling.
 - **Table of Contents:** Every markdown file containing more than one paragraph must include a Table of Contents.
 - **Docstrings:** All modules, classes, and public functions must include clear, structured docstrings (e.g., Google-style) detailing their purpose, arguments, and return types.
 - **License:** The repository has no license file and grants no license for its code or data. Do not add a license file or a license statement. The field `license` of the records names the terms of the sources, not a license of this repository.
@@ -47,7 +47,7 @@ This file contains foundational instructions and conventions for developing in t
 ## 6. Linting & Validation
 - Code must pass `ruff check` before being finalized.
 - Always verify that configuration files (e.g., `.yml`, `.toml` or `.json` files) remain structurally compliant and correctly reflect any changes made to the codebase (such as script renames or moving files).
-- The tests check that the README data model and example records match `src/schema.py` and that the README lists every active concept of `config/series.toml`; update the README together with the schema, the catalog and the snapshot configuration.
+- The tests check that the README data model and example records match `src/schema.py` and that the README lists every active concept of `config/series.toml`; update the README together with the schema, the catalog, the snapshot configuration and the source configuration.
 
 ## 7. Security Best Practices
 - Never hardcode secrets, passwords, or API keys in the repository. Always rely on environment variables or the `.env` file, which is listed in `.gitignore`.
@@ -55,22 +55,23 @@ This file contains foundational instructions and conventions for developing in t
 - Never send personal data such as an email address to a source, also not in a User-Agent header.
 
 ## 8. Data Collection Rules
-- All HTTP requests go through `src/web.py` (`WebClient`), which applies the fetch rules.
-- Never bypass bot protection. A statistical provider that returns HTTP 401 or 403, a challenge page or a CAPTCHA stops its collector with an error; a snapshot item that meets them fails and is not requested again for 30 days. Do not add headless browsers.
+- All HTTP requests go through `src/web.py` (`WebClient`), which applies the fetch rules; only the requests of the google-genai SDK to the Gemini API do not.
+- Never bypass bot protection. A statistical provider that returns HTTP 401 or 403, a challenge page or a CAPTCHA stops its collector with an error; a snapshot item that meets them fails and is not requested again for 30 days; a news or press source is set to `blocked`. Do not add headless browsers.
 - Respect `robots.txt` for every website request, including its crawl delay; a host whose crawl delay exceeds 120 seconds is not fetched. Only documented APIs and data files that are offered for programmatic use (Eurostat dissemination API and table of contents, ECB Data Portal, the web services of GENESIS-Online, the Regionaldatenbank Deutschland and the Zensus database) are called with `respect_robots=False`, under their terms and rate limits.
 - Respect text-and-data-mining reservations (TDMRep) of every website.
 - Store only published aggregates of official statistics. Do not store microdata or any data about individual persons.
+- News and press releases: store only titles, URLs, metadata and derived labels. Do not store full texts; text fetched for the annotation is discarded after use. Do not store names of authors, and label groups of the population, never single persons.
 - Every record carries the license or terms of its source in the `license` field; the providers and their terms are listed in `config/providers.toml`.
-- Only sources whose terms permit the redistribution of their data are collected. Sources that require an API key or an account are added only with an optional key and a documented secret.
-- A source that is checked and not admitted is recorded with the day of the check and the reason as an `[[excluded]]` entry of `config/snapshots.toml`.
+- Only sources whose terms permit the redistribution of their data are collected; a news or press source whose terms forbid the inclusion in databases is not collected. Sources that require an API key or an account are added only with an optional key and a documented secret.
+- A source that is checked and not admitted is recorded with the day of the check and the reason as an `[[excluded]]` entry of `config/snapshots.toml` (snapshot sources) or `config/sources.toml` (news and press sources).
 
 ## 9. Long-Term Stability Rules
 The dataset is collected over many years. Changes must keep the time series comparable:
-- **Ids are permanent.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), snapshot ids (`<provider>.<item>`), region codes, provider ids, dataset names, field names and `record_id` formats are never reused for a different meaning. A concept, snapshot item or region that is no longer collected keeps its entry with `removed` and `removed_reason`.
+- **Ids are permanent.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), snapshot ids (`<provider>.<item>`), region codes, provider ids, outlet and press source ids, dataset names, field names and `record_id` formats are never reused for a different meaning. A concept, snapshot item, region or news and press source that is no longer collected keeps its entry with `removed` and `removed_reason`.
 - **Vintages and snapshots are complete.** `sociodemographic_series` stores the full series at the first observation and every later change; `source_snapshots` stores the full published content at the first observation and every change. Do not rewrite or drop past records.
 - **Schema changes are additive.** New fields get a description and are added without changing existing ones; a changed meaning of a field requires a new field and an increment of `SCHEMA_VERSION` in `src/schema.py`. After an intended change, regenerate `tests/fixtures/schema_snapshot.txt`.
-- **Measurement changes are logged.** Any change of a source, a key, a code, a unit, a regional classification or a counting rule is recorded with its date in the measurement log of [project_architecture.md](project_architecture.md), so that structural breaks in the series can be identified.
-- **Identifiers are verified.** A new or changed key in `config/series.toml` is fetched from the live provider before it is committed, e.g. with the workflow `source_review.yml` started by hand with `pull_request` off and the concept in `concepts`. A new or changed item in `config/snapshots.toml` is fetched in the same way with the item in `snapshots`; the report shows its title, columns and first row. A new region code in `config/regions.toml` is taken from the NUTS classification published by Eurostat. A new provider or source is checked with the fetch rules (robots.txt, TDM reservation, bot protection) and its terms of reuse, with the input `probe` of `source_review.yml`.
+- **Measurement changes are logged.** Any change of a source, a key, a code, a unit, a regional classification, a counting rule, the topic filter of the news or a vocabulary of the annotation is recorded with its date in the measurement log of [project_architecture.md](project_architecture.md), so that structural breaks in the series can be identified.
+- **Identifiers are verified.** A new or changed key in `config/series.toml` is fetched from the live provider before it is committed, e.g. with the workflow `source_review.yml` started by hand with `pull_request` off and the concept in `concepts`. A new or changed item in `config/snapshots.toml` is fetched in the same way with the item in `snapshots`; the report shows its title, columns and first row. A new region code in `config/regions.toml` is taken from the NUTS classification published by Eurostat. A new provider or source is checked with the fetch rules (robots.txt, TDM reservation, bot protection) and its terms of reuse, with the input `probe` of `source_review.yml`; a new news or press source in `config/sources.toml` also with its feed content (the probe lists the items of a feed), and afterwards with the input `press_sources`.
 
 ## 10. Error Handling
 - Use specific exception handling (`try...except` blocks) instead of catching generic `Exception`s where possible, and provide informative error messages.

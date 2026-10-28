@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
 USER_AGENT = ("GermanSociodemographicsDataset/0.1 "
               "(+https://github.com/kleinnconrad/dataset.sociodemographics.germany)")
 
@@ -38,6 +39,42 @@ def _env_int(name: str, default: int) -> int:
     return value
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    """Reads a boolean from an environment variable ("on"/"off", "true"/"false", "1"/"0").
+
+    Args:
+        name: Name of the environment variable.
+        default: Value used when the variable is unset or empty.
+
+    Returns:
+        bool: The parsed value.
+
+    Raises:
+        ValueError: If the value is not one of the accepted words.
+    """
+    raw = os.getenv(name, "").strip().lower()
+    if not raw:
+        return default
+    if raw in ("1", "true", "on", "yes"):
+        return True
+    if raw in ("0", "false", "off", "no"):
+        return False
+    raise ValueError(f"Environment variable {name} must be on or off, got {raw!r}")
+
+
+def _env_secret(name: str) -> Optional[str]:
+    """Reads a secret and removes surrounding whitespace and quotes.
+
+    Args:
+        name: Name of the environment variable.
+
+    Returns:
+        Optional[str]: The value, or None if it is unset or empty.
+    """
+    raw = os.getenv(name, "").strip().strip("\"'").strip()
+    return raw or None
+
+
 def default_output_dir() -> Path:
     """Returns the folder for records and state.
 
@@ -63,12 +100,31 @@ class Settings:
             before its timeout.
         full_check_days (int): A catalog entry whose dataset the provider reports
             as unchanged is fetched again after this many days at the latest.
+        gemini_model (str): Gemini model id used for the annotation.
+        gemini_api_key (Optional[str]): Gemini API key; None stores the news items
+            and press releases without annotation.
+        max_gemini_calls_per_run (int): Upper bound for Gemini calls in one run,
+            including retries.
+        max_annotations_per_run (int): Maximum number of news articles and press
+            releases annotated in one run; further items are stored without labels.
+        gemini_concurrency (int): Number of Gemini requests sent at the same time.
+        news_lookback_hours (int): Feed and sitemap items published longer ago
+            are ignored.
+        fetch_pages (bool): Whether article pages are fetched for metadata and
+            lead text (where robots.txt and TDM reservations permit).
         collectors (Optional[tuple[str, ...]]): Names of the collectors to run;
             None runs all that are due.
         output_dir (Path): Folder for the datasets and ``state/``.
     """
     run_deadline_minutes: int = 25
     full_check_days: int = 28
+    gemini_model: str = DEFAULT_GEMINI_MODEL
+    gemini_api_key: Optional[str] = None
+    max_gemini_calls_per_run: int = 50
+    max_annotations_per_run: int = 400
+    gemini_concurrency: int = 4
+    news_lookback_hours: int = 96
+    fetch_pages: bool = True
     collectors: Optional[tuple[str, ...]] = None
     output_dir: Path = Path("data")
 
@@ -89,6 +145,13 @@ class Settings:
         return cls(
             run_deadline_minutes=_env_int("RUN_DEADLINE_MINUTES", cls.run_deadline_minutes),
             full_check_days=_env_int("FULL_CHECK_DAYS", cls.full_check_days),
+            gemini_model=os.getenv("GEMINI_MODEL", "").strip() or DEFAULT_GEMINI_MODEL,
+            gemini_api_key=_env_secret("GEMINI_API_KEY"),
+            max_gemini_calls_per_run=_env_int("MAX_GEMINI_CALLS_PER_RUN", cls.max_gemini_calls_per_run),
+            max_annotations_per_run=_env_int("MAX_ANNOTATIONS_PER_RUN", cls.max_annotations_per_run),
+            gemini_concurrency=_env_int("GEMINI_CONCURRENCY", cls.gemini_concurrency),
+            news_lookback_hours=_env_int("NEWS_LOOKBACK_HOURS", cls.news_lookback_hours),
+            fetch_pages=_env_bool("NEWS_FETCH_PAGES", cls.fetch_pages),
             collectors=collectors,
             output_dir=default_output_dir(),
         )

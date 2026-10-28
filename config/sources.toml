@@ -1,0 +1,1558 @@
+# News outlets and issuers of press releases of the feeds collector. The monthly source review (src/press_review.py,
+# run by src/source_review.py in the workflow source_review.yml) checks every source and proposes changes as a pull
+# request. The comment line above each entry records the check that admitted it: entries taken over from
+# dataset.politics.germany (checked 2026-10-19) and dataset.economics.germany (checked 2026-10-25) keep the result of
+# that check (time span of the items of each feed and news sitemap in hours, reasons for fetch_pages); feeds and sources
+# added here were checked on 2026-10-28 with the probe of source_review.yml (robots.txt, TDM reservation, bot
+# protection, feed response).
+# Lifecycle keys of every source:
+#   added = YYYY-MM-DD           day on which the source was added to the list
+#   removed = YYYY-MM-DD         day on which the source was removed; the entry stays, so that its coverage period is known
+#   removed_reason = "..."       why the source was removed
+#   keep = true                  the review does not propose a removal for low yield
+# Outlets have an outlet_type, the publisher group (owner_group), the paywall model, the state of a regional outlet
+# (home_state) and the topic of a specialist outlet (topic, a value of SocialTopic in src/schema.py). Press sources have
+# an actor_type and a jurisdiction (DE, a state code, EU or INT).
+# topic_filter: items are stored only if they come from a feed of a sociodemographic section or contain a
+# sociodemographic term (SOCIAL_TERMS in src/collectors/feeds.py). Default: true for outlets except specialist_press,
+# false for press sources; issuers whose releases cover many other topics set it to true.
+# [[excluded]] entries at the end are candidates that were checked and not admitted. The search does not propose
+# them again. Status blocked, tdm_reserved, terms, duplicate and not_relevant are permanent; entries with no_feed,
+# inactive or robots and a kind are checked again by every review and added when they pass.
+
+# =============================================================================
+# National outlets
+# =============================================================================
+
+# feeds inland and innenpolitik: check of dataset.politics.germany on 2026-10-19 (107 h, 13056 h); feed inland/gesellschaft: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "tagesschau"
+name = "tagesschau.de"
+homepage = "https://www.tagesschau.de/"
+outlet_type = "public_broadcaster_national"
+owner_group = "public"
+paywall_model = "free"
+feeds = ["https://www.tagesschau.de/inland/gesellschaft/index~rss2.xml", "https://www.tagesschau.de/inland/index~rss2.xml", "https://www.tagesschau.de/inland/innenpolitik/index~rss2.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 90 h; news sitemap: none; robots.txt crawl-delay 5 s; news ticker feed nachrichten-100.rss omitted: all items carry the feed generation time as pubDate
+[[outlet]]
+id = "deutschlandfunk"
+name = "Deutschlandfunk"
+homepage = "https://www.deutschlandfunk.de/"
+outlet_type = "public_broadcaster_national"
+owner_group = "public"
+paywall_model = "free"
+feeds = ["https://www.deutschlandfunk.de/politikportal-100.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 7844 h, 61248 h; news sitemap: none
+[[outlet]]
+id = "zdfheute"
+name = "ZDFheute"
+homepage = "https://www.zdfheute.de/"
+outlet_type = "public_broadcaster_national"
+owner_group = "public"
+paywall_model = "free"
+feeds = ["https://www.zdfheute.de/rss/zdf/nachrichten/politik", "https://www.zdfheute.de/rss/zdf/nachrichten"]
+fetch_pages = true
+added = 2026-10-28
+
+# feeds Topthemen and Politik: check of dataset.politics.germany on 2026-10-19; feed Bildung: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+# source review 2026-10-28: feed https://rss.sueddeutsche.de/rss/Bildung removed: newest item from 2023-12-05
+[[outlet]]
+id = "sueddeutsche"
+name = "Süddeutsche Zeitung"
+homepage = "https://www.sueddeutsche.de/"
+outlet_type = "national_daily"
+owner_group = "Südwestdeutsche Medienholding"
+paywall_model = "mixed"
+feeds = ["https://rss.sueddeutsche.de/rss/Topthemen", "https://rss.sueddeutsche.de/rss/Politik"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 25 h, 5 h, 3 h; news sitemap: 54 h
+[[outlet]]
+id = "welt"
+name = "Die Welt"
+homepage = "https://www.welt.de/"
+outlet_type = "national_daily"
+owner_group = "Axel Springer"
+paywall_model = "mixed"
+feeds = ["https://www.welt.de/feeds/section/politik/deutschland.rss", "https://www.welt.de/feeds/section/politik.rss", "https://www.welt.de/feeds/latest.rss"]
+news_sitemap = "https://www.welt.de/sitemaps/newssitemap/newssitemap.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# feeds Politik/Deutschland and the front page, news sitemap: check of dataset.politics.germany on 2026-10-19 (114 h, 28 h; sitemap 56 h); feed Gesellschaft: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "taz"
+name = "taz"
+homepage = "https://taz.de/"
+outlet_type = "national_daily"
+owner_group = "taz Verlagsgenossenschaft"
+paywall_model = "free"
+feeds = ["https://taz.de/Gesellschaft/!p4611;rss/", "https://taz.de/Politik/Deutschland/!p4616;rss/", "https://taz.de/!p4608;rss/"]
+news_sitemap = "https://taz.de/sitemap-google-news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# feeds politik and home, news sitemap: check of dataset.politics.germany on 2026-10-19 (265 h, 789 h; sitemap 48 h); feed gesellschaft: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "tagesspiegel"
+name = "Der Tagesspiegel"
+homepage = "https://www.tagesspiegel.de/"
+outlet_type = "national_daily"
+owner_group = "Dieter von Holtzbrinck Medien"
+paywall_model = "mixed"
+feeds = ["https://www.tagesspiegel.de/contentexport/feed/gesellschaft", "https://www.tagesspiegel.de/contentexport/feed/politik", "https://www.tagesspiegel.de/contentexport/feed/home"]
+news_sitemap = "https://www.tagesspiegel.de/news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# news sitemap: check of dataset.politics.germany on 2026-10-19 (48 h); feed wirtschaft/soziales: check of dataset.economics.germany on 2026-10-25 (538 h); feeds panorama/gesellschaft and panorama/bildung: probe of source_review.yml on 2026-10-28; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "spiegel"
+name = "Der Spiegel"
+homepage = "https://www.spiegel.de/"
+outlet_type = "weekly_magazine"
+owner_group = "Spiegel-Verlag"
+paywall_model = "mixed"
+feeds = ["https://www.spiegel.de/panorama/gesellschaft/index.rss", "https://www.spiegel.de/panorama/bildung/index.rss", "https://www.spiegel.de/wirtschaft/soziales/index.rss"]
+news_sitemap = "https://www.spiegel.de/sitemaps/news-de.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 289 h; news sitemap: none
+[[outlet]]
+id = "focus"
+name = "Focus Online"
+homepage = "https://www.focus.de/"
+outlet_type = "weekly_magazine"
+owner_group = "Hubert Burda Media"
+paywall_model = "free"
+feeds = ["https://www.focus.de/politik/rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed nachrichten/deutschland: check of dataset.politics.germany on 2026-10-19 (92 h); robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "t_online"
+name = "t-online"
+homepage = "https://www.t-online.de/"
+outlet_type = "online_only"
+owner_group = "Ströer"
+paywall_model = "free"
+feeds = ["https://www.t-online.de/nachrichten/deutschland/feed.rss"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 24 h, 20 h; news sitemap: 78 h
+[[outlet]]
+id = "n_tv"
+name = "n-tv.de"
+homepage = "https://www.n-tv.de/"
+outlet_type = "online_only"
+owner_group = "Gruner + Jahr/RTL"
+paywall_model = "free"
+feeds = ["https://www.n-tv.de/politik/rss", "https://www.n-tv.de/rss"]
+news_sitemap = "https://www.n-tv.de/news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 77 h, 2 h; news sitemap: 48 h
+[[outlet]]
+id = "bild"
+name = "Bild"
+homepage = "https://www.bild.de/"
+outlet_type = "tabloid"
+owner_group = "Axel Springer"
+paywall_model = "mixed"
+feeds = ["https://www.bild.de/feed/politik.xml", "https://www.bild.de/feed/alles.xml"]
+news_sitemap = "https://www.bild.de/sitemap-news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# =============================================================================
+# Regional public broadcasters
+# =============================================================================
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 47 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; no RSS feed, news sitemap only
+[[outlet]]
+id = "br24"
+name = "BR24"
+homepage = "https://www.br.de/nachrichten/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-BY"
+paywall_model = "free"
+feeds = []
+news_sitemap = "https://www.br.de/nachrichten/newsSitemap"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 2852 h, 116760 h, 5183 h; news sitemap: 7 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; covers HH, NI, SH, MV; Hamburg feed https://www.ndr.de/nachrichten/hamburg/index~rdf.xml omitted (3-feed limit)
+[[outlet]]
+id = "ndr"
+name = "NDR"
+homepage = "https://www.ndr.de/nachrichten/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-HH"
+paywall_model = "free"
+feeds = ["https://www.ndr.de/nachrichten/niedersachsen/index~rss2.xml", "https://www.ndr.de/nachrichten/schleswig-holstein/index~rdf.xml", "https://www.ndr.de/nachrichten/mecklenburg-vorpommern/index~rdf.xml"]
+news_sitemap = "https://www.ndr.de/news-102~news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 4361 h, 4361 h; news sitemap: 59 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "wdr"
+name = "WDR"
+homepage = "https://www1.wdr.de/nachrichten/index.html"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-NW"
+paywall_model = "free"
+feeds = ["https://www1.wdr.de/politik/politik-in-nrw/uebersicht-landespolitik-100.feed", "https://www1.wdr.de/uebersicht-100.feed"]
+news_sitemap = "https://www1.wdr.de/nachrichten/news-sitemap-100.news"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 3483 h, 11233 h, 55565 h; news sitemap: 48 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; covers SN, ST, TH
+[[outlet]]
+id = "mdr"
+name = "MDR"
+homepage = "https://www.mdr.de/nachrichten/index.html"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-SN"
+paywall_model = "free"
+feeds = ["https://www.mdr.de/nachrichten/sachsen/index~rss2.xml", "https://www.mdr.de/nachrichten/sachsen-anhalt/index~rss2.xml", "https://www.mdr.de/nachrichten/thueringen/index~rss2.xml"]
+news_sitemap = "https://www.mdr.de/sitemap/mdr-news-ueberblick-102~news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 35092 h, 64656 h, 35092 h; news sitemap: none; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; covers BW, RP
+[[outlet]]
+id = "swr"
+name = "SWR Aktuell"
+homepage = "https://www.swr.de/swraktuell/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-BW"
+paywall_model = "free"
+feeds = ["https://www.swr.de/~atom/swraktuell/baden-wuerttemberg/index.xml", "https://www.swr.de/~atom/swraktuell/rheinland-pfalz/index.xml", "https://www.swr.de/~atom/swraktuell/index.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 8013 h, 3482 h; news sitemap: none; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; covers BE, BB
+[[outlet]]
+id = "rbb24"
+name = "rbb24"
+homepage = "https://www.rbb24.de/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-BE"
+paywall_model = "free"
+feeds = ["https://www.rbb24.de/politik/index.xml/feed=rss.xml", "https://www.rbb24.de/aktuell/index.xml/feed=rss.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 388 h, 99794 h; news sitemap: 98603 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "hessenschau"
+name = "hessenschau.de"
+homepage = "https://www.hessenschau.de/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-HE"
+paywall_model = "free"
+feeds = ["https://www.hessenschau.de/politik/index.rss", "https://www.hessenschau.de/index.rss"]
+news_sitemap = "https://www.hessenschau.de/newssitemap.nc.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 23 h, 43 h; news sitemap: none; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "butenunbinnen"
+name = "buten un binnen"
+homepage = "https://www.butenunbinnen.de/"
+outlet_type = "public_broadcaster_regional"
+owner_group = "public"
+home_state = "DE-HB"
+paywall_model = "free"
+feeds = ["https://www.butenunbinnen.de/feed/rss/nachrichten/neuste-nachrichten100.xml", "https://www.butenunbinnen.de/feed/rss/neuste-inhalte100.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# =============================================================================
+# Regional dailies
+# =============================================================================
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 8814 h; news sitemap: 48 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "suedkurier"
+name = "Südkurier"
+homepage = "https://www.suedkurier.de/"
+outlet_type = "regional_daily"
+owner_group = "Mediengruppe Pressedruck"
+home_state = "DE-BW"
+paywall_model = "mixed"
+feeds = ["https://www.suedkurier.de/rss"]
+news_sitemap = "https://www.suedkurier.de/news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 30 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; no RSS feed, news sitemap only
+[[outlet]]
+id = "stuttgarter_zeitung"
+name = "Stuttgarter Zeitung"
+homepage = "https://www.stuttgarter-zeitung.de/"
+outlet_type = "regional_daily"
+owner_group = "Südwestdeutsche Medienholding"
+home_state = "DE-BW"
+paywall_model = "mixed"
+feeds = []
+news_sitemap = "https://www.stuttgarter-zeitung.de/sitemap-news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 128 h, 4831 h; news sitemap: none; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "nn"
+name = "Nürnberger Nachrichten"
+homepage = "https://www.nn.de/"
+outlet_type = "regional_daily"
+owner_group = "Verlag Nürnberger Presse"
+home_state = "DE-BY"
+paywall_model = "mixed"
+feeds = ["https://www.nn.de/politik?isRss=true", "https://www.nn.de/?isRss=true"]
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 9917 h, 9922 h; news sitemap: 29 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "augsburger_allgemeine"
+name = "Augsburger Allgemeine"
+homepage = "https://www.augsburger-allgemeine.de/"
+outlet_type = "regional_daily"
+owner_group = "Mediengruppe Pressedruck"
+home_state = "DE-BY"
+paywall_model = "mixed"
+feeds = ["https://www.augsburger-allgemeine.de/politik/rss", "https://www.augsburger-allgemeine.de/rss"]
+news_sitemap = "https://www.augsburger-allgemeine.de/news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 67 h; news sitemap: 46 h; robots.txt crawl-delay 10 s
+[[outlet]]
+id = "berliner_zeitung"
+name = "Berliner Zeitung"
+homepage = "https://www.berliner-zeitung.de/"
+outlet_type = "regional_daily"
+owner_group = "Berliner Verlag"
+home_state = "DE-BE"
+paywall_model = "mixed"
+feeds = ["https://www.berliner-zeitung.de/feed.xml"]
+news_sitemap = "https://www.berliner-zeitung.de/news-sitemap.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 30 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; no RSS feed, news sitemap only
+[[outlet]]
+id = "lr_online"
+name = "Lausitzer Rundschau"
+homepage = "https://www.lr-online.de/"
+outlet_type = "regional_daily"
+owner_group = "Südwestdeutsche Medienholding"
+home_state = "DE-BB"
+paywall_model = "mixed"
+feeds = []
+news_sitemap = "https://www.lr-online.de/sitemap-news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 251 h, 10 h; news sitemap: 60 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "weser_kurier"
+name = "Weser-Kurier"
+homepage = "https://www.weser-kurier.de/"
+outlet_type = "regional_daily"
+owner_group = "Bremer Tageszeitungen"
+home_state = "DE-HB"
+paywall_model = "mixed"
+feeds = ["https://www.weser-kurier.de/bremen/politik/?view=rss", "https://www.weser-kurier.de/bremen/?view=rss"]
+news_sitemap = "https://www.weser-kurier.de/sitemap-news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 262 h, 58 h, 120 h; news sitemap: 1255 h
+[[outlet]]
+id = "abendblatt"
+name = "Hamburger Abendblatt"
+homepage = "https://www.abendblatt.de/"
+outlet_type = "regional_daily"
+owner_group = "Funke"
+home_state = "DE-HH"
+paywall_model = "mixed"
+feeds = ["https://www.abendblatt.de/hamburg/politik/rss", "https://www.abendblatt.de/hamburg/rss", "https://www.abendblatt.de/politik/rss"]
+news_sitemap = "https://www.abendblatt.de/sitemaps/news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 49 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; no RSS feed, news sitemap only
+[[outlet]]
+id = "wiesbadener_kurier"
+name = "Wiesbadener Kurier"
+homepage = "https://www.wiesbadener-kurier.de/"
+outlet_type = "regional_daily"
+owner_group = "VRM"
+home_state = "DE-HE"
+paywall_model = "mixed"
+feeds = []
+news_sitemap = "https://www.wiesbadener-kurier.de/sitemaps/news-sitemap.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 48 h; no RSS feed, news sitemap only
+[[outlet]]
+id = "nordkurier"
+name = "Nordkurier"
+homepage = "https://www.nordkurier.de/"
+outlet_type = "regional_daily"
+owner_group = "Schwäbisch Media"
+home_state = "DE-MV"
+paywall_model = "mixed"
+feeds = []
+news_sitemap = "https://www.nordkurier.de/sitemaps/nord/google-news-sitemap-1.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 22 h, 95 h; news sitemap: 48 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "noz"
+name = "Neue Osnabrücker Zeitung"
+homepage = "https://www.noz.de/"
+outlet_type = "regional_daily"
+owner_group = "NOZ/mh:n Medien"
+home_state = "DE-NI"
+paywall_model = "mixed"
+feeds = ["https://www.noz.de/deutschland-welt/politik/rss", "https://www.noz.de/rss"]
+news_sitemap = "https://www.noz.de/sitemap/googleNewsList.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 164 h, 6 h; news sitemap: 48 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "rp_online"
+name = "Rheinische Post"
+homepage = "https://rp-online.de/"
+outlet_type = "regional_daily"
+owner_group = "Rheinische Post Mediengruppe"
+home_state = "DE-NW"
+paywall_model = "mixed"
+feeds = ["https://rp-online.de/nrw/landespolitik/feed.rss", "https://rp-online.de/politik/feed.rss"]
+news_sitemap = "https://rp-online.de/sitemap-news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 116 h, 420 h; news sitemap: 118 h
+[[outlet]]
+id = "waz"
+name = "WAZ"
+homepage = "https://www.waz.de/"
+outlet_type = "regional_daily"
+owner_group = "Funke"
+home_state = "DE-NW"
+paywall_model = "mixed"
+feeds = ["https://www.waz.de/politik/rss", "https://www.waz.de/rhein-und-ruhr/rss"]
+news_sitemap = "https://www.waz.de/sitemaps/news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 70 h, 1 h; news sitemap: 29 h
+[[outlet]]
+id = "volksfreund"
+name = "Trierischer Volksfreund"
+homepage = "https://www.volksfreund.de/"
+outlet_type = "regional_daily"
+owner_group = "Rheinische Post Mediengruppe"
+home_state = "DE-RP"
+paywall_model = "mixed"
+feeds = ["https://www.volksfreund.de/nachrichten/politik/feed.rss", "https://www.volksfreund.de/feed.rss"]
+news_sitemap = "https://www.volksfreund.de/sitemap-news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 4 h, 1 h; news sitemap: 48 h
+[[outlet]]
+id = "saarbruecker_zeitung"
+name = "Saarbrücker Zeitung"
+homepage = "https://www.saarbruecker-zeitung.de/"
+outlet_type = "regional_daily"
+owner_group = "Rheinische Post Mediengruppe"
+home_state = "DE-SL"
+paywall_model = "mixed"
+feeds = ["https://www.saarbruecker-zeitung.de/saarland/feed.rss", "https://www.saarbruecker-zeitung.de/feed.rss"]
+news_sitemap = "https://www.saarbruecker-zeitung.de/sitemap-news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 1937 h, 95 h; news sitemap: 46 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "freiepresse"
+name = "Freie Presse"
+homepage = "https://www.freiepresse.de/"
+outlet_type = "regional_daily"
+owner_group = "Medien Union"
+home_state = "DE-SN"
+paywall_model = "mixed"
+feeds = ["https://www.freiepresse.de/nachrichten/sachsen/feed.atom", "https://www.freiepresse.de/feed.atom"]
+news_sitemap = "https://www.freiepresse.de/sitemaps/articles_news.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: none; news sitemap: 106 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false; no RSS feed, news sitemap only
+[[outlet]]
+id = "volksstimme"
+name = "Volksstimme"
+homepage = "https://www.volksstimme.de/"
+outlet_type = "regional_daily"
+owner_group = "Bauer Media Group"
+home_state = "DE-ST"
+paywall_model = "mixed"
+feeds = []
+news_sitemap = "https://www.volksstimme.de/sitemaps/newssitemap-1.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 37 h, 173 h; news sitemap: 48 h; robots.txt states a TDM reservation (§ 44b UrhG) in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "shz"
+name = "shz.de"
+homepage = "https://www.shz.de/"
+outlet_type = "regional_daily"
+owner_group = "NOZ/mh:n Medien"
+home_state = "DE-SH"
+paywall_model = "mixed"
+feeds = ["https://www.shz.de/deutschland-welt/politik/rss", "https://www.shz.de/rss"]
+news_sitemap = "https://www.shz.de/sitemap/googleNewsList.xml"
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 102 h, 62151 h; news sitemap: 148 h
+[[outlet]]
+id = "thueringer_allgemeine"
+name = "Thüringer Allgemeine"
+homepage = "https://www.thueringer-allgemeine.de/"
+outlet_type = "regional_daily"
+owner_group = "Funke"
+home_state = "DE-TH"
+paywall_model = "mixed"
+feeds = ["https://www.thueringer-allgemeine.de/politik/rss", "https://www.thueringer-allgemeine.de/rss"]
+news_sitemap = "https://www.thueringer-allgemeine.de/sitemaps/news.xml"
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.economics.germany on 2026-10-25: feeds: 251 h; news sitemap: none
+[[outlet]]
+id = "ksta"
+name = "Kölner Stadt-Anzeiger"
+homepage = "https://www.ksta.de/"
+outlet_type = "regional_daily"
+owner_group = "DuMont"
+home_state = "DE-NW"
+paywall_model = "mixed"
+feeds = ["https://feed.ksta.de/feed/rss/wirtschaft/index.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# =============================================================================
+# Specialist outlets
+# =============================================================================
+
+# feed: probe of source_review.yml on 2026-10-28 (RSS, 146 kB); robots.txt allows the feed, no TDM reservation
+[[outlet]]
+id = "news4teachers"
+name = "News4teachers"
+homepage = "https://www.news4teachers.de/"
+outlet_type = "specialist_press"
+owner_group = "Agentur für Bildungsjournalismus"
+topic = "Education and schools"
+paywall_model = "free"
+feeds = ["https://www.news4teachers.de/feed/"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the news (epd): probe of source_review.yml on 2026-10-28 (RSS, items of the same day); it carries general news, therefore topic_filter = true
+[[outlet]]
+id = "evangelisch_de"
+name = "evangelisch.de"
+homepage = "https://www.evangelisch.de/"
+outlet_type = "specialist_press"
+owner_group = "Gemeinschaftswerk der Evangelischen Publizistik"
+topic = "Religion and churches"
+paywall_model = "free"
+feeds = ["https://www.evangelisch.de/rss/nachrichten.rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# feed: probe of source_review.yml on 2026-10-28 (RSS, 136 kB); robots.txt states a TDM reservation in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "domradio"
+name = "DOMRADIO.DE"
+homepage = "https://www.domradio.de/"
+outlet_type = "specialist_press"
+owner_group = "DOMRADIO.DE gGmbH"
+topic = "Religion and churches"
+paywall_model = "free"
+feeds = ["https://www.domradio.de/rss-feeds/domradio-rss.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# =============================================================================
+# Press sources: federal institutions and parliaments
+# =============================================================================
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 357 h, 120 h, 259 h
+[[press_source]]
+id = "bundesregierung"
+name = "Bundesregierung"
+homepage = "https://www.bundesregierung.de/breg-de"
+actor_type = "federal_government"
+jurisdiction = "DE"
+feeds = ["https://www.bundesregierung.de/service/rss/breg-de/1151244/feed.xml", "https://www.bundesregierung.de/service/rss/breg-de/1151242/feed.xml", "https://www.bundesregierung.de/service/rss/breg-de/1151246/feed.xml"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 241 h, 4 h, 5 h
+[[press_source]]
+id = "bundestag"
+name = "Deutscher Bundestag"
+homepage = "https://www.bundestag.de/"
+actor_type = "parliament"
+jurisdiction = "DE"
+feeds = ["https://www.bundestag.de/static/appdata/includes/rss/pressemitteilungen.rss", "https://www.bundestag.de/static/appdata/includes/rss/hib.rss", "https://www.bundestag.de/static/appdata/includes/rss/aktuellethemen.rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 504 h; robots.txt crawl-delay 30 s, therefore one feed and fetch_pages = false; announcement feed RSSGenerator_Announcement.xml omitted
+[[press_source]]
+id = "bundesrat"
+name = "Bundesrat"
+homepage = "https://www.bundesrat.de/DE/homepage/homepage-node.html"
+actor_type = "parliament"
+jurisdiction = "DE"
+feeds = ["https://www.bundesrat.de/SiteGlobals/Functions/RSSFeed/RSSGenerator_top_plenumkompakt.xml"]
+topic_filter = true
+fetch_pages = false
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 2882 h, 2280 h; robots.txt crawl-delay 10 s
+[[press_source]]
+id = "bmi"
+name = "Bundesministerium des Innern"
+homepage = "https://www.bmi.bund.de/DE/startseite/startseite-node.html"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+feeds = ["https://www.bmi.bund.de/DE/service/rss-newsfeed/function/rssnewsfeed-pressemitteilungen.xml", "https://www.bmi.bund.de/DE/service/rss-newsfeed/function/rssnewsfeed-kurzmeldungen.xml"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 2188 h, 603 h
+[[press_source]]
+id = "bmbfsfj"
+name = "Bundesministerium für Bildung, Familie, Senioren, Frauen und Jugend"
+homepage = "https://www.bmbfsfj.bund.de/"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+feeds = ["https://www.bmbfsfj.bund.de/service/rss/bmbfsfj/111102/feed.rss", "https://www.bmbfsfj.bund.de/service/rss/bmbfsfj/108854/feed.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 75288 h, 111504 h
+[[press_source]]
+id = "bmg"
+name = "Bundesministerium für Gesundheit"
+homepage = "https://www.bundesgesundheitsministerium.de/"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+feeds = ["https://www.bundesgesundheitsministerium.de/pressemitteilungen.xml", "https://www.bundesgesundheitsministerium.de/meldungen.xml"]
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 4388 h
+[[press_source]]
+id = "bmwsb"
+name = "Bundesministerium für Wohnen, Stadtentwicklung und Bauwesen"
+homepage = "https://www.bmwsb.bund.de/DE/home/home_node.html"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+feeds = ["https://www.bmwsb.bund.de/DE/tools-services/rssfeed/_functions/rssnewsfeed.xml"]
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 9315 h, 25294 h
+[[press_source]]
+id = "bmjv"
+name = "Bundesministerium der Justiz und für Verbraucherschutz"
+homepage = "https://www.bmjv.de/DE/Startseite/Startseite_node.html"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+feeds = ["https://www.bmjv.de/SiteGlobals/Functions/RSSNewsfeed/DE/RSSNewsfeed/RSSNewsfeedPressemitteilungen.xml?nn=149890", "https://www.bmjv.de/SiteGlobals/Functions/RSSNewsfeed/DE/RSSNewsfeed/RSSNewsfeedGesetzgebungsverfahren.xml?nn=149890"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28; the feed is served as text/html; robots.txt allows /SiteGlobals/Functions/RSSFeed/DE/ and sets a crawl-delay of 30 s, therefore fetch_pages = false
+[[press_source]]
+id = "destatis"
+name = "Statistisches Bundesamt"
+homepage = "https://www.destatis.de/"
+actor_type = "statistical_office"
+jurisdiction = "DE"
+feeds = ["https://www.destatis.de/SiteGlobals/Functions/RSSFeed/DE/RSSNewsfeed/Aktuell.xml"]
+fetch_pages = false
+added = 2026-10-28
+
+# =============================================================================
+# Press sources: statistical offices of the states
+# =============================================================================
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28 (RSS); the office publishes the statistics of Hamburg and Schleswig-Holstein
+[[press_source]]
+id = "statistik_nord"
+name = "Statistisches Amt für Hamburg und Schleswig-Holstein"
+homepage = "https://www.statistik-nord.de/"
+actor_type = "statistical_office"
+jurisdiction = "DE-HH"
+feeds = ["https://www.statistik-nord.de/feed/693/feed.xml?cHash=af2e86567e947e8598a3b7c4be8548f4"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28 (RSS, publication times without a standard format)
+[[press_source]]
+id = "statistik_mv"
+name = "Statistisches Amt Mecklenburg-Vorpommern"
+homepage = "https://www.laiv-mv.de/Statistik/"
+actor_type = "statistical_office"
+jurisdiction = "DE-MV"
+feeds = ["https://www.laiv-mv.de/feed/rss2/pressemitteilungen/22/40"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28; the feed is served as text/html
+[[press_source]]
+id = "statistik_rlp"
+name = "Statistisches Landesamt Rheinland-Pfalz"
+homepage = "https://www.statistik.rlp.de/"
+actor_type = "statistical_office"
+jurisdiction = "DE-RP"
+feeds = ["https://www.statistik.rlp.de/service/rss-feeds/all_feeds.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28; the feed is served as text/html
+[[press_source]]
+id = "statistik_st"
+name = "Statistisches Landesamt Sachsen-Anhalt"
+homepage = "https://statistik.sachsen-anhalt.de/"
+actor_type = "statistical_office"
+jurisdiction = "DE-ST"
+feeds = ["https://statistik.sachsen-anhalt.de/news-aktuelles/news-aktuelles-rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# =============================================================================
+# Press sources: state governments
+# =============================================================================
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 110 h, 311 h
+[[press_source]]
+id = "state_by"
+name = "Bayerische Staatsregierung"
+homepage = "https://www.bayern.de/"
+actor_type = "state_government"
+jurisdiction = "DE-BY"
+feeds = ["https://www.bayern.de/rss/pm_alle.php", "https://www.bayern.de/rss/pm.php"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# check of dataset.politics.germany on 2026-10-19: feeds: 374 h
+[[press_source]]
+id = "state_ni"
+name = "Niedersächsische Landesregierung"
+homepage = "https://www.niedersachsen.de/startseite/"
+actor_type = "state_government"
+jurisdiction = "DE-NI"
+feeds = ["https://www.niedersachsen.de/rss.php"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# source review of dataset.politics.germany on 2026-10-20: 6 items in the last 60 days; found by the first review, added by hand
+[[press_source]]
+id = "state_be"
+name = "Senatskanzlei Berlin"
+homepage = "https://www.berlin.de/senatskanzlei/"
+actor_type = "state_government"
+jurisdiction = "DE-BE"
+feeds = ["https://www.berlin.de/rbmskzl/index.php/rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# =============================================================================
+# Press sources: research institutes, associations and organizations
+# =============================================================================
+
+# check of dataset.economics.germany on 2026-10-25: feeds: 696 h
+[[press_source]]
+id = "iab"
+name = "Institut für Arbeitsmarkt- und Berufsforschung"
+homepage = "https://iab.de/"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://iab.de/feed/"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: check of dataset.economics.germany on 2026-10-25 (49538 h); the feed of wage agreements is not read
+[[press_source]]
+id = "dgb"
+name = "Deutscher Gewerkschaftsbund"
+homepage = "https://www.dgb.de/"
+actor_type = "trade_union"
+jurisdiction = "DE"
+feeds = ["https://www.dgb.de/pressemitteilungen-rss-feed.xml"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28 (RSS, 248 kB)
+[[press_source]]
+id = "dji"
+name = "Deutsches Jugendinstitut"
+homepage = "https://www.dji.de/"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://www.dji.de/presse-rss.xml"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed: probe of source_review.yml on 2026-10-28 (RSS of the whole website, 658 kB)
+[[press_source]]
+id = "svr_migration"
+name = "Sachverständigenrat für Integration und Migration"
+homepage = "https://www.svr-migration.de/"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://www.svr-migration.de/feed/"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed: probe of source_review.yml on 2026-10-28 (RSS, 4 kB)
+[[press_source]]
+id = "wzb"
+name = "Wissenschaftszentrum Berlin für Sozialforschung"
+homepage = "https://www.wzb.eu/de"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://www.wzb.eu/de/rss.xml"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28 (15 kB)
+[[press_source]]
+id = "bertelsmann_stiftung"
+name = "Bertelsmann Stiftung"
+homepage = "https://www.bertelsmann-stiftung.de/de/"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+feeds = ["https://www.bertelsmann-stiftung.de/de/system/service/rss-feed-pressemitteilungen"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed: probe of source_review.yml on 2026-10-28 (RSS, 170 kB)
+[[press_source]]
+id = "paritaetischer"
+name = "Der Paritätische Gesamtverband"
+homepage = "https://www.der-paritaetische.de/"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+feeds = ["https://www.der-paritaetische.de/xml/rss2/"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the news: probe of source_review.yml on 2026-10-28 (RSS, 325 kB)
+[[press_source]]
+id = "proasyl"
+name = "PRO ASYL"
+homepage = "https://www.proasyl.de/"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+feeds = ["https://www.proasyl.de/news/feed/"]
+fetch_pages = true
+added = 2026-10-28
+
+# feed of the press releases: probe of source_review.yml on 2026-10-28 (RSS, items of the same day); the association comments on many topics of the districts, therefore topic_filter = true
+[[press_source]]
+id = "landkreistag"
+name = "Deutscher Landkreistag"
+homepage = "https://www.landkreistag.de/"
+actor_type = "municipal_association"
+jurisdiction = "DE"
+feeds = ["https://www.landkreistag.de/index.php/presseforum/pressemitteilungen?format=feed&type=rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: 16 items in the last 60 days; the robots.txt of www.bamf.de was reachable again
+[[press_source]]
+id = "bamf"
+name = "Bundesamt für Migration und Flüchtlinge"
+homepage = "https://www.bamf.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meldungen.xml?nn=282672", "https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Publikationen_EMN.xml?nn=282672", "https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Publikationen_Forschungszentrum.xml?nn=282672"]
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: 3 items in the last 60 days; the feed of the publication server edoc.rki.de (reports and articles, among them the Journal of Health Monitoring); robots.txt crawl-delay 30 s, therefore fetch_pages = false
+[[press_source]]
+id = "rki"
+name = "Robert Koch-Institut"
+homepage = "https://www.rki.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://edoc.rki.de/feed/atom_1.0/site"]
+fetch_pages = false
+added = 2026-10-28
+
+# source review 2026-10-28: 11 items in the last 60 days
+[[press_source]]
+id = "mpidr"
+name = "Max-Planck-Institut für demografische Forschung"
+homepage = "https://www.demogr.mpg.de/de"
+actor_type = "research_institute"
+jurisdiction = "DE"
+feeds = ["https://www.demogr.mpg.de/de/presse.rss", "https://www.demogr.mpg.de/de/presse_news.rss"]
+fetch_pages = true
+added = 2026-10-28
+
+# source review 2026-10-28: background articles (Hintergrund aktuell, 75 items since January 2025), the series Migrationspolitik im Fokus and the Dossier Bildung; the feed of the press releases has no item after 2026-06-18 and announces events; most background articles are on other topics, therefore topic_filter = true
+[[press_source]]
+id = "bpb"
+name = "Bundeszentrale für politische Bildung"
+homepage = "https://www.bpb.de/"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://www.bpb.de/rss-feed/230153.rss", "https://www.bpb.de/rss-feed/325589.rss", "https://www.bpb.de/rss-feed/518453.rss"]
+topic_filter = true
+fetch_pages = true
+added = 2026-10-28
+
+# Candidates that were checked and not admitted. The source review does not propose them again (see the header).
+
+[[excluded]]
+id = "faz"
+name = "Frankfurter Allgemeine Zeitung"
+homepage = "https://www.faz.net/"
+status = "tdm_reserved"
+reason = "machine-readable text-and-data-mining reservation (check of dataset.politics.germany)"
+checked = 2026-10-19
+
+[[excluded]]
+id = "bz_berlin"
+name = "B.Z."
+homepage = "https://www.bz-berlin.de/"
+status = "tdm_reserved"
+reason = "machine-readable text-and-data-mining reservation (check of dataset.politics.germany)"
+checked = 2026-10-19
+
+[[excluded]]
+id = "zeit"
+name = "ZEIT ONLINE"
+homepage = "https://www.zeit.de/"
+status = "blocked"
+reason = "blocks automated requests (check of dataset.politics.germany)"
+checked = 2026-10-19
+
+[[excluded]]
+id = "rnd"
+name = "RedaktionsNetzwerk Deutschland"
+homepage = "https://www.rnd.de/"
+status = "blocked"
+reason = "blocks automated requests, as do the regional titles of the RND network (check of dataset.politics.germany)"
+checked = 2026-10-19
+
+[[excluded]]
+id = "aerzteblatt"
+name = "Deutsches Ärzteblatt"
+homepage = "https://www.aerzteblatt.de/"
+status = "terms"
+reason = "the imprint permits the inclusion in electronic databases, also of excerpts, only with the permission of the publisher; robots.txt states a TDM reservation in natural language"
+checked = 2026-10-28
+
+[[excluded]]
+id = "migazin"
+name = "MiGAZIN"
+homepage = "https://www.migazin.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Migration and asylum"
+paywall_model = "free"
+feeds = ["https://www.migazin.de/feed/"]
+status = "robots"
+reason = "robots.txt disallows /feed/"
+checked = 2026-10-28
+
+[[excluded]]
+id = "mediendienst_integration"
+name = "Mediendienst Integration"
+homepage = "https://mediendienst-integration.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Migration and asylum"
+paywall_model = "free"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "katholisch_de"
+name = "katholisch.de"
+homepage = "https://www.katholisch.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Religion and churches"
+paywall_model = "free"
+status = "no_feed"
+reason = "no feed link on the homepage; /rss returns HTTP 404"
+checked = 2026-10-28
+
+[[excluded]]
+id = "bib"
+name = "Bundesinstitut für Bevölkerungsforschung"
+homepage = "https://www.bib.bund.de/"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "robots"
+reason = "no feed link on the homepage; robots.txt disallows /DE/Service/ except the podcast feeds"
+checked = 2026-10-28
+
+[[excluded]]
+id = "bka"
+name = "Bundeskriminalamt"
+homepage = "https://www.bka.de/"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "robots"
+reason = "robots.txt crawl delay 180 s (see the excluded snapshot sources)"
+checked = 2026-10-26
+
+[[excluded]]
+id = "bmas"
+name = "Bundesministerium für Arbeit und Soziales"
+homepage = "https://www.bmas.de/"
+kind = "press_source"
+actor_type = "federal_ministry"
+jurisdiction = "DE"
+status = "robots"
+reason = "robots.txt crawl delay 180 s (check of dataset.economics.germany)"
+checked = 2026-10-25
+
+[[excluded]]
+id = "arbeitsagentur"
+name = "Bundesagentur für Arbeit"
+homepage = "https://www.arbeitsagentur.de/presse"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found (check of dataset.economics.germany)"
+checked = 2026-10-25
+
+[[excluded]]
+id = "ekd"
+name = "Evangelische Kirche in Deutschland"
+homepage = "https://www.ekd.de/"
+status = "terms"
+reason = "the imprint forbids any further use of texts without permission (see the excluded snapshot sources)"
+checked = 2026-10-26
+
+[[excluded]]
+id = "dbk"
+name = "Deutsche Bischofskonferenz"
+homepage = "https://www.dbk.de/"
+status = "blocked"
+reason = "HTTP 401 for automated requests (see the excluded snapshot sources)"
+checked = 2026-10-26
+
+[[excluded]]
+id = "iw"
+name = "Institut der deutschen Wirtschaft"
+homepage = "https://www.iwkoeln.de/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "unhcr"
+name = "UNHCR Deutschland"
+homepage = "https://www.unhcr.org/dach/de/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "studierendenwerke"
+name = "Deutsches Studierendenwerk"
+homepage = "https://www.studierendenwerke.de/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "gew"
+name = "Gewerkschaft Erziehung und Wissenschaft"
+homepage = "https://www.gew.de/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_bremen"
+name = "Statistisches Landesamt Bremen"
+homepage = "https://www.statistik.bremen.de/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_saarland"
+name = "Statistisches Amt Saarland"
+homepage = "https://www.saarland.de/stat/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_bw"
+name = "Statistisches Landesamt Baden-Württemberg"
+homepage = "https://www.statistik-bw.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-BW"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_bayern"
+name = "Bayerisches Landesamt für Statistik"
+homepage = "https://www.statistik.bayern.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-BY"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_bbb"
+name = "Amt für Statistik Berlin-Brandenburg"
+homepage = "https://www.statistik-berlin-brandenburg.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-BE"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_hessen"
+name = "Hessisches Statistisches Landesamt"
+homepage = "https://statistik.hessen.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-HE"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_niedersachsen"
+name = "Landesamt für Statistik Niedersachsen"
+homepage = "https://www.statistik.niedersachsen.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-NI"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "it_nrw"
+name = "Landesbetrieb IT.NRW (Statistisches Landesamt)"
+homepage = "https://www.it.nrw/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-NW"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_sachsen"
+name = "Statistisches Landesamt des Freistaates Sachsen"
+homepage = "https://www.statistik.sachsen.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-SN"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "statistik_thueringen"
+name = "Thüringer Landesamt für Statistik"
+homepage = "https://statistik.thueringen.de/"
+kind = "press_source"
+actor_type = "statistical_office"
+jurisdiction = "DE-TH"
+status = "no_feed"
+reason = "no feed link on the homepage and the press page"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dezim"
+name = "Deutsches Zentrum für Integrations- und Migrationsforschung"
+homepage = "https://www.dezim-institut.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "berlin_institut"
+name = "Berlin-Institut für Bevölkerung und Entwicklung"
+homepage = "https://www.berlin-institut.org/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dza"
+name = "Deutsches Zentrum für Altersfragen"
+homepage = "https://www.dza.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "caritas"
+name = "Deutscher Caritasverband"
+homepage = "https://www.caritas.de/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "diakonie"
+name = "Diakonie Deutschland"
+homepage = "https://www.diakonie.de/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "vdk"
+name = "Sozialverband VdK Deutschland"
+homepage = "https://www.vdk.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "sovd"
+name = "Sozialverband Deutschland"
+homepage = "https://www.sovd.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dkhw"
+name = "Deutsches Kinderhilfswerk"
+homepage = "https://www.dkhw.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "kmk"
+name = "Kultusministerkonferenz"
+homepage = "https://www.kmk.org/"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "staedtetag"
+name = "Deutscher Städtetag"
+homepage = "https://www.staedtetag.de/"
+kind = "press_source"
+actor_type = "municipal_association"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no feed link on the homepage"
+checked = 2026-10-28
+
+[[excluded]]
+id = "mieterbund"
+name = "Deutscher Mieterbund"
+homepage = "https://mieterbund.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+feeds = ["https://mieterbund.de/feed/"]
+status = "inactive"
+reason = "the feed /feed/ has no items (1 kB)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dipf"
+name = "DIPF | Leibniz-Institut für Bildungsforschung und Bildungsinformation"
+homepage = "https://www.dipf.de/de"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: its feeds list the elements of the home page (banners, greetings, links to the media library), not press releases"
+checked = 2026-10-28
+
+[[excluded]]
+id = "sozialpolitik_aktuell"
+name = "Sozialpolitik aktuell"
+homepage = "https://www.sozialpolitik-aktuell.de/"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: the feed neu_eingestellt.xml lists reports of other institutions and links them to anchors of a few section pages; the URL without the anchor identifies an item, so most items would be dropped as duplicates"
+checked = 2026-10-28
+
+[[excluded]]
+id = "die_bonn"
+name = "Deutsches Institut für Erwachsenenbildung - Leibniz-Zentrum für Lebenslanges Lernen"
+homepage = "https://www.die-bonn.de/"
+status = "not_relevant"
+reason = "passes the checks; not admitted by hand: 355 items in 60 days, a volume of literature and publication notices rather than press releases"
+checked = 2026-10-28
+
+[[excluded]]
+id = "ifo"
+name = "ifo Institut"
+homepage = "https://www.ifo.de/"
+status = "not_relevant"
+reason = "passes the checks; economic research, collected by dataset.economics.germany"
+checked = 2026-10-28
+
+[[excluded]]
+id = "rwi"
+name = "RWI - Leibniz-Institut für Wirtschaftsforschung"
+homepage = "https://www.rwi-essen.de/"
+status = "not_relevant"
+reason = "passes the checks; economic research, collected by dataset.economics.germany"
+checked = 2026-10-28
+
+[[excluded]]
+id = "baulinks"
+name = "Baulinks.de"
+homepage = "https://www.baulinks.de/"
+status = "not_relevant"
+reason = "passes the checks; news of the construction trade, not on housing as a living condition"
+checked = 2026-10-28
+
+[[excluded]]
+id = "integrationsbeauftragte"
+name = "Die Beauftragte der Bundesregierung für Migration, Flüchtlinge und Integration"
+homepage = "https://www.integrationsbeauftragte.de"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "diw"
+name = "DIW Berlin (Deutsches Institut für Wirtschaftsforschung)"
+homepage = "https://www.diw.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "igmetall"
+name = "IG Metall"
+homepage = "https://www.igmetall.de/"
+kind = "press_source"
+actor_type = "trade_union"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "gesis"
+name = "GESIS - Leibniz-Institut für Sozialwissenschaften"
+homepage = "https://www.gesis.org/"
+status = "blocked"
+reason = "homepage blocked (HTTP 403)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "awo"
+name = "Arbeiterwohlfahrt Bundesverband"
+homepage = "https://www.awo.org/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-10-28
+
+[[excluded]]
+id = "drk"
+name = "Deutsches Rotes Kreuz"
+homepage = "https://www.drk.de/"
+kind = "press_source"
+actor_type = "welfare_association"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "bagso"
+name = "Bundesarbeitsgemeinschaft der Seniorenorganisationen (BAGSO)"
+homepage = "https://www.bagso.de/"
+kind = "press_source"
+actor_type = "civil_society_organization"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "iwh"
+name = "Leibniz-Institut für Wirtschaftsforschung Halle (IWH)"
+homepage = "https://www.iwh-halle.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "zew"
+name = "ZEW - Leibniz-Zentrum für Europäische Wirtschaftsforschung"
+homepage = "https://www.zew.de/"
+kind = "press_source"
+actor_type = "research_institute"
+jurisdiction = "DE"
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-10-28
+
+[[excluded]]
+id = "dguv"
+name = "Deutsche Gesetzliche Unfallversicherung"
+homepage = "https://www.dguv.de/de/index.jsp"
+kind = "press_source"
+actor_type = "public_agency"
+jurisdiction = "DE"
+status = "inactive"
+reason = "4 recent items, fewer than 5"
+checked = 2026-10-28
+
+[[excluded]]
+id = "aerztezeitung"
+name = "Ärzte Zeitung"
+homepage = "https://www.aerztezeitung.de/"
+status = "tdm_reserved"
+reason = "TDM reservation (tdmrep.json)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "senioren_nachrichten"
+name = "Senioren Nachrichten"
+homepage = "https://senioren-nachrichten.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Older people and ageing"
+paywall_model = "free"
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-10-28
+
+[[excluded]]
+id = "springerpflege"
+name = "Springer Pflege"
+homepage = "https://www.springerpflege.de/"
+status = "tdm_reserved"
+reason = "TDM reservation (tdmrep.json)"
+checked = 2026-10-28
+
+[[excluded]]
+id = "mehrfamilienhaus_magazin"
+name = "Mehrfamilienhaus Magazin"
+homepage = "https://www.mehrfamilienhaus-magazin.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "unknown"
+topic = "Housing and rents"
+paywall_model = "free"
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-10-28

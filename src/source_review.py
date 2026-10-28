@@ -24,20 +24,25 @@ The review
    statistics as candidates (if a token is set) and the excluded sources that
    are due for a new check;
 6. fetches the terms of use of every provider and compares the hash of their
-   text with ``terms_hash`` in ``config/providers.toml``.
+   text with ``terms_hash`` in ``config/providers.toml``;
+7. reviews the news outlets and press sources of ``config/sources.toml``
+   (``press_review.py``): feeds, health and yield of every source, gaps, a
+   recheck of the excluded candidates and, with a Gemini API key, a search for
+   new sources.
 
-The review writes a Markdown report and, when the text of a terms page
-changed, the new hash into ``config/providers.toml``. The workflow
-``source_review.yml`` stores the report as ``reviews/YYYY-MM.md`` and opens a
-pull request with it. Changes of the catalog and the region registry are
-proposed in the report only, because they need a verified key and a
-measurement log entry (CLAUDE.md, section 9). Every request goes through
-``WebClient`` and its fetch rules; the terms pages are website requests that
-respect robots.txt.
+The review writes a Markdown report, the new hash of a changed terms page
+into ``config/providers.toml`` and the proposed changes of the news and press
+sources into ``config/sources.toml``. The workflow ``source_review.yml``
+stores the report as ``reviews/YYYY-MM.md`` and opens a pull request with
+it. Changes of the catalog and the region registry are proposed in the report
+only, because they need a verified key and a measurement log entry (CLAUDE.md,
+section 9). Every request goes through ``WebClient`` and its fetch rules; the
+terms pages, feeds and homepages are website requests that respect robots.txt.
 
 Usage:
-    uv run python src/source_review.py --report PATH [--concepts NAME,...] [--snapshots ID,...] [--no-terms]
-                                       [--providers PATH] [--output-dir PATH]
+    uv run python src/source_review.py --report PATH [--concepts NAME,...] [--snapshots ID,...]
+                                       [--press-sources ID,...] [--no-press] [--no-press-search] [--no-terms]
+                                       [--providers PATH] [--sources-config PATH] [--output-dir PATH]
     uv run python src/source_review.py --report PATH --probe "URL URL ..." [--link-filter REGEX] [--text-filter REGEX]
 """
 import argparse
@@ -79,6 +84,7 @@ from collectors.snapshots import (
     genesis_tables,
     snapshot_hash,
 )
+from press_review import SearchModel, build_press_section, press_summary, run_press_review
 from probe import probe_url
 from providers import CONFIG_PATH as PROVIDERS_PATH
 from providers import Provider, ProvidersError, load_providers, set_terms_hash
@@ -86,6 +92,8 @@ from regions import Region, RegistryError, active_regions, load_regions
 from settings import Settings
 from snapshots import CONFIG_PATH as SNAPSHOTS_PATH
 from snapshots import ExcludedSource, SnapshotConfigError, SnapshotSource, load_snapshot_config
+from sources import CONFIG_PATH as SOURCES_PATH
+from sources import load_config as load_sources
 from state import RUN_LOG_FILE, SeenEntry, SeenStore
 from web import FetchError, NotFoundError, Response, WebClient
 
@@ -965,13 +973,17 @@ def snapshot_section(result: ReviewResult, today: date) -> list[str]:
     return lines
 
 
-def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
+def build_report(result: ReviewResult, now: datetime, catalog_size: int, press_lines: Sequence[str] = (),
+                 press_line: Optional[str] = None) -> str:
     """Builds the Markdown report of a review, used as review file and pull request description.
 
     Args:
         result: The review result.
         now: Time of the review (UTC).
         catalog_size: Number of active catalog entries.
+        press_lines: The section of the press review (``press_review.build_press_section``); empty if the
+            news and press sources were not reviewed.
+        press_line: The summary line of the press review.
 
     Returns:
         str: The Markdown text.
@@ -987,7 +999,9 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         f"Review of {now:%Y-%m-%d %H:%M} UTC. Checked {len(result.checks)} of {catalog_size} catalog entries live "
         f"(periods since {now.year - CHECK_YEARS}), the Eurostat table of contents "
         f"({'read' if result.toc_available else 'not available'}), the German NUTS codes, "
-        f"{len(result.snapshots)} snapshot entries and the terms of {len(result.terms)} providers.",
+        f"{len(result.snapshots)} snapshot entries"
+        + (", the news and press sources" if press_lines else "")
+        + f" and the terms of {len(result.terms)} providers.",
         "",
         "## Table of Contents",
         "- [Summary](#summary)",
@@ -996,6 +1010,7 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         "- [Datasets and regions](#datasets-and-regions)",
         "- [Stored series and recent runs](#stored-series-and-recent-runs)",
         "- [Snapshot sources](#snapshot-sources)",
+        *(["- [News and press sources](#news-and-press-sources)"] if press_lines else []),
         "- [Terms of use](#terms-of-use)",
         "- [Next steps](#next-steps)",
         "",
@@ -1010,6 +1025,7 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         f"attention, {snapshot_statuses.get('no_access', 0)} without access, {snapshot_statuses.get('failed', 0)} "
         f"failed",
         f"- **Excluded sources due for a new check:** {len(due)}",
+        *([press_line] if press_line else []),
         f"- **Terms pages changed or recorded:** {len(changed_terms)}",
         "",
         "## Entries that need attention",
@@ -1070,6 +1086,7 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
     if not (result.unstored_entries or result.stale_series or result.run_failures):
         lines.append("Nothing to report.")
     lines.extend(snapshot_section(result, now.date()))
+    lines.extend(press_lines)
     lines.extend(["", "## Terms of use", "", "| Provider | Page | Status | Detail |", "|---|---|---|---|"])
     lines.extend(f"| {check.provider} | {check.url} | {check.status} | {_cell(check.detail)} |" for check in result.terms)
     if not result.terms:
@@ -1089,6 +1106,8 @@ def build_report(result: ReviewResult, now: datetime, catalog_size: int) -> str:
         "excluded sources that are due again with the probe of this workflow.",
         "- Read the terms pages marked as changed; the pull request records their new hash in "
         "`config/providers.toml`.",
+        "- Check the proposed changes of the news and press sources in `config/sources.toml`; to keep a source "
+        "that is proposed for removal because of low yield, set `keep = true` in its entry.",
         "- Merge this pull request to keep the report in `reviews/`. The next review replaces the branch, so merge "
         "or close the pull request before then.",
     ])
@@ -1131,6 +1150,11 @@ def run_probes(urls: Sequence[str], link_filter: Optional[str], report: Path, we
     return 0
 
 
+def _selection(value: Optional[str]) -> Optional[set[str]]:
+    """Parses a comma-separated selection of ids; None if nothing is selected."""
+    return {name.strip() for name in value.split(",") if name.strip()} if value else None
+
+
 def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
     """Parses the command-line arguments.
 
@@ -1146,10 +1170,20 @@ def parse_args(argv: Optional[list[str]]) -> argparse.Namespace:
                                            "with --snapshots only, none)")
     parser.add_argument("--snapshots", help="comma-separated snapshot entries to check (default: all active entries; "
                                             "with --concepts only, none)")
+    parser.add_argument("--press-sources", help="comma-separated news and press sources of config/sources.toml to "
+                                                "check, without gaps, rechecks and search (default: all active "
+                                                "sources; with --concepts or --snapshots only, none)")
+    parser.add_argument("--press", action=argparse.BooleanOptionalAction, default=True,
+                        help="review the news and press sources (default: on)")
+    parser.add_argument("--press-search", action=argparse.BooleanOptionalAction, default=True,
+                        help="search for new news and press sources with Gemini and Google Search, if GEMINI_API_KEY "
+                             "is set (default: on)")
     parser.add_argument("--terms", action=argparse.BooleanOptionalAction, default=True,
                         help="check the terms pages of the providers (default: on)")
     parser.add_argument("--providers", type=Path, default=PROVIDERS_PATH, help="the provider configuration")
     parser.add_argument("--snapshot-config", type=Path, default=SNAPSHOTS_PATH, help="the snapshot configuration")
+    parser.add_argument("--sources-config", type=Path, default=SOURCES_PATH,
+                        help="the configuration of the news and press sources")
     parser.add_argument("--probe", help="URLs separated by spaces: check them with the fetch rules and describe "
                                          "their content instead of running the review")
     parser.add_argument("--link-filter", help="regular expression for the links of probed HTML pages to list")
@@ -1185,16 +1219,43 @@ def main(argv: Optional[list[str]] = None) -> int:
     except (ValueError, CatalogError, RegistryError, ProvidersError) as e:
         logger.error("The review cannot start: %s", e)
         return 1
-    concepts = {name.strip() for name in args.concepts.split(",") if name.strip()} if args.concepts else None
-    snapshot_ids = {name.strip() for name in args.snapshots.split(",") if name.strip()} if args.snapshots else None
-    if concepts is not None and snapshot_ids is None:
-        snapshot_ids = set()
-    elif snapshot_ids is not None and concepts is None:
-        concepts = set()
+    concepts = _selection(args.concepts)
+    snapshot_ids = _selection(args.snapshots)
+    press_ids = _selection(args.press_sources)
+    review_press = args.press and (press_ids is not None or (concepts is None and snapshot_ids is None))
+    if press_ids is not None or concepts is not None or snapshot_ids is not None:
+        concepts = set() if concepts is None else concepts
+        snapshot_ids = set() if snapshot_ids is None else snapshot_ids
+    try:
+        sources_config = load_sources(args.sources_config) if review_press else None
+    except (ValueError, FileNotFoundError) as e:
+        logger.error("The review cannot start: %s", e)
+        return 1
+    model: Optional[SearchModel] = None
+    if review_press and args.press_search and press_ids is None:
+        if settings.gemini_api_key:
+            model = SearchModel(settings)
+        else:
+            logger.warning("GEMINI_API_KEY is not set; the review runs without the search for new press sources.")
     now = datetime.now(timezone.utc).replace(microsecond=0)
+    press_lines: list[str] = []
+    press_line: Optional[str] = None
     with WebClient() as web:
         result = run_review(settings, web, now, concepts, providers if args.terms else None, snapshot_ids,
                             args.snapshot_config, {provider.id for provider in providers})
+        if sources_config is not None:
+            try:
+                sources_text, press_result = run_press_review(settings, args.sources_config, web, model, now,
+                                                              source_ids=press_ids)
+            except ValueError as e:
+                logger.error("The review of the news and press sources failed: %s", e)
+                return 1
+            if press_result.changes:
+                args.sources_config.write_text(sources_text, encoding="utf-8", newline="\n")
+            press_lines = build_press_section(press_result, sources_config, now, model is not None)
+            press_line = press_summary(press_result, sources_config)
+            for note in press_result.notes:
+                logger.info("Note on the press sources: %s", note)
     text = args.providers.read_text(encoding="utf-8")
     for check in result.terms:
         if check.status in ("changed", "recorded") and check.new_hash:
@@ -1202,7 +1263,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     if text != args.providers.read_text(encoding="utf-8"):
         args.providers.write_text(text, encoding="utf-8", newline="\n")
     args.report.parent.mkdir(parents=True, exist_ok=True)
-    args.report.write_text(build_report(result, now, catalog_size), encoding="utf-8", newline="\n")
+    args.report.write_text(build_report(result, now, catalog_size, press_lines, press_line), encoding="utf-8",
+                           newline="\n")
     statuses = Counter(check.status for check in result.checks)
     snapshot_statuses = Counter(check.status for check in result.snapshots)
     logger.info("Source review: %s; snapshots: %s; %d candidates, %d unregistered regions; report written to %s.",

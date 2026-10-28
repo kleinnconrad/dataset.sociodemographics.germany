@@ -8,6 +8,10 @@ on:
     # GitHub delays schedules at the full hour
     - cron: '7 2 * * 3'
       timezone: 'Europe/Berlin'
+    # Saturdays 02:07 Berlin time, the feeds collector only: news feeds list items for a few days, so the feeds are
+    # read every three or four days (see COLLECTORS below)
+    - cron: '7 2 * * 6'
+      timezone: 'Europe/Berlin'
   workflow_dispatch:
     inputs:
       mode:
@@ -21,6 +25,11 @@ on:
         default: normal
       collectors:
         description: 'Comma-separated collectors to run, e.g. eurostat; empty runs all due collectors'
+        type: string
+        required: false
+        default: ''
+      max_annotations:
+        description: 'Maximum number of news articles and press releases annotated with Gemini; empty uses the default of 400'
         type: string
         required: false
         default: ''
@@ -39,7 +48,9 @@ jobs:
       contents: write
     env:
       MODE: ${{ inputs.mode || 'normal' }}
-      COLLECTORS: ${{ inputs.collectors }}
+      # The Saturday schedule reads the news and press feeds only
+      COLLECTORS: ${{ github.event.schedule == '7 2 * * 6' && 'feeds' || inputs.collectors }}
+      MAX_ANNOTATIONS_PER_RUN: ${{ inputs.max_annotations }}
       RUN_DEADLINE_MINUTES: ${{ inputs.mode == 'backfill' && '85' || '25' }}
 
     steps:
@@ -67,9 +78,11 @@ jobs:
         fi
 
     # The accounts of the GENESIS databases are optional; without them the genesis collector counts its tables as
-    # no_access. Secrets are not passed to workflows of pull requests from forks.
+    # no_access. The Gemini API key is optional; without it the news items and press releases are stored without
+    # annotation. Secrets are not passed to workflows of pull requests from forks.
     - name: Execute Pipeline
       env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GENESIS_TOKEN: ${{ secrets.GENESIS_TOKEN }}
         GENESIS_PASSWORD: ${{ secrets.GENESIS_PASSWORD }}
         REGIONALSTATISTIK_TOKEN: ${{ secrets.REGIONALSTATISTIK_TOKEN }}

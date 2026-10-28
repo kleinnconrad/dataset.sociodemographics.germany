@@ -1,6 +1,6 @@
 # German Sociodemographics Dataset: Architecture
 
-This document describes the structure of the pipeline: scope and decisions, the design rules for a long collection period, the datasets and their variables (statistical series, snapshots of volatile sources, regions, religious affiliation), how the dataset is correlated with other datasets, the prediction targets, the sources, storage and data volume, the run, failure handling, the measurement log and the implementation status. The pipeline adopts the structure of [dataset.economics.germany](https://github.com/kleinnconrad/dataset.economics.germany) and [dataset.politics.germany](https://github.com/kleinnconrad/dataset.politics.germany). Usage and configuration are described in the [README](README.md).
+This document describes the structure of the pipeline: scope and decisions, the design rules for a long collection period, the datasets and their variables (statistical series, snapshots of volatile sources, regions, religious affiliation, news and press releases), how the dataset is correlated with other datasets, the prediction targets, the sources, storage and data volume, the run, failure handling, the measurement log and the implementation status. The pipeline adopts the structure of [dataset.economics.germany](https://github.com/kleinnconrad/dataset.economics.germany) and [dataset.politics.germany](https://github.com/kleinnconrad/dataset.politics.germany). Usage and configuration are described in the [README](README.md).
 
 ## Table of Contents
 - [1. Scope and Decisions](#1-scope-and-decisions)
@@ -12,6 +12,7 @@ This document describes the structure of the pipeline: scope and decisions, the 
   - [3.4 Concepts by Topic](#34-concepts-by-topic)
   - [3.5 Snapshots of Volatile Sources](#35-snapshots-of-volatile-sources)
   - [3.6 Religious Affiliation](#36-religious-affiliation)
+  - [3.7 News and Press Releases](#37-news-and-press-releases)
 - [4. Correlation with Other Datasets](#4-correlation-with-other-datasets)
 - [5. Prediction Targets](#5-prediction-targets)
 - [6. Sources and Fetch Rules](#6-sources-and-fetch-rules)
@@ -27,12 +28,15 @@ This document describes the structure of the pipeline: scope and decisions, the 
 ## 1. Scope and Decisions
 
 - **Purpose:** the main purpose is to persist volatile sociodemographic data: tables and files that their sources overwrite, delete, publish only as the current state, keep online only for a short time or change without versions. The pipeline stores what such a source published at every observation (`source_snapshots`) and thereby builds the history that the source does not keep. The statistical series of Eurostat and the ECB, which keep their own history, are the stable backbone and are stored as vintages.
-- **Scope:** the population of Germany and its structure: age and sex, births and fertility, mortality, migration and citizenship, households and families, education, income distribution and poverty, wealth distribution, housing, religious affiliation, crime and criminal justice, and the regional labour market and economy as context. Germany is described as a whole, by state (NUTS 1), by government region (NUTS 2) and by district (NUTS 3), as far as the sources publish the variables at these levels; national indicators are compared with the European Union (`EU27_2020`).
+- **Scope:** the population of Germany and its structure: age and sex, births and fertility, mortality, migration and citizenship, households and families, education, income distribution and poverty, wealth distribution, housing, religious affiliation, crime and criminal justice, and the regional labour market and economy as context. Germany is described as a whole, by state (NUTS 1), by government region (NUTS 2) and by district (NUTS 3), as far as the sources publish the variables at these levels; national indicators are compared with the European Union (`EU27_2020`). Next to the statistics, the press coverage of these topics is collected: the metadata of news articles and press releases on sociodemographic topics and their labels (Section 3.7), so that the attention of the public to a topic can be compared with its statistics.
 - **Horizon:** the data is collected over many years and analyzed as long time series. The design favors stable definitions, durable sources and a moderate data volume over the completeness of single tables.
 - **Repository:** public. No license is granted for the code or the data of this repository. Every record names the license or terms of its source in the field `license`; the sources and their attribution requirements are listed in the [README](README.md#sources-and-attribution).
-- **Schedule:** one workflow runs the collectors once a week, on Wednesdays at 02:07 Europe/Berlin. The source that changes most often is the weekly report on deaths of the Statistisches Bundesamt, whose edition is replaced every week (the edition observed on 2026-10-26 was published on a Tuesday morning); a run in the middle of the week sees every edition, and a failed run can be repeated by hand before the next edition replaces it. The other sources are checked at their own intervals, independent of the schedule: Eurostat datasets when the table of contents reports an update (at the latest every 28 days), snapshot items every 7 to 30 days. A run takes at most 30 minutes. Every run is reported by `notify.yml`. A second workflow reviews the data sources on the first day of every month.
-- **No paid access:** every source is free. The GENESIS databases (GENESIS-Online, Regionaldatenbank, Zensus database) need free accounts, whose tokens are optional repository secrets; without them their tables are counted as `no_access` and every other source is collected. The pipeline uses no language model; all variables are published statistics.
-- **Aggregates only:** the dataset stores published aggregates of official statistics. It stores no microdata and nothing about individual persons.
+- **Schedule:** one workflow runs the collectors once a week, on Wednesdays at 02:07 Europe/Berlin. The source that changes most often is the weekly report on deaths of the Statistisches Bundesamt, whose edition is replaced every week (the edition observed on 2026-10-26 was published on a Tuesday morning); a run in the middle of the week sees every edition, and a failed run can be repeated by hand before the next edition replaces it. The other sources are checked at their own intervals, independent of the schedule: Eurostat datasets when the table of contents reports an update (at the latest every 28 days), snapshot items every 7 to 30 days. A second schedule on Saturdays at 02:07 runs only the feeds collector, because news feeds list their items for a few days; together the feeds are read every three or four days, as in dataset.politics.germany and dataset.economics.germany. A run takes at most 30 minutes. Every run is reported by `notify.yml`. A second workflow reviews the data sources on the first day of every month.
+- **No paid access to sources:** every source is free. The GENESIS databases (GENESIS-Online, Regionaldatenbank, Zensus database) need free accounts, whose tokens are optional repository secrets; without them their tables are counted as `no_access` and every other source is collected. The variables of the statistical datasets are published statistics; no language model is involved in them.
+- **Model:** Google Gemini (`gemini-2.5-flash` by default, thinking off) labels up to 400 news articles and press releases per run, with the request handling of dataset.economics.germany. At the token use measured there (about 4,300 input and 3,100 output tokens per request of ten items, labels of a similar size) a run costs about 0.36 USD, two runs a week about 3 USD per month. The key is the optional secret `GEMINI_API_KEY`; without it the items are stored without labels. The run summary reports the tokens and the estimated cost of every run.
+- **Aggregates only:** the statistical datasets store published aggregates of official statistics, no microdata and nothing about individual persons. The press datasets store titles, URLs and metadata of published articles and press releases, no texts and no names of authors; the annotation labels groups of the population, never single persons.
+
+**Consequence of the schedule for news.** RSS feeds and news sitemaps list only recent items; a news sitemap covers 48 hours, many feeds a few days. With runs every three or four days and a lookback of 96 hours, the pipeline collects what the feeds and sitemaps list at run time. Articles that have left a feed before the next run are missing, so the press coverage is a sample, not a complete record. The statistical series and snapshots are not affected.
 
 **Frequency of the data.** Most sociodemographic statistics are annual and published with a lag of one to three years (population on 1 January within about six months, regional accounts after two to three years). Monthly and quarterly series (asylum applications, temporary protection, asylum decisions, wealth shares) and weekly deaths are the high-frequency part of the dataset. Because the pipeline runs every week, `observed_at` marks the publication of every new value within seven days.
 
@@ -42,17 +46,19 @@ This document describes the structure of the pipeline: scope and decisions, the 
 
 1. **Point-in-time correctness.** Every record has `observed_at`, the UTC time at which the pipeline observed it. Filtering `observed_at <= t` reproduces what was known at time t. The history that a series has at its first observation has `backfilled: true`.
 2. **Vintages of statistical series.** Statistical offices revise published values, e.g. the population after a census. `sociodemographic_series` stores the complete series at its first observation (revision 0) and afterwards, with the next revision, only the periods that were added, revised or removed. Replaying the revisions in the order of `observed_at` gives the real-time data set.
-3. **Three kinds of datasets.**
+3. **Four kinds of datasets.**
    - *Vintage:* `sociodemographic_series` (rule 2).
    - *Snapshot:* `source_snapshots` stores the complete content of a volatile item at its first observation and whenever its hash changes; unchanged content writes no record (Section 3.5).
-   - *Change:* `series_catalog`, `regions` and `snapshot_catalog` store an entry when it appears and again when a field changes.
-4. **Declarative registries.** The concepts (`config/series.toml`), the snapshot items (`config/snapshots.toml`), the regions (`config/regions.toml`) and the providers (`config/providers.toml`) are configuration files with `added` and `removed` dates. The catalogs and the regions are written to datasets, so that the coverage of every concept and region is known from the data alone.
-5. **Permanent identifiers.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), snapshot ids (`<provider>.<item>`), region codes, dataset names, field names and `record_id` formats are never reused for a different meaning.
+   - *Change:* `series_catalog`, `regions`, `snapshot_catalog` and `press_catalog` store an entry when it appears and again when a field changes.
+   - *Event:* `news_items`, `press_releases` and `text_annotations` store each item once when it is observed.
+4. **Declarative registries.** The concepts (`config/series.toml`), the snapshot items (`config/snapshots.toml`), the regions (`config/regions.toml`), the providers (`config/providers.toml`) and the news and press sources (`config/sources.toml`) are configuration files with `added` and `removed` dates. The catalogs and the regions are written to datasets, so that the coverage of every concept and region is known from the data alone.
+5. **Permanent identifiers.** Concepts, series ids (`<concept>.<geo>[.<code>...]`), snapshot ids (`<provider>.<item>`), region codes, outlet and press source ids, dataset names, field names and `record_id` formats are never reused for a different meaning.
 6. **Additive schema changes.** New fields get a description and are added without changing existing ones; a changed meaning requires a new field and a new `SCHEMA_VERSION`. A snapshot test guards the record schema.
 7. **Raw values, derived variables later.** The datasets store values as the sources report them. Shares, rates by citizenship, growth rates and other features are computed in the analysis (README, section Variables).
 8. **One region key for the series.** All regional series use the NUTS code of Eurostat as `geo` and carry the ISO 3166-2 code of their state, so that they join with the other datasets without a mapping table. Snapshots keep the region codes of their sources (`geo_scheme`); the mapping of official keys and state names to the ISO codes is in Section 3.3.
 9. **Logged measurement changes.** Every change of a source, key, code, unit or regional classification is recorded in the measurement log (Section 11), so that structural breaks can be identified.
-10. **Reviewed sources.** The sources are checked every month (Section 6): keys, coverage, discontinued and new datasets, the snapshot items, regions and terms of use. A source that is checked and not admitted is recorded with the reason.
+10. **Reviewed sources.** The sources are checked every month (Section 6): keys, coverage, discontinued and new datasets, the snapshot items, regions, the news and press sources and terms of use. A source that is checked and not admitted is recorded with the reason.
+11. **Raw data and annotations are separated.** The Gemini labels are stored in `text_annotations`, keyed by item and `extraction_hash`, so that they can be regenerated with another model or prompt without changing the items. No texts of articles or press releases are stored.
 
 ---
 
@@ -172,6 +178,68 @@ Religious affiliation is a required variable. What the sources publish:
 
 **Gaps.** Annual church members, joinings and leavings by state are not collected until the EKD or the Deutsche Bischofskonferenz permit the reuse or offer the data without bot protection; the annual figures between the censuses therefore come only from the census years 2011 and 2022. Other religious communities (Muslims, Orthodox churches, Jewish communities, free churches) are part of the group other, none or not stated; their member statistics are published by the communities themselves (e.g. the Zentralwohlfahrtsstelle der Juden in Deutschland for the Jewish communities) as PDF documents without stated terms that permit redistribution, and the Islam statistics of the Bundesamt für Migration und Flüchtlinge are survey estimates published as PDF.
 
+### 3.7 News and Press Releases
+
+**`news_items`** (event): outlet_id, outlet_type, owner_group, home_state, outlet_topic, channel (rss or news_sitemap), url, canonical_url, title, published_at, updated_at, section, feed_categories, keywords, jsonld_type, is_agency_copy, author_count, word_count, is_paywalled, has_video, content_basis (title_only, title_teaser, lead_text).
+
+**`press_releases`** (event): press_source_id, actor_type, jurisdiction (DE, a state, EU or INT), url, canonical_url, title, published_at, feed_categories, content_basis.
+
+**`press_catalog`** (change): the entries of [config/sources.toml](config/sources.toml) with press_id, kind (outlet or press_source), name, homepage, outlet_type, owner_group, home_state, outlet_topic, paywall_model, actor_type, jurisdiction, feeds, news_sitemap, topic_filter, fetch_pages, added, removed, removed_reason.
+
+**`text_annotations`** (event): the Gemini labels of an item with item_dataset, item_id, model, extraction_hash and content_basis:
+
+| Group | Variables |
+|---|---|
+| Relevance and topic | is_sociodemographic, topic, topics_secondary (at most two), issue_detail |
+| Form | article_type (news, opinion, interview, analysis, live blog, explainer, press release) |
+| Population groups | population_groups (at most five), group_tone {group: tone} |
+| Statistics | indicators {indicator: rising, falling, unchanged, not stated}, reports_statistics |
+| Actors and places | institutions, countries (ISO 3166-1, for migration also the countries of origin), states_concerned |
+| Events | event_types, event_status, upcoming_events [{event_type, date}] |
+| Tone and framing | overall_tone, frame, mentions_demographic_change, mentions_inequality, policy_level, government_involved |
+| Press releases only | communication_type |
+
+The vocabularies are `Literal` types in [src/schema.py](src/schema.py): 21 topics (`SocialTopic`), 29 population groups (`PopulationGroup`), 41 indicators (`SocialIndicator`), 31 institutions by function (`Institution`, so that the values stay valid when ministries are renamed or merged), 22 event types and the generic news frames of Semetko and Valkenburg (2000), as in the other datasets. Long vocabularies are plain strings with the allowed values in the field description of the response schema, because a schema with many enumerations exceeds the limit of constrained decoding of the Gemini API; the annotation keeps only values of the vocabularies.
+
+**Rules of the annotation** (system instruction in [src/annotation.py](src/annotation.py)): only what the text states or clearly implies is labelled; population groups are groups, never single persons, and names of persons are not labelled; tone describes the presentation in the text; crime counts as sociodemographic when the item is about crime as a social phenomenon (statistics, trends, policies), not for reports on a single crime, accident or court case.
+
+**Topics and topic groups of the series.** The topics of the annotation map to the topic groups of the series and snapshots (`SeriesTopic`):
+
+| Topic of the annotation | Topic group of the series |
+|---|---|
+| Population and demographic change, Older people and ageing | population_structure, population_change |
+| Births and fertility | births_and_fertility |
+| Mortality and life expectancy, Health and care | mortality_and_health |
+| Migration and asylum, Integration and citizenship | migration_and_citizenship |
+| Families and households, Children and youth | households_and_families |
+| Education and schools, Higher education and vocational training | education |
+| Income, poverty and social benefits, Pensions | income_and_poverty |
+| Wealth and inequality | wealth, income_and_poverty |
+| Housing and rents | housing |
+| Labour market and employment | labour_market |
+| Religion and churches | religion |
+| Crime and justice | crime_and_justice |
+| Regional disparities and rural areas | regional_structure, regional_economy |
+| Gender and equality, Other | none |
+
+**Selection.** Sources with `topic_filter` (by default the general outlets; issuers whose releases cover many other topics, such as the federal government, the parliaments, the ministries of the interior and of justice, the state governments, the DGB and the Deutscher Landkreistag) keep an item only if it comes from a feed of a sociodemographic section or contains a sociodemographic term (`SOCIAL_PATH_TOKENS` and `SOCIAL_TERMS` in [src/collectors/feeds.py](src/collectors/feeds.py)). Words that appear in many reports on single events (Kinder, Familie, Wohnung) count only in their policy compounds or plural forms, and the crime terms name crime as a phenomenon (Kriminalität, Kriminalstatistik, Straftaten, Gefängnis), not single offences. Specialist outlets and the other press sources are stored without the filter; the annotation decides the relevance (`is_sociodemographic`).
+
+**Annotation per run.** Up to `MAX_ANNOTATIONS_PER_RUN` (400) items: all press releases first, then news items in turns across the outlets, newest first. Input per item: title, teaser and up to 1,500 characters of lead text where the page may be fetched. Ten items per request, up to four requests at the same time (`GEMINI_CONCURRENCY`), at most `MAX_GEMINI_CALLS_PER_RUN` (50) calls. The other new items are stored without labels, so that the item counts per source stay complete and the annotated sample can be weighted. Without `GEMINI_API_KEY` every item is stored without labels and no page is fetched.
+
+**Sources** (`config/sources.toml`, 43 outlets and 29 press sources after the first source review on 2026-10-28):
+
+| Group | Sources | Check |
+|---|---|---|
+| National outlets (12) | tagesschau.de, Deutschlandfunk, ZDFheute, Süddeutsche Zeitung, Die Welt, taz, Der Tagesspiegel, Der Spiegel, Focus, t-online, n-tv, Bild; feeds of the domestic, politics, society and education sections and news sitemaps | taken over from dataset.politics.germany (2026-10-19) and dataset.economics.germany (2026-10-25); the feeds of the society and education sections probed on 2026-10-28 |
+| Regional public broadcasters (8) and regional dailies (20) | at least one regional daily per state | taken over from dataset.politics.germany and dataset.economics.germany |
+| Specialist outlets (3) | News4teachers (education), evangelisch.de (religion, with topic filter, because its news feed carries general news), DOMRADIO.DE (religion) | probed on 2026-10-28 |
+| Federal institutions and parliaments (12) | Bundesregierung, Bundestag, Bundesrat, BMI, BMBFSFJ, BMG, BMWSB, BMJV, Statistisches Bundesamt (feed `Aktuell.xml`, allowed by robots.txt, served as text/html); BAMF (news and the publications of the EMN and of the research centre), Robert Koch-Institut (feed of the publication server edoc.rki.de, without page fetching because of a crawl delay of 30 seconds), Bundeszentrale für politische Bildung (background articles, migration policy series and education dossier, with topic filter) | taken over from dataset.politics.germany; Destatis probed on 2026-10-28; BAMF, RKI and bpb added by the source review of 2026-10-28 |
+| Statistical offices of the states (4) | Statistikamt Nord (Hamburg and Schleswig-Holstein), Mecklenburg-Vorpommern, Rheinland-Pfalz, Sachsen-Anhalt | probed on 2026-10-28 |
+| State governments (3) | Bayern, Niedersachsen, Berlin | taken over from dataset.politics.germany |
+| Research institutes, associations and organizations (10) | IAB, DGB (from dataset.economics.germany); DJI, Sachverständigenrat für Integration und Migration, WZB, Bertelsmann Stiftung, Der Paritätische, PRO ASYL, Deutscher Landkreistag; Max-Planck-Institut für demografische Forschung | probed on 2026-10-28; MPIDR added by the source review of 2026-10-28 |
+
+The 59 `[[excluded]]` entries record the candidates that were checked and not admitted: outlets with a TDM reservation or bot protection (FAZ, B.Z., Zeit, RND, Ärzte Zeitung, Springer Pflege), the Deutsches Ärzteblatt (its imprint permits the inclusion in electronic databases only with permission), the EKD (terms), the Deutsche Bischofskonferenz (HTTP 401) and GESIS (HTTP 403), BKA and BMAS (crawl delay of 180 seconds), MiGAZIN and the BiB (robots.txt disallows the feed paths), hosts that refused the probe (IW, UNHCR, Deutsches Studierendenwerk, GEW, the statistical offices of Bremen and the Saarland), candidates without a feed link on their homepage or without recent items (the statistical offices of the other states, Bundesagentur für Arbeit, DeZIM, Berlin-Institut, DZA, Caritas, Diakonie, AWO, DRK, VdK, SoVD, BAGSO, Deutsches Kinderhilfswerk, KMK, Deutscher Städtetag, Deutscher Mieterbund, DGUV, the Beauftragte für Migration, Flüchtlinge und Integration, DIW, IWH, ZEW, IG Metall, Mediendienst Integration, katholisch.de, Senioren Nachrichten, Mehrfamilienhaus Magazin), and candidates that pass the checks but were not admitted by hand: ifo and RWI (economic research, collected by dataset.economics.germany), the DIE Bonn (literature notices rather than press releases), Baulinks.de (construction trade), the DIPF (its feeds list the elements of the home page) and Sozialpolitik aktuell (its feed links its items to anchors of a few section pages, so that the URL does not identify an item). Entries with the status no_feed, inactive or robots are checked again by every source review and added when they pass; the search of the review looks for the press feeds of the statistical offices of the states that are missing.
+
 ---
 
 ## 4. Correlation with Other Datasets
@@ -187,12 +255,14 @@ The dataset is built to be joined with [dataset.politics.germany](https://github
 | NUTS codes | The keys of the regional statistics of Eurostat and of the GISCO boundaries; further regional sources and maps join on them. |
 | Constituency numbers | The structural data of the Bundeswahlleiterin and the constituency evaluations of the Zensus 2022 (`geo_scheme = constituency`) carry the number of the Bundestag constituency, the key of the constituency results and of the directly elected members in dataset.politics.germany. The constituencies are redrawn before most elections; every edition holds the constituencies of its election. |
 | Official keys | The snapshots with `geo_scheme = ags` carry the official keys of states, districts and municipalities; the first two digits give the state (Section 3.3). |
+| News and press items | An article or press release has the same `record_id` (`news:` or `press:` and a hash of the normalized URL) in this dataset, dataset.politics.germany and dataset.economics.germany, and the outlets taken over keep their ids, so that the political, economic and sociodemographic labels of an item can be combined. `states_concerned` uses the ISO 3166-2 codes of the series; the topics map to the topic groups of the series (Section 3.7). |
 
 Examples of cross-dataset questions:
 - **Constituencies:** do the religious affiliation, the share of foreigners, the age structure, income and unemployment of a constituency (structural data and Zensus evaluations) explain the first and second votes and the party of its directly elected member?
 - **Politics and society:** do the age structure, the share of foreign citizens, net migration, poverty and unemployment of a state explain the level and the change of the party shares in the polls for its state parliament (`polls` with `parliament = Landtag`)? Do monthly asylum applications precede changes in the polls, in the parliamentary procedures on migration or in the press coverage of migration?
 - **Economy and society:** how do regional income and poverty move with the national business cycle, inflation and the labour market of dataset.economics.germany? Are the wealth shares related to house prices and interest rates? Population series are the denominators of per-capita measures.
 - **Technology and society:** do the Eurostat indicators of digital adoption and AI use of dataset.technology follow the educational attainment and the age structure?
+- **Press and statistics:** does the press report on migration, poverty or housing more often and in a more negative tone when the statistics rise, or before and after their release? Which statistical releases of the Statistisches Bundesamt and the statistical offices are taken up by the press, and with which delay?
 - **Fashion and society:** the age structure, household income and urbanization of Germany as context for the posts of German fashion sources in dataset.fashion.
 
 ---
@@ -216,6 +286,8 @@ The dataset is designed for questions that need long series of comparable measur
 | Final weekly deaths from the provisional figures | the final values of the weekly report (after about a year) | the provisional and estimated values of earlier editions in `source_snapshots` |
 | Crime and its regional context | `police_recorded_offences`, suspects of `criminal_justice_persons_by_citizenship`, the PKS tables in `source_snapshots` | age structure, citizenship, unemployment, poverty, urbanization |
 | Religious affiliation by region | the census shares of the churches | age structure, migration, urbanization, East and West Germany |
+| Press attention to a topic in the next weeks | weekly items per topic of `text_annotations` | statistical releases (`press_releases` of the statistical offices, new periods in `sociodemographic_series`), monthly asylum applications, weekly deaths, events of the other datasets |
+| Tone of the coverage of a population group | `group_tone` per group and week | reported indicators and their direction, outlet type, policy events, statistics of the group |
 
 ---
 
@@ -232,11 +304,13 @@ The dataset is designed for questions that need long series of comparable measur
 | www.destatis.de (Statistische Berichte, special evaluations of the Zensus 2022 and of the Strafverfolgungsstatistik) | page with the file link, then the xlsx file; conditional requests | 30 s (crawl delay), robots.txt, TDMRep | reproduction and distribution with a reference to the source (Copyright allgemein; Zensus: Datenlizenz Deutschland 2.0) | `source_snapshots` |
 | www.bundeswahlleiterin.de (structural data of the constituencies) | page with the file link, then the CSV file | 1 s, robots.txt, TDMRep | Datenlizenz Deutschland – Namensnennung 2.0 | `source_snapshots` |
 | Terms pages of the providers | HTML, monthly | 1 s, robots.txt | as stated on the pages | source review |
+| News outlets and issuers of press releases (`config/sources.toml`) | RSS and Atom feeds, news sitemaps, article pages where permitted | 1 s or the crawl delay, robots.txt, TDMRep | publisher rights; metadata only | `news_items`, `press_releases` |
+| Gemini API (Google) | `generateContent` with a response schema, through the google-genai SDK; with Google Search for the source review | at least 1 s between requests, up to four at the same time | paid per token; API key `GEMINI_API_KEY` | `text_annotations`, source review |
 
 **Fetch rules** ([src/web.py](src/web.py)), the same as in the other datasets:
 - Every request identifies the pipeline with the User-Agent `GermanSociodemographicsDataset/0.1 (+https://github.com/kleinnconrad/dataset.sociodemographics.germany)`. No personal data is sent.
 - The SDMX interfaces, the table of contents and the web services of the GENESIS databases are documented APIs offered for programmatic use; they are called under their terms and rate limits (`respect_robots=False`). The robots.txt of www.regionalstatistik.de disallows every path, including the web service; the open-data page of the statistical offices names the base URL of this web service for programmatic use, so it is treated as a documented API. Website requests (the pages and files of the snapshot sources, the terms pages) are checked against robots.txt with the longest-match rule of RFC 9309 and against TDMRep reservations.
-- **Bot protection:** HTTP 401 or 403, a challenge page or a CAPTCHA stops a series collector with an error; a snapshot item fails and is not requested again for 30 days. HTTP 401 of a GENESIS web service means a missing or invalid account and is counted as `no_access`. No headless browser is used.
+- **Bot protection:** HTTP 401 or 403, a challenge page or a CAPTCHA stops a series collector with an error; a snapshot item fails and is not requested again for 30 days; a news or press source is set to `blocked` and is not requested again until the entry in `data/state/sources.json` is reset by hand. HTTP 401 of a GENESIS web service means a missing or invalid account and is counted as `no_access`. No headless browser is used.
 - **Pacing:** one request per second per host, longer if robots.txt sets a crawl delay; a host with a crawl delay of more than 120 seconds is not fetched. Server errors, rate limits and network errors are retried twice.
 
 **Unchanged datasets.** The Eurostat collector reads the table of contents first. A catalog entry whose dataset has the same last update as at its last download is skipped, unless the entry changed or its last download is older than `FULL_CHECK_DAYS` (28). Without the table of contents every entry is downloaded. The ECB entries are downloaded in every run.
@@ -247,14 +321,15 @@ The dataset is designed for questions that need long series of comparable measur
 - **Regions:** German NUTS codes in a district dataset of Eurostat that the registry lacks.
 - **State and runs:** entries without stored series, stale stored series, and entries without data or failed in the runs of the last 35 days.
 - **Snapshot items:** every active item is fetched live: unavailable items, titles or columns that no longer match `expect`, GENESIS tables without access (with the name of the missing secret), changed file addresses, content without rows, content changed since the last run, items never stored, and items whose content did not change for longer than `update_days`. The report shows the title, columns and first row of every item. With a token, the other tables of every observed GENESIS statistic are listed as candidates. The excluded sources are listed; a source checked more than 365 days ago is due for a new check.
+- **News and press sources** ([src/press_review.py](src/press_review.py)): every active source of `config/sources.toml` is checked: health in `data/state/sources.json`, yield of sociodemographic items in the last 90 days, every feed and news sitemap (errors, permanent redirects, newest item older than 180 days, number of items that pass the topic filter) and the robots.txt of the homepage (crawl delay, TDM reservation in natural language). Sources that are blocked or TDM reserved, still broken, without a working feed or without an item in 90 days (unless `keep = true`) are proposed for removal; feeds that are gone or stale are removed, permanent redirects followed, and page fetching is turned off where robots.txt states a reservation or a crawl delay above 10 seconds. Gaps are states without a press source of their statistical office (Hamburg covers Schleswig-Holstein, Berlin covers Brandenburg), states without a regional daily and topics without a specialist outlet. The excluded candidates with a temporary reason are checked again, and with `GEMINI_API_KEY` Gemini with Google Search proposes the official feeds of federal institutions, research institutes, associations and of the gaps (at most five requests); every candidate is checked with the fetch rules and at most five are added per review. The changes are written into `config/sources.toml` of the pull request; the report lists the feeds of every checked source with their number of items.
 - **Terms:** the text of every terms page is compared with the hash in `config/providers.toml`; a change is reported and the new hash is part of the pull request.
-- **Probe:** started by hand with URLs, the workflow checks candidate sources with the fetch rules and describes them (robots.txt rules and crawl delay, TDM reservations, response, links and text passages of pages, sheets and first rows of workbooks). Every source of the table below was checked this way.
+- **Probe:** started by hand with URLs, the workflow checks candidate sources with the fetch rules and describes them (robots.txt rules and crawl delay, TDM reservations, response, links and text passages of pages, items and time span of feeds and news sitemaps, sheets and first rows of workbooks). Every source of the table below was checked this way.
 
 Changes of the catalog, the snapshot configuration and the registry need a verified key or address and a measurement log entry and are made by hand; the review only reports them.
 
 **Sources that were checked and are not collected:**
 
-The snapshot sources are recorded with the day of the check in the `[[excluded]]` entries of `config/snapshots.toml`, which the monthly review lists.
+The snapshot sources are recorded with the day of the check in the `[[excluded]]` entries of `config/snapshots.toml`, which the monthly review lists; the news and press sources in the `[[excluded]]` entries of `config/sources.toml` (Section 3.7).
 
 | Source | Checked | Reason |
 |---|---|---|
@@ -281,10 +356,14 @@ data/
 ├── regions/...
 ├── source_snapshots/...
 ├── snapshot_catalog/...
+├── news_items/..., press_releases/..., text_annotations/..., press_catalog/...
 ├── files/<snapshot_id>/YYYY-MM-DD_<hash>.pdf           # archived documents of snapshot items
 └── state/
     ├── seen/series_catalog.json, seen/regions.json      # written entries with content hash and revision
     ├── seen/snapshot_catalog.json, seen/source_snapshots.json  # snapshot items: hash, file address, ETag, last change
+    ├── seen/news_items.json, seen/press_releases.json     # normalized URLs of the items of the last 30 days
+    ├── seen/press_catalog.json                           # written entries of the press configuration
+    ├── sources.json                                      # health of the news and press sources
     ├── seen/sociodemographic_series/<concept>/<shard>.json  # current values per concept and state
     ├── collectors.json                                   # first run, last run, failures, cursor per collector
     └── run_log.jsonl                                     # one line per run
@@ -296,6 +375,7 @@ data/
 - **Seen shards:** the current values of the series are kept per concept and state (`DE1` to `DEG`), with Germany and the EU in shards of their own, so that a run rewrites only the shards of the concepts whose data changed (about 480 files).
 - **Expected volume:** an offline test of the whole catalog with synthetic responses (31 years for every annual series, which is more than most datasets have) wrote 40 MB of records and 19 MB of state on the first run and nothing on a second run with unchanged data. The real first run is expected to write 20 to 40 MB. Afterwards, every annual release adds one period to each series of a concept: about 34,000 small records per year (an estimated 15 to 25 MB), plus revisions; git compresses the files to a fraction of their size.
 - **Snapshots:** an item writes its complete content at every change. The one-time special evaluations and the structural data change rarely (a few hundred rows each). The weekly report on deaths changes every week: the deaths by day (about 2,200 rows) are stored in every run, about 10 MB per year; the tables by week and by month and state (5,000 to 6,500 rows) are checked every 28 days, about 8 MB per year each. GENESIS tables are checked every 7 or 30 days and change with their releases. In total the snapshots are expected to add 30 to 60 MB per year before compression.
+- **News and press:** a news item takes about 0.9 kB, an annotation about 1.3 kB. With a few hundred new items per run and two runs a week, the press datasets are expected to add 50 to 100 MB per year before compression.
 - **Long-term plan:** when the repository approaches 1 GB, the records of completed years are archived as compressed Parquet files per year and dataset, or move to a separate data repository with the same layout.
 
 ---
@@ -309,13 +389,14 @@ dataset.sociodemographics.germany/
 │   └── workflows/
 │       ├── ci.yml              # lint, tests, commit messages
 │       ├── notify.yml          # run summary as a commit comment that mentions the owner
-│       ├── pipeline.yml        # collectors, Wednesdays 02:07 Europe/Berlin
+│       ├── pipeline.yml        # collectors, Wednesdays 02:07 Europe/Berlin; feeds only on Saturdays
 │       └── source_review.yml   # monthly review of the data sources as a pull request
 ├── config/
 │   ├── series.toml             # catalog of the concepts
 │   ├── snapshots.toml          # snapshot items and excluded sources
 │   ├── regions.toml            # registry of the German NUTS regions
-│   └── providers.toml          # providers, terms of use and their hashes
+│   ├── providers.toml          # providers, terms of use and their hashes
+│   └── sources.toml            # news outlets, press sources and excluded candidates
 ├── data/                       # datasets and state, committed by the workflow
 ├── reviews/                    # reports of the monthly source review
 ├── src/
@@ -328,19 +409,25 @@ dataset.sociodemographics.germany/
 │   ├── regions.py              # region registry
 │   ├── providers.py            # provider configuration and terms hashes
 │   ├── snapshots.py            # snapshot configuration
+│   ├── sources.py              # news and press sources and their health
+│   ├── content.py              # metadata and lead text of article pages
+│   ├── annotation.py           # Gemini labels
+│   ├── urls.py                 # URL normalization
 │   ├── probe.py                # description of candidate sources with the fetch rules
 │   ├── storage.py, state.py
 │   ├── generate_dataset_overview.py
 │   ├── source_review.py        # monthly review of the data sources
+│   ├── press_review.py         # review of the news and press sources, part of the source review
 │   └── collectors/
 │       ├── base.py             # collector interface and run context
 │       ├── series.py           # vintages of statistical series
 │       ├── sdmx.py             # Eurostat and ECB, Eurostat table of contents
 │       ├── snapshots.py        # GENESIS tables and files as snapshots
-│       └── registries.py       # series catalog, regions and snapshot catalog
+│       ├── feeds.py            # news items, press releases, annotations
+│       └── registries.py       # series catalog, regions, snapshot and press catalog
 ├── scripts/
 │   └── run_summary.py          # run summary for notify.yml
-├── tests/                      # offline tests with a fake web
+├── tests/                      # offline tests with a fake web and a fake Gemini client
 ├── pyproject.toml
 ├── uv.lock
 └── README.md
@@ -352,16 +439,19 @@ dataset.sociodemographics.germany/
 
 `src/main.py` starts the run; `src/pipeline.py` runs the collectors in the order of `COLLECTOR_ORDER`:
 
-1. **series_catalog, regions, snapshot_catalog:** write new and changed entries of the registries (no requests).
+1. **series_catalog, regions, snapshot_catalog, press_catalog:** write new and changed entries of the registries (no requests).
 2. **files:** fetch the file items that are due (page, then file; one download per file and run) and write a snapshot for new or changed content.
 3. **genesis:** fetch the GENESIS tables that are due (title, then table) and write a snapshot for new or changed content; without a token the tables count as `no_access`.
-4. **ecb:** fetch the ECB entries and write the new and revised vintages.
-5. **eurostat:** read the table of contents; fetch every catalog entry whose dataset changed or whose last download is older than 28 days, in groups of up to 50 regions; write the new and revised vintages entry by entry.
-6. The workflow updates the README overview and commits `data/` and `README.md`. `notify.yml` then posts a summary of the run as a commit comment that mentions the repository owner.
+4. **feeds:** load the robots.txt of all feed hosts, read the feeds and news sitemaps of the due sources and keep the new items published within 96 hours that pass the topic filter; select up to 400 items (press releases first, then news items in turns across the outlets); fetch the article pages where permitted, annotate ten items per Gemini request with up to four requests at the same time and write items and annotations every 100 items; write the other new items without labels.
+5. **ecb:** fetch the ECB entries and write the new and revised vintages.
+6. **eurostat:** read the table of contents; fetch every catalog entry whose dataset changed or whose last download is older than 28 days, in groups of up to 50 regions; write the new and revised vintages entry by entry.
+7. The workflow updates the README overview and commits `data/` and `README.md`. `notify.yml` then posts a summary of the run, with the Gemini tokens and their estimated cost, as a commit comment that mentions the repository owner.
 
-**Run modes.** A regular run (`normal`) has a deadline of 25 minutes (`RUN_DEADLINE_MINUTES`) and a job timeout of 30 minutes. A `backfill` run downloads every entry, also those whose dataset is unchanged (deadline 85 minutes, timeout 90 minutes). `shadow` and `dry-run` work on a copy of the state and commit nothing.
+The Saturday schedule runs only the collector `feeds`.
 
-**Requests and duration.** A full download of the catalog takes about 170 requests (the district concepts need nine groups of regions each). An offline test with synthetic responses processed the 34,000 series of a first run in under two minutes; the run time is set by the responses of the providers. Later runs skip the unchanged datasets and send a few requests.
+**Run modes.** A regular run (`normal`) has a deadline of 25 minutes (`RUN_DEADLINE_MINUTES`) and a job timeout of 30 minutes. A `backfill` run downloads every entry, also those whose dataset is unchanged (deadline 85 minutes, timeout 90 minutes); it reads the feeds as a normal run, because feeds have no history. `shadow` and `dry-run` work on a copy of the state and commit nothing.
+
+**Requests and duration.** A full download of the catalog takes about 170 requests (the district concepts need nine groups of regions each). An offline test with synthetic responses processed the 34,000 series of a first run in under two minutes; the run time is set by the responses of the providers. Later runs skip the unchanged datasets and send a few requests. The feeds collector reads about 120 feeds and sitemaps of 68 sources; in dataset.politics.germany a similar number of sources is read in about 5 minutes, and pages and Gemini for 400 items take another 5 to 8 minutes.
 
 ---
 
@@ -374,7 +464,9 @@ dataset.sociodemographics.germany/
 - **Incomplete series response:** a response that would remove more than 5 % of the stored periods of a series (and more than three) is not written for that series; the next run tries again. Stored series that a response no longer contains are counted as `absent` and are not changed.
 - **Table of contents unavailable:** every entry is downloaded.
 - **A snapshot item fails** (page or file unavailable, no link matches, the title or columns do not match `expect`, unreadable file): the other items continue; the failure is listed in the run log (`failed_entries`) and reported by the review. An item whose source refuses requests (HTTP 401/403, challenge) is not requested for 30 days (`blocked`). GENESIS tables without access are counted as `no_access` and do not fail the collector; the collector fails only if every attempted item failed.
-- **Run deadline:** after `RUN_DEADLINE_MINUTES` the collectors start no new work; a collector that stops early has the status `partial` and continues in the next run.
+- **A news or press source fails:** the other sources continue; the health rules apply (`blocked` after HTTP 401/403 or a challenge, `tdm_reserved` after a TDM reservation, `broken` after seven consecutive failed runs, retried once a week).
+- **Gemini returns an unusable response:** the batch is split in halves down to single items; items without usable labels are written without annotation. A quota or API error stops the annotation for the run and marks the collector as failed; reaching `MAX_GEMINI_CALLS_PER_RUN` does not. The remaining items are written without labels.
+- **Run deadline:** after `RUN_DEADLINE_MINUTES` the collectors start no new work; a collector that stops early has the status `partial` and continues in the next run. The feeds collector writes the selected items that are not yet annotated without labels.
 - **Concurrent pushes:** the workflow pulls with rebase and retries the push up to three times.
 
 ---
@@ -407,6 +499,10 @@ Changes of sources, keys, codes, units, regional classifications and counting ru
 | 2026-10-26 | `series_catalog` | Crime and criminal justice (Eurostat, Germany), verified live: `police_recorded_offences` (`crim_off_cat`, `A.{iccs}.NR.{geo}`, 20 ICCS codes; Germany reports serious assault as `ICCS020111` and the theft of motor vehicles as `ICCS05021`, not `ICCS02011` and `ICCS050211`), `criminal_justice_persons_by_citizenship` (`crim_just_ctz` with the dimensions freq, leg_stat, citizen, unit, geo; Germany reports suspected and convicted persons, `PER_SUSP` and `PER_CNV`, as `TOTAL`, `NAT` and `FOR`, without prosecuted persons and without an offence breakdown), `prison_population` (`crim_pris_cap`, `PRIS_ACT_CAP` and `PRIS_OFF_CAP`). Not added: `crim_pris_ctz` (Germany reports only the total) and `crim_gen_reg` (regional data end in 2010). |
 | 2026-10-26 | `source_snapshots` | Checked and not admitted (Section 6): Polizeiliche Kriminalstatistik on www.bka.de (crawl delay 180 s), Kirchliche Statistik of the Deutsche Bischofskonferenz (HTTP 401), Kirchenmitgliederzahlen of the EKD (terms forbid further use), Statistik der Bundesagentur für Arbeit (HTTP 403, robots.txt of the data API), BAMF (robots.txt not reachable), INKAR (robots.txt not reachable), open data Ruhr and Düsseldorf (not reachable). |
 | 2026-10-26 | `source_snapshots` | Fetch rules of the snapshot items: a host with a crawl delay of more than 120 seconds is not fetched; an item whose source answers with HTTP 401 or 403 or a challenge is not requested again for 30 days; HTTP 401 of a GENESIS web service counts as `no_access`. |
+| 2026-10-28 | `news_items`, `press_releases`, `text_annotations`, `press_catalog` | New datasets of the press coverage (additive; `SCHEMA_VERSION` stays 1.0): metadata of news articles and press releases on sociodemographic topics from 43 outlets and 25 press sources of `config/sources.toml`, read from RSS feeds and news sitemaps, and their labels by Gemini (`gemini-2.5-flash`, thinking off, ten items per request, up to 400 items per run; vocabularies `SocialTopic`, `PopulationGroup`, `SocialIndicator`, `Institution`, `EventType`). The description of the common field `source_id` names outlets and press sources. A second schedule reads the feeds on Saturdays. The coverage of the press starts with the first run after this date and is a sample of what the feeds list at run time (Section 1). |
+| 2026-10-28 | `news_items` | Topic filter of the general outlets and of the issuers with `topic_filter = true`: feeds and URL sections of sociodemographic sections (`SOCIAL_PATH_TOKENS`) or sociodemographic terms (`SOCIAL_TERMS`); specialist outlets and the other press sources pass without the filter. A change of the terms changes the number of stored items and must be logged here. |
+| 2026-10-28 | `press_catalog` | Sources checked with the probe of `source_review.yml` on 2026-10-28: the feeds of the society and education sections of tagesschau.de, Süddeutsche Zeitung, taz, Tagesspiegel and Spiegel; Statistisches Bundesamt (`Aktuell.xml`, allowed by robots.txt, served as text/html), Statistikamt Nord, Statistisches Amt Mecklenburg-Vorpommern, Statistisches Landesamt Rheinland-Pfalz and Sachsen-Anhalt; DJI, SVR Migration, WZB, Bertelsmann Stiftung, Der Paritätische, PRO ASYL, Deutscher Landkreistag; News4teachers, evangelisch.de, DOMRADIO.DE. The other outlets and press sources were taken over with the checks of dataset.politics.germany (2026-10-19) and dataset.economics.germany (2026-10-25). Not admitted: 42 candidates (Section 3.7). |
+| 2026-10-28 | `press_catalog` | First source review of the news and press sources (`source_review.yml` on the branch, 68 sources, 28 excluded candidates and 21 candidates of the search checked): feed Bildung of the Süddeutsche Zeitung removed (newest item from 2023-12-05); added the BAMF (robots.txt reachable again), the RKI (feed of edoc.rki.de instead of the feeds under /SiteGlobals/ of www.rki.de; `fetch_pages = false`, because robots.txt sets a crawl delay of 30 seconds and the review turns off page fetching above 10 seconds), the MPIDR (feeds presse.rss and presse_news.rss) and the Bundeszentrale für politische Bildung (three topical feeds, `topic_filter = true`); 20 candidates recorded as `[[excluded]]` (Section 3.7). 29 press sources from this date. |
 
 ---
 
@@ -427,4 +523,6 @@ Changes of sources, keys, codes, units, regional classifications and counting ru
 | Mapping of the districts to their official keys (Kreisschlüssel) and of the constituencies of every election to districts | planned |
 | Population projections (EUROPOP2023, regional projections) as vintages | planned |
 | Urban-rural, metropolitan and coastal typologies of the districts | planned |
+| News articles and press releases on sociodemographic topics with Gemini labels (`news_items`, `press_releases`, `text_annotations`, `press_catalog`), review of the press sources as part of the monthly source review | implemented; first collection after 2026-10-28 |
+| Resolution of districts and municipalities named in the press to NUTS codes | planned |
 | Feature tables with point-in-time joins of the vintages, also across the datasets (`scripts/build_features.py`) | planned |

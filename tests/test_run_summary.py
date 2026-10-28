@@ -60,3 +60,23 @@ def test_main_writes_the_summary_file(tmp_path: Path) -> None:
     assert run_summary.main(["--run-log", str(log), "--output", str(output), "--conclusion", "success",
                              "--not-before", "2026-10-27T01:06:30Z"]) == 0
     assert "German sociodemographics pipeline: **success**" in output.read_text(encoding="utf-8")
+
+
+def test_summary_reports_feeds_and_the_cost_of_gemini() -> None:
+    entry = {**ENTRY, "collectors": {"feeds": {"status": "ok", "records": {"news_items": 300}, "counters": {
+        "items_new": 320, "sources_ok": 60, "annotated": 300, "beyond_cap": 20, "not_annotated": 0,
+        "gemini_model": "gemini-2.5-flash",
+        "gemini_usage": {"calls": 30, "prompt_tokens": 1_000_000, "output_tokens": 100_000, "thinking_tokens": 0}}}}}
+
+    text = run_summary.build_summary(entry, "success", None, None)
+
+    assert "**Feeds:** 320 new items from 60 sources; 300 annotated, 20 stored without labels." in text
+    assert "estimated cost $0.55 at the list prices of gemini-2.5-flash" in text
+    assert run_summary.gemini_cost("other-model", {"prompt_tokens": 1}) is None
+
+
+def test_summary_reports_feeds_without_annotation() -> None:
+    entry = {**ENTRY, "collectors": {"feeds": {"status": "ok", "counters": {
+        "items_new": 12, "sources_ok": 5, "beyond_cap": 12, "annotation": "off: GEMINI_API_KEY is not set"}}}}
+
+    assert "**Gemini:** off: GEMINI_API_KEY is not set." in run_summary.build_summary(entry, "success", None, None)

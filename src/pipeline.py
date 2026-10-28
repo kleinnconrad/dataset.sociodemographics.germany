@@ -2,11 +2,12 @@
 Executes one pipeline run.
 
 The collectors run one after another in COLLECTOR_ORDER: first the
-registries (series catalog, regions, snapshot configuration), which send no
-requests, then the snapshots of the volatile sources (files of websites,
-GENESIS tables), because these sources do not keep what they published, and
-last the statistical series of the ECB and of Eurostat, whose providers keep
-the history and can be fetched by a later run. Each collector runs in
+registries (series catalog, regions, snapshot and press configuration), which
+send no requests, then the snapshots of the volatile sources (files of
+websites, GENESIS tables), because these sources do not keep what they
+published, then the news and press feeds, whose items leave the feeds after a
+few days, and last the statistical series of the ECB and of Eurostat, whose
+providers keep the history and can be fetched by a later run. Each collector runs in
 isolation: a failure is logged and recorded in ``state/collectors.json`` and
 the run log, and the other
 collectors continue. The data that a failing collector has already emitted
@@ -28,8 +29,15 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Optional
 
+from annotation import GeminiAnnotator
 from collectors.base import Collector, CollectorSkipped, RunContext, utc_now
-from collectors.registries import RegionsCollector, SeriesCatalogCollector, SnapshotCatalogCollector
+from collectors.feeds import FeedsCollector
+from collectors.registries import (
+    PressCatalogCollector,
+    RegionsCollector,
+    SeriesCatalogCollector,
+    SnapshotCatalogCollector,
+)
 from collectors.sdmx import EcbCollector, EurostatCollector
 from collectors.snapshots import FilesCollector, GenesisCollector
 from settings import Settings
@@ -38,8 +46,8 @@ from web import WebClient
 
 logger = logging.getLogger(__name__)
 
-COLLECTOR_ORDER: tuple[str, ...] = ("series_catalog", "regions", "snapshot_catalog", "files", "genesis", "ecb",
-                                    "eurostat")
+COLLECTOR_ORDER: tuple[str, ...] = ("series_catalog", "regions", "snapshot_catalog", "press_catalog", "files",
+                                    "genesis", "feeds", "ecb", "eurostat")
 # Request intervals per host in seconds; hosts not listed get one request per second.
 HOST_INTERVALS: dict[str, float] = {}
 # Outcomes that make the run exit with code 1
@@ -99,16 +107,20 @@ class RunSummary:
         }
 
 
-def build_collectors() -> list[Collector]:
+def build_collectors(annotator: Optional[GeminiAnnotator] = None) -> list[Collector]:
     """Creates all collectors in COLLECTOR_ORDER.
+
+    Args:
+        annotator: The Gemini annotator of the feeds collector; None writes the news items and
+            press releases without labels (dry-run mode or no API key).
 
     Returns:
         list[Collector]: The collectors.
     """
     collectors: dict[str, Collector] = {
         collector.name: collector for collector in (
-            SeriesCatalogCollector(), RegionsCollector(), SnapshotCatalogCollector(), FilesCollector(),
-            GenesisCollector(), EcbCollector(), EurostatCollector(),
+            SeriesCatalogCollector(), RegionsCollector(), SnapshotCatalogCollector(), PressCatalogCollector(),
+            FilesCollector(), GenesisCollector(), FeedsCollector(annotator), EcbCollector(), EurostatCollector(),
         )
     }
     return [collectors[name] for name in COLLECTOR_ORDER]

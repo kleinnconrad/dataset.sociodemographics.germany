@@ -6,7 +6,7 @@ from main import main
 
 def test_unknown_collector_on_the_command_line_is_rejected(tmp_path) -> None:
     with pytest.raises(SystemExit):
-        main(["--collectors", "feeds", "--output-dir", str(tmp_path)])
+        main(["--collectors", "wikipedia_pageviews", "--output-dir", str(tmp_path)])
     assert not (tmp_path / "state").exists()
 
 
