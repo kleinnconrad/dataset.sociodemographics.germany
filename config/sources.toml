@@ -926,7 +926,7 @@ feeds = ["https://www.bamf.de/SiteGlobals/Functions/RSS/DE/Feed/RSSNewsfeed_Meld
 fetch_pages = true
 added = 2026-10-28
 
-# source review 2026-10-28: 3 items in the last 60 days; the feed of the publication server edoc.rki.de (reports and articles, among them the Journal of Health Monitoring); robots.txt crawl-delay 30 s
+# source review 2026-10-28: 3 items in the last 60 days; the feed of the publication server edoc.rki.de (reports and articles, among them the Journal of Health Monitoring); robots.txt crawl-delay 30 s, therefore fetch_pages = false
 [[press_source]]
 id = "rki"
 name = "Robert Koch-Institut"
@@ -934,7 +934,7 @@ homepage = "https://www.rki.de/"
 actor_type = "public_agency"
 jurisdiction = "DE"
 feeds = ["https://edoc.rki.de/feed/atom_1.0/site"]
-fetch_pages = true
+fetch_pages = false
 added = 2026-10-28
 
 # source review 2026-10-28: 11 items in the last 60 days
