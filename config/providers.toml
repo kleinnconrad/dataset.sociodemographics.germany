@@ -22,6 +22,8 @@ api = "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1"
 license = "Eurostat (reuse authorised with acknowledgement of the source)"
 attribution = "Source: Eurostat"
 terms_url = "https://ec.europa.eu/eurostat/help/copyright-notice"
+terms_hash = "23142611819cd217"
+terms_hash_since = 2026-11-01
 notes = "Statistical data, metadata and publications may be reused for commercial or non-commercial purposes provided the source is acknowledged; data that Eurostat marks as belonging to third parties is excluded."
 
 [[provider]]
@@ -31,6 +33,8 @@ api = "https://data-api.ecb.europa.eu/service"
 license = "ECB (reuse free of charge with acknowledgement of the source)"
 attribution = "Source: ECB statistics"
 terms_url = "https://www.ecb.europa.eu/stats/ecb_statistics/governance_and_quality_framework/html/usage_policy.en.html"
+terms_hash = "a02341ba52678fd0"
+terms_hash_since = 2026-11-01
 notes = "Policy regarding the reuse of ESCB statistics: free of charge for commercial and non-commercial use, provided the source is quoted and the data are not altered."
 
 # Providers of the snapshot sources (config/snapshots.toml)
@@ -42,6 +46,8 @@ api = "https://genesis.destatis.de/genesisWS/rest/2020"
 license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
 attribution = "Datenquelle: Statistisches Bundesamt (Destatis), Genesis-Online; Datenlizenz by-2-0"
 terms_url = "https://www.destatis.de/DE/Service/Impressum/copyright-genesis-online.html"
+terms_hash = "991f08fa5c2eee1c"
+terms_hash_since = 2026-11-01
 notes = "GENESIS-Online (web service with a free account) and the files of www.destatis.de (Statistische Berichte). The page Copyright allgemein (https://www.destatis.de/DE/Service/Impressum/copyright-allgemein.html) permits the reproduction and distribution of texts, data and graphics, also in extracts, with a reference to the source, for non-commercial and commercial purposes."
 
 [[provider]]
@@ -51,6 +57,8 @@ api = "https://www.regionalstatistik.de/genesisws/rest/2020"
 license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
 attribution = "Statistische Ämter des Bundes und der Länder, Regionaldatenbank Deutschland; Datenlizenz by-2-0"
 terms_url = "https://www.statistikportal.de/de/open-data"
+terms_hash = "3b57930b55ce81e5"
+terms_hash_since = 2026-11-01
 notes = "The robots.txt of www.regionalstatistik.de disallows every path; the web service is called as a documented API, whose base URL the open-data page of the statistical offices names for programmatic use. Needs a free account. Tables of the Bundesagentur für Arbeit in the database name it as source."
 
 [[provider]]
@@ -60,6 +68,8 @@ api = "https://ergebnisse.zensus2022.de/api/rest/2020"
 license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
 attribution = "Statistische Ämter des Bundes und der Länder, Zensus 2022; Datenlizenz by-2-0"
 terms_url = "https://www.statistikportal.de/de/open-data"
+terms_hash = "3b57930b55ce81e5"
+terms_hash_since = 2026-11-01
 notes = "Zensus database (web service with a free account) and the special evaluations of the Zensus 2022 on www.destatis.de. The files state: Sie können Informationen speichern, (auch auszugsweise) mit Quellenangabe weitergeben, vervielfältigen und verbreiten."
 
 [[provider]]
@@ -69,4 +79,6 @@ api = "https://www.bundeswahlleiterin.de"
 license = "Datenlizenz Deutschland - Namensnennung - Version 2.0"
 attribution = "© Die Bundeswahlleiterin, Wiesbaden; raw data of columns 35 to 48 of the structural data: © Bundesagentur für Arbeit"
 terms_url = "https://www.bundeswahlleiterin.de/info/impressum.html"
+terms_hash = "075e7a5d9c4ff798"
+terms_hash_since = 2026-11-01
 notes = "The imprint permits the reproduction and distribution, also in extracts, with a reference to the source, for non-commercial and commercial purposes; the CSV files state the Datenlizenz Deutschland - Namensnennung - Version 2.0."

@@ -614,6 +614,33 @@ feeds = ["https://www.domradio.de/rss-feeds/domradio-rss.xml"]
 fetch_pages = false
 added = 2026-10-28
 
+# source review 2026-11-01: 5 items in the last 7 days
+[[outlet]]
+id = "haufe"
+name = "Haufe Sozialwesen"
+homepage = "https://www.haufe.de/sozialwesen/"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Income, poverty and social benefits"
+paywall_model = "mixed"
+feeds = ["https://www.haufe.de/xml/rss_129120.xml"]
+news_sitemap = "https://www.haufe.de/news_free.xml"
+fetch_pages = true
+added = 2026-11-01
+
+# source review 2026-11-01: 30 items in the last 7 days; robots.txt states a TDM reservation in natural language, therefore fetch_pages = false
+[[outlet]]
+id = "immobilienmanager"
+name = "Immobilien Manager"
+homepage = "https://www.immobilienmanager.de/"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Housing and rents"
+paywall_model = "mixed"
+feeds = ["https://www.immobilienmanager.de/rss/"]
+fetch_pages = false
+added = 2026-11-01
+
 # =============================================================================
 # Press sources: federal institutions and parliaments
 # =============================================================================
@@ -960,6 +987,17 @@ topic_filter = true
 fetch_pages = true
 added = 2026-10-28
 
+# source review 2026-11-01: 16 items in the last 60 days
+[[press_source]]
+id = "dguv"
+name = "Deutsche Gesetzliche Unfallversicherung"
+homepage = "https://www.dguv.de/de/index.jsp"
+actor_type = "public_agency"
+jurisdiction = "DE"
+feeds = ["https://www.dguv.de/de/index.xml.jsp"]
+fetch_pages = true
+added = 2026-11-01
+
 # Candidates that were checked and not admitted. The source review does not propose them again (see the header).
 
 [[excluded]]
@@ -1012,9 +1050,9 @@ owner_group = "unknown"
 topic = "Migration and asylum"
 paywall_model = "free"
 feeds = ["https://www.migazin.de/feed/"]
-status = "robots"
-reason = "robots.txt disallows /feed/"
-checked = 2026-10-28
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-11-01
 
 [[excluded]]
 id = "mediendienst_integration"
@@ -1049,9 +1087,9 @@ homepage = "https://www.bib.bund.de/"
 kind = "press_source"
 actor_type = "public_agency"
 jurisdiction = "DE"
-status = "robots"
-reason = "no feed link on the homepage; robots.txt disallows /DE/Service/ except the podcast feeds"
-checked = 2026-10-28
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-11-01
 
 [[excluded]]
 id = "bka"
@@ -1505,17 +1543,6 @@ reason = "no readable feed found"
 checked = 2026-10-28
 
 [[excluded]]
-id = "dguv"
-name = "Deutsche Gesetzliche Unfallversicherung"
-homepage = "https://www.dguv.de/de/index.jsp"
-kind = "press_source"
-actor_type = "public_agency"
-jurisdiction = "DE"
-status = "inactive"
-reason = "4 recent items, fewer than 5"
-checked = 2026-10-28
-
-[[excluded]]
 id = "aerztezeitung"
 name = "Ärzte Zeitung"
 homepage = "https://www.aerztezeitung.de/"
@@ -1556,3 +1583,73 @@ paywall_model = "free"
 status = "inactive"
 reason = "no feed with recent items"
 checked = 2026-10-28
+
+[[excluded]]
+id = "bibliomed_pflege"
+name = "Bibliomed Pflege"
+homepage = "https://www.bibliomed-pflege.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Health and care"
+paywall_model = "mixed"
+feeds = ["https://www.bibliomed-pflege.de/rss.xml"]
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-11-01
+
+[[excluded]]
+id = "sozial"
+name = "sozial.de"
+homepage = "https://www.sozial.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Income, poverty and social benefits"
+paywall_model = "free"
+feeds = ["https://www.sozial.de/rss.xml"]
+status = "inactive"
+reason = "no feed with recent items"
+checked = 2026-11-01
+
+[[excluded]]
+id = "zfg_online"
+name = "Zeitschrift für Gerontologie und Geriatrie"
+homepage = "https://www.zfg-online.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Older people and ageing"
+paywall_model = "mixed"
+feeds = ["https://www.zfg-online.de/rss.xml"]
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-11-01
+
+[[excluded]]
+id = "frnrw"
+name = "Flüchtlingsrat NRW"
+homepage = "https://www.frnrw.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "organization"
+topic = "Migration and asylum"
+paywall_model = "free"
+feeds = ["https://www.frnrw.de/feed/"]
+status = "inactive"
+reason = "1 recent items, fewer than 5"
+checked = 2026-11-01
+
+[[excluded]]
+id = "jugendhilfe"
+name = "Jugendhilfe"
+homepage = "https://www.jugendhilfe.de/"
+kind = "outlet"
+outlet_type = "specialist_press"
+owner_group = "publisher"
+topic = "Families and households"
+paywall_model = "free"
+feeds = ["https://www.jugendhilfe.de/rss.xml"]
+status = "no_feed"
+reason = "no readable feed found"
+checked = 2026-11-01
