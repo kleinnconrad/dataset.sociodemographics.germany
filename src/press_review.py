@@ -97,7 +97,9 @@ MAX_CANDIDATES_PER_SEARCH = 12
 # Topics without a specialist outlet that are searched in one review
 MAX_TOPICS_PER_SEARCH = 6
 MIN_SEARCH_INTERVAL_S = 2.0
-SEARCH_TEMPERATURE = 0.2
+# Google recommends MEDIUM or higher for requests with tools; MINIMAL, the default of gemini-3.5-flash-lite, can end
+# the searches early. About four requests per month; the thinking tokens cost a few cents.
+SEARCH_THINKING_LEVEL = types.ThinkingLevel.MEDIUM
 SEARCH_TIMEOUT_MS = 120_000
 # A new press source needs at least one item in PRESS_RECENT_DAYS days; a new outlet at least
 # MIN_OUTLET_ITEMS sociodemographic items in OUTLET_RECENT_DAYS days
@@ -394,7 +396,7 @@ class SearchModel:
         self.calls += 1
         config = types.GenerateContentConfig(
             tools=[types.Tool(google_search=types.GoogleSearch())],
-            temperature=SEARCH_TEMPERATURE,
+            thinking_config=types.ThinkingConfig(thinking_level=SEARCH_THINKING_LEVEL),
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         try:

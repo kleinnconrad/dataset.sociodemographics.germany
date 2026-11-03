@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_GEMINI_MODEL = "gemini-2.5-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 USER_AGENT = ("GermanSociodemographicsDataset/0.1 "
               "(+https://github.com/kleinnconrad/dataset.sociodemographics.germany)")
 
