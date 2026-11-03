@@ -54,11 +54,13 @@ class FakeClient:
 
     def __init__(self, answer: Callable[[str], SimpleNamespace]) -> None:
         self.prompts: list[str] = []
+        self.configs: list[Any] = []
         self.models = SimpleNamespace(generate_content=self._generate)
         self._answer = answer
 
     def _generate(self, model: str, contents: str, config: Any) -> SimpleNamespace:
         self.prompts.append(contents)
+        self.configs.append(config)
         return self._answer(contents)
 
 
@@ -187,6 +189,16 @@ def test_build_prompt_numbers_items_and_marks_missing_text() -> None:
                                            published=None, title="T")])
     assert "Item 1" in prompt and "Kind: press release" in prompt
     assert "Published: (unknown)" in prompt and "Teaser: (none)" in prompt
+
+
+def test_requests_set_a_thinking_level_and_no_sampling_values() -> None:
+    gemini, client = annotator(lambda prompt: response([label(1)]))
+    gemini.annotate(items(1))
+
+    config = client.configs[0]
+    assert config.thinking_config.thinking_level == types.ThinkingLevel.MINIMAL
+    assert config.thinking_config.thinking_budget is None
+    assert config.temperature is None
 
 
 def test_extraction_hash_changes_with_the_model() -> None:

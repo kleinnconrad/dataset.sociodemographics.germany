@@ -25,9 +25,10 @@ logger = logging.getLogger(__name__)
 # Collectors that write vintages of statistical series
 SERIES_COLLECTORS = ("ecb", "eurostat")
 # List prices of the paid tier in USD per million tokens (input, output including thinking), as of
-# October 2026. Update them when Google changes the prices or the pipeline uses another model.
+# November 2026. Update them when Google changes the prices or the pipeline uses another model.
 GEMINI_PRICES_USD_PER_M: dict[str, tuple[float, float]] = {
     "gemini-2.5-flash": (0.30, 2.50),
+    "gemini-3.5-flash-lite": (0.30, 2.50),
 }
 
 

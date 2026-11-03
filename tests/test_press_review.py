@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from google.genai import types
 
 import press_review
 import source_review
@@ -467,6 +468,20 @@ def test_search_model_stops_at_the_budget_and_wraps_errors() -> None:
         assert model.ask("prompt") == "[]"
     with pytest.raises(SearchError):
         model.ask("prompt")
+
+
+def test_search_model_sets_a_thinking_level_and_no_temperature() -> None:
+    configs: list[Any] = []
+
+    def generate(**kwargs: Any) -> SimpleNamespace:
+        configs.append(kwargs["config"])
+        return SimpleNamespace(text="[]", usage_metadata=None)
+
+    client = SimpleNamespace(models=SimpleNamespace(generate_content=generate))
+    SearchModel(Settings(gemini_api_key="key"), client=client, sleep=lambda seconds: None).ask("prompt")
+
+    assert configs[0].thinking_config.thinking_level == types.ThinkingLevel.MEDIUM
+    assert configs[0].temperature is None
 
 
 def test_section_lists_notes(tmp_path) -> None:

@@ -46,9 +46,10 @@ from settings import Settings
 logger = logging.getLogger(__name__)
 
 BATCH_SIZE = 10
-TEMPERATURE = 0.2
-# 0 turns thinking off: the labels are a classification of short texts, and thinking tokens are billed as output
-THINKING_BUDGET: Optional[int] = 0
+# MINIMAL is the lowest thinking level of Gemini 3 and later models: the labels are a classification of short
+# texts, and thinking tokens are billed as output. These models ignore custom sampling values (temperature,
+# top-k, top-p), and Gemini 2.5 models reject a thinking level.
+THINKING_LEVEL: Optional[types.ThinkingLevel] = types.ThinkingLevel.MINIMAL
 # A batch of ten items takes 10 to 20 seconds; the timeout bounds the time a run needs after its deadline
 REQUEST_TIMEOUT_MS = 60_000
 SDK_RETRY_STATUS_CODES = [408, 500, 502, 503, 504]
@@ -219,8 +220,7 @@ def extraction_hash(settings: Settings) -> str:
         "prompt_template": PROMPT_TEMPLATE,
         "schema": describe_models(ANNOTATION_MODELS, include_descriptions=True),
         "model": settings.gemini_model,
-        "temperature": TEMPERATURE,
-        "thinking_budget": THINKING_BUDGET,
+        "thinking_level": THINKING_LEVEL,
         "batch_size": BATCH_SIZE,
         "max_chars": [MAX_TITLE_CHARS, MAX_TEASER_CHARS, MAX_LEAD_CHARS],
         "google_genai": importlib.metadata.version("google-genai"),
@@ -448,10 +448,9 @@ class GeminiAnnotator:
             system_instruction=SYSTEM_INSTRUCTION,
             response_mime_type="application/json",
             response_schema=AnnotationBatch,
-            temperature=TEMPERATURE,
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
             thinking_config=(
-                types.ThinkingConfig(thinking_budget=THINKING_BUDGET) if THINKING_BUDGET is not None else None
+                types.ThinkingConfig(thinking_level=THINKING_LEVEL) if THINKING_LEVEL is not None else None
             ),
         )
         self.usage = UsageTotals()
