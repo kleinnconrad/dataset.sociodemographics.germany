@@ -76,7 +76,7 @@ The table lists the variables that carry content and the dataset (table) that st
 
 ## Dataset Overview
 <!-- DATASET_OVERVIEW_START -->
-**Last updated:** 2026-11-18 08:35 UTC
+**Last updated:** 2026-11-21 08:25 UTC
 
 | Dataset | Records | Items | Files | Observed | Content |
 |---|---|---|---|---|---|
@@ -85,23 +85,15 @@ The table lists the variables that carry content and the dataset (table) that st
 | `regions` | 462 | 462 | 1 | 2026-10-26 to 2026-10-26 | An entry of the region registry, recorded when it appears or changes. |
 | `source_snapshots` | 62 | 54 | 5 | 2026-10-26 to 2026-11-18 | The content that a source without a reliable history published at one observation, stored again only when it changes. |
 | `snapshot_catalog` | 54 | 54 | 1 | 2026-10-26 to 2026-10-26 | An entry of the snapshot configuration, recorded when it appears or changes. |
-| `news_items` | 11,613 | 11,613 | 7 | 2026-10-28 to 2026-11-18 | Metadata of one news article. The text is not stored. |
-| `press_releases` | 370 | 370 | 7 | 2026-10-28 to 2026-11-18 | Metadata of one press release. The text is not stored. |
-| `text_annotations` | 2,800 | 2,800 | 7 | 2026-10-28 to 2026-11-18 | Gemini labels of one news article or press release. |
+| `news_items` | 13,325 | 13,325 | 8 | 2026-10-28 to 2026-11-21 | Metadata of one news article. The text is not stored. |
+| `press_releases` | 446 | 446 | 8 | 2026-10-28 to 2026-11-21 | Metadata of one press release. The text is not stored. |
+| `text_annotations` | 3,200 | 3,200 | 8 | 2026-10-28 to 2026-11-21 | Gemini labels of one news article or press release. |
 | `press_catalog` | 75 | 75 | 2 | 2026-10-28 to 2026-11-04 | An entry of the press configuration (news outlets and issuers of press releases), recorded when it appears or changes. |
 
 **Runs**
 
-- **Latest run:** 2026-11-18 08:22 UTC (normal)
-  - `ecb`: ok
-  - `eurostat`: ok (sociodemographic_series 1)
-  - `feeds`: ok (news_items 1,643, press_releases 64, text_annotations 400)
-  - `files`: ok (source_snapshots 1)
-  - `genesis`: ok
-  - `press_catalog`: ok
-  - `regions`: ok
-  - `series_catalog`: ok
-  - `snapshot_catalog`: ok
+- **Latest run:** 2026-11-21 08:14 UTC (normal)
+  - `feeds`: ok (news_items 1,712, press_releases 76, text_annotations 400)
 
 **Statistical series**
 
@@ -206,51 +198,51 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Source | Type | Status | Items | Last 30 days | Annotated | With lead text | Latest publication |
 |---|---|---|---|---|---|---|---|
-| Augsburger Allgemeine | regional daily | active | 803 | 803 | 7.3% (59) | 0.0% (0) | 2026-11-18 |
-| Berliner Zeitung | regional daily | active | 155 | 155 | 38.1% (59) | 38.1% (59) | 2026-11-18 |
-| Bild | tabloid | active | 398 | 398 | 15.6% (62) | 15.6% (62) | 2026-11-18 |
-| BR24 | public broadcaster regional | active | 97 | 97 | 62.9% (61) | 0.0% (0) | 2026-11-18 |
-| buten un binnen | public broadcaster regional | active | 45 | 45 | 95.6% (43) | 0.0% (0) | 2026-11-18 |
-| Der Spiegel | weekly magazine | active | 271 | 271 | 22.9% (62) | 0.0% (0) | 2026-11-18 |
-| Der Tagesspiegel | national daily | active | 1,012 | 1,012 | 6.1% (62) | 0.0% (0) | 2026-11-18 |
-| Deutschlandfunk | public broadcaster national | active | 34 | 34 | 97.1% (33) | 97.1% (33) | 2026-11-17 |
-| Die Welt | national daily | active | 741 | 741 | 8.5% (63) | 7.8% (58) | 2026-11-18 |
-| DOMRADIO.DE | specialist press | active | 483 | 483 | 11.8% (57) | 0.0% (0) | 2026-11-18 |
-| evangelisch.de | specialist press | active | 19 | 19 | 100.0% (19) | 100.0% (19) | 2026-11-18 |
-| Focus Online | weekly magazine | active | 72 | 72 | 80.6% (58) | 80.6% (58) | 2026-11-18 |
-| Freie Presse | regional daily | active | 184 | 184 | 31.5% (58) | 0.0% (0) | 2026-11-18 |
-| Hamburger Abendblatt | regional daily | active | 346 | 346 | 17.1% (59) | 3.8% (13) | 2026-11-18 |
-| Haufe Sozialwesen | specialist press | active | 129 | 129 | 31.0% (40) | 31.0% (40) | 2026-11-18 |
-| hessenschau.de | public broadcaster regional | active | 111 | 111 | 55.0% (61) | 0.0% (0) | 2026-11-18 |
-| Immobilien Manager | specialist press | active | 57 | 57 | 68.4% (39) | 0.0% (0) | 2026-11-17 |
-| Kölner Stadt-Anzeiger | regional daily | active | 10 | 10 | 100.0% (10) | 100.0% (10) | 2026-11-17 |
-| Lausitzer Rundschau | regional daily | active | 126 | 126 | 46.8% (59) | 0.0% (0) | 2026-11-18 |
-| MDR | public broadcaster regional | active | 327 | 327 | 18.7% (61) | 0.0% (0) | 2026-11-18 |
-| n-tv.de | online only | active | 507 | 507 | 12.2% (62) | 12.2% (62) | 2026-11-18 |
-| NDR | public broadcaster regional | active | 185 | 185 | 33.0% (61) | 0.0% (0) | 2026-11-18 |
-| Neue Osnabrücker Zeitung | regional daily | active | 472 | 472 | 12.3% (58) | 0.0% (0) | 2026-11-18 |
-| News4teachers | specialist press | active | 60 | 60 | 80.0% (48) | 80.0% (48) | 2026-11-17 |
-| Nordkurier | regional daily | active | 315 | 315 | 18.4% (58) | 18.4% (58) | 2026-11-18 |
-| Nürnberger Nachrichten | regional daily | active | 67 | 67 | 85.1% (57) | 0.0% (0) | 2026-11-18 |
-| rbb24 | public broadcaster regional | active | 45 | 45 | 97.8% (44) | 0.0% (0) | 2026-11-18 |
-| Rheinische Post | regional daily | active | 468 | 468 | 12.4% (58) | 0.0% (0) | 2026-11-18 |
-| Saarbrücker Zeitung | regional daily | active | 74 | 74 | 71.6% (53) | 70.3% (52) | 2026-11-18 |
-| shz.de | regional daily | active | 372 | 372 | 15.6% (58) | 0.0% (0) | 2026-11-18 |
-| Stuttgarter Zeitung | regional daily | active | 189 | 189 | 31.2% (59) | 0.0% (0) | 2026-11-18 |
-| SWR Aktuell | public broadcaster regional | active | 96 | 96 | 63.5% (61) | 0.0% (0) | 2026-11-18 |
-| Süddeutsche Zeitung | national daily | active | 30 | 30 | 100.0% (30) | 0.0% (0) | 2026-11-18 |
-| Südkurier | regional daily | active | 396 | 396 | 15.2% (60) | 0.0% (0) | 2026-11-18 |
-| t-online | online only | active | 63 | 63 | 88.9% (56) | 0.0% (0) | 2026-11-17 |
-| tagesschau.de | public broadcaster national | active | 72 | 72 | 79.2% (57) | 0.0% (0) | 2026-11-18 |
-| taz | national daily | active | 378 | 378 | 16.4% (62) | 0.0% (0) | 2026-11-18 |
-| Thüringer Allgemeine | regional daily | active | 229 | 229 | 25.3% (58) | 1.7% (4) | 2026-11-18 |
-| Trierischer Volksfreund | regional daily | active | 62 | 62 | 80.6% (50) | 79.0% (49) | 2026-11-17 |
-| Volksstimme | regional daily | active | 936 | 936 | 6.2% (58) | 0.0% (0) | 2026-11-18 |
-| WAZ | regional daily | active | 328 | 328 | 17.7% (58) | 0.9% (3) | 2026-11-18 |
-| WDR | public broadcaster regional | active | 359 | 359 | 17.0% (61) | 0.0% (0) | 2026-11-18 |
-| Weser-Kurier | regional daily | active | 85 | 85 | 64.7% (55) | 0.0% (0) | 2026-11-18 |
-| Wiesbadener Kurier | regional daily | active | 303 | 303 | 19.5% (59) | 0.0% (0) | 2026-11-18 |
-| ZDFheute | public broadcaster national | active | 102 | 102 | 62.7% (64) | 32.4% (33) | 2026-11-18 |
+| Augsburger Allgemeine | regional daily | active | 929 | 929 | 7.2% (67) | 0.0% (0) | 2026-11-21 |
+| Berliner Zeitung | regional daily | active | 181 | 181 | 37.0% (67) | 37.0% (67) | 2026-11-21 |
+| Bild | tabloid | active | 465 | 465 | 15.1% (70) | 15.1% (70) | 2026-11-21 |
+| BR24 | public broadcaster regional | active | 117 | 117 | 59.0% (69) | 0.0% (0) | 2026-11-21 |
+| buten un binnen | public broadcaster regional | active | 54 | 54 | 94.4% (51) | 0.0% (0) | 2026-11-21 |
+| Der Spiegel | weekly magazine | active | 305 | 305 | 23.0% (70) | 0.0% (0) | 2026-11-21 |
+| Der Tagesspiegel | national daily | active | 1,159 | 1,159 | 6.0% (70) | 0.0% (0) | 2026-11-21 |
+| Deutschlandfunk | public broadcaster national | active | 35 | 35 | 97.1% (34) | 97.1% (34) | 2026-11-19 |
+| Die Welt | national daily | active | 838 | 838 | 8.5% (71) | 7.8% (65) | 2026-11-21 |
+| DOMRADIO.DE | specialist press | active | 563 | 563 | 11.4% (64) | 0.0% (0) | 2026-11-21 |
+| evangelisch.de | specialist press | active | 22 | 22 | 100.0% (22) | 100.0% (22) | 2026-11-21 |
+| Focus Online | weekly magazine | active | 82 | 82 | 80.5% (66) | 80.5% (66) | 2026-11-21 |
+| Freie Presse | regional daily | active | 208 | 208 | 31.2% (65) | 0.0% (0) | 2026-11-21 |
+| Hamburger Abendblatt | regional daily | active | 388 | 388 | 17.0% (66) | 3.6% (14) | 2026-11-21 |
+| Haufe Sozialwesen | specialist press | active | 144 | 144 | 32.6% (47) | 32.6% (47) | 2026-11-20 |
+| hessenschau.de | public broadcaster regional | active | 127 | 127 | 54.3% (69) | 0.0% (0) | 2026-11-21 |
+| Immobilien Manager | specialist press | active | 69 | 69 | 66.7% (46) | 0.0% (0) | 2026-11-20 |
+| Kölner Stadt-Anzeiger | regional daily | active | 14 | 14 | 100.0% (14) | 100.0% (14) | 2026-11-21 |
+| Lausitzer Rundschau | regional daily | active | 137 | 137 | 48.9% (67) | 0.0% (0) | 2026-11-21 |
+| MDR | public broadcaster regional | active | 371 | 371 | 18.6% (69) | 0.0% (0) | 2026-11-21 |
+| n-tv.de | online only | active | 587 | 587 | 11.9% (70) | 11.9% (70) | 2026-11-21 |
+| NDR | public broadcaster regional | active | 212 | 212 | 32.5% (69) | 0.0% (0) | 2026-11-21 |
+| Neue Osnabrücker Zeitung | regional daily | active | 560 | 560 | 11.6% (65) | 0.0% (0) | 2026-11-21 |
+| News4teachers | specialist press | active | 70 | 70 | 78.6% (55) | 78.6% (55) | 2026-11-20 |
+| Nordkurier | regional daily | active | 359 | 359 | 18.1% (65) | 18.1% (65) | 2026-11-21 |
+| Nürnberger Nachrichten | regional daily | active | 81 | 81 | 80.2% (65) | 0.0% (0) | 2026-11-21 |
+| rbb24 | public broadcaster regional | active | 53 | 53 | 98.1% (52) | 0.0% (0) | 2026-11-21 |
+| Rheinische Post | regional daily | active | 535 | 535 | 12.1% (65) | 0.0% (0) | 2026-11-21 |
+| Saarbrücker Zeitung | regional daily | active | 88 | 88 | 68.2% (60) | 67.0% (59) | 2026-11-21 |
+| shz.de | regional daily | active | 432 | 432 | 15.0% (65) | 0.0% (0) | 2026-11-21 |
+| Stuttgarter Zeitung | regional daily | active | 209 | 209 | 32.1% (67) | 0.0% (0) | 2026-11-21 |
+| SWR Aktuell | public broadcaster regional | active | 111 | 111 | 62.2% (69) | 0.0% (0) | 2026-11-21 |
+| Süddeutsche Zeitung | national daily | active | 34 | 34 | 100.0% (34) | 0.0% (0) | 2026-11-20 |
+| Südkurier | regional daily | active | 456 | 456 | 14.9% (68) | 0.0% (0) | 2026-11-21 |
+| t-online | online only | active | 76 | 76 | 84.2% (64) | 0.0% (0) | 2026-11-21 |
+| tagesschau.de | public broadcaster national | active | 81 | 81 | 80.2% (65) | 0.0% (0) | 2026-11-21 |
+| taz | national daily | active | 426 | 426 | 16.4% (70) | 0.0% (0) | 2026-11-21 |
+| Thüringer Allgemeine | regional daily | active | 262 | 262 | 24.8% (65) | 1.5% (4) | 2026-11-21 |
+| Trierischer Volksfreund | regional daily | active | 71 | 71 | 80.3% (57) | 78.9% (56) | 2026-11-21 |
+| Volksstimme | regional daily | active | 1,076 | 1,076 | 6.0% (65) | 0.0% (0) | 2026-11-21 |
+| WAZ | regional daily | active | 370 | 370 | 17.6% (65) | 1.1% (4) | 2026-11-21 |
+| WDR | public broadcaster regional | active | 411 | 411 | 16.8% (69) | 0.0% (0) | 2026-11-21 |
+| Weser-Kurier | regional daily | active | 103 | 103 | 61.2% (63) | 0.0% (0) | 2026-11-21 |
+| Wiesbadener Kurier | regional daily | active | 337 | 337 | 19.6% (66) | 0.0% (0) | 2026-11-21 |
+| ZDFheute | public broadcaster national | active | 117 | 117 | 61.5% (72) | 32.5% (38) | 2026-11-21 |
 
 </details>
 
@@ -259,58 +251,58 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Source | Type | Status | Items | Last 30 days | Annotated | With lead text | Latest publication |
 |---|---|---|---|---|---|---|---|
-| Bayerische Staatsregierung | state government | active | 78 | 78 | 100.0% (78) | 96.2% (75) | 2026-11-17 |
+| Bayerische Staatsregierung | state government | active | 95 | 95 | 100.0% (95) | 96.8% (92) | 2026-11-20 |
 | Bertelsmann Stiftung | civil society organization | active | 4 | 4 | 100.0% (4) | 75.0% (3) | 2026-11-16 |
 | Bundesamt für Migration und Flüchtlinge | public agency | active | 7 | 7 | 100.0% (7) | 100.0% (7) | 2026-11-16 |
-| Bundesministerium der Justiz und für Verbraucherschutz | federal ministry | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
+| Bundesministerium der Justiz und für Verbraucherschutz | federal ministry | active | 2 | 2 | 100.0% (2) | 100.0% (2) | 2026-11-18 |
 | Bundesministerium des Innern | federal ministry | active | 1 | 1 | 100.0% (1) | 100.0% (1) | 2026-11-11 |
-| Bundesministerium für Bildung, Familie, Senioren, Frauen und Jugend | federal ministry | active | 26 | 26 | 100.0% (26) | 100.0% (26) | 2026-11-17 |
+| Bundesministerium für Bildung, Familie, Senioren, Frauen und Jugend | federal ministry | active | 37 | 37 | 100.0% (37) | 100.0% (37) | 2026-11-20 |
 | Bundesministerium für Gesundheit | federal ministry | active | 6 | 6 | 100.0% (6) | 100.0% (6) | 2026-11-16 |
 | Bundesministerium für Wohnen, Stadtentwicklung und Bauwesen | federal ministry | active | 3 | 3 | 100.0% (3) | 100.0% (3) | 2026-11-12 |
 | Bundesrat | parliament | active | 2 | 2 | 100.0% (2) | 0.0% (0) | 2026-11-12 |
-| Bundesregierung | federal government | active | 13 | 13 | 100.0% (13) | 100.0% (13) | 2026-11-16 |
+| Bundesregierung | federal government | active | 22 | 22 | 100.0% (22) | 100.0% (22) | 2026-11-20 |
 | Bundeszentrale für politische Bildung | public agency | active | 2 | 2 | 100.0% (2) | 100.0% (2) | 2026-11-09 |
-| Der Paritätische Gesamtverband | welfare association | active | 31 | 31 | 100.0% (31) | 100.0% (31) | 2026-11-18 |
-| Deutsche Gesetzliche Unfallversicherung | public agency | active | 3 | 3 | 100.0% (3) | 66.7% (2) | 2026-11-17 |
-| Deutscher Bundestag | parliament | active | 28 | 28 | 100.0% (28) | 100.0% (28) | 2026-11-13 |
-| Deutscher Gewerkschaftsbund | trade union | active | 10 | 10 | 100.0% (10) | 100.0% (10) | 2026-11-16 |
+| Der Paritätische Gesamtverband | welfare association | active | 33 | 33 | 100.0% (33) | 100.0% (33) | 2026-11-18 |
+| Deutsche Gesetzliche Unfallversicherung | public agency | active | 4 | 4 | 100.0% (4) | 75.0% (3) | 2026-11-19 |
+| Deutscher Bundestag | parliament | active | 34 | 34 | 100.0% (34) | 100.0% (34) | 2026-11-20 |
+| Deutscher Gewerkschaftsbund | trade union | active | 11 | 11 | 100.0% (11) | 100.0% (11) | 2026-11-19 |
 | Deutscher Landkreistag | municipal association | active | 1 | 1 | 100.0% (1) | 100.0% (1) | 2026-11-05 |
-| Deutsches Jugendinstitut | research institute | active | 1 | 1 | 100.0% (1) | 100.0% (1) | 2026-11-10 |
-| Institut für Arbeitsmarkt- und Berufsforschung | research institute | active | 13 | 13 | 100.0% (13) | 100.0% (13) | 2026-11-18 |
-| Max-Planck-Institut für demografische Forschung | research institute | active | 9 | 9 | 100.0% (9) | 100.0% (9) | 2026-11-16 |
+| Deutsches Jugendinstitut | research institute | active | 2 | 2 | 100.0% (2) | 100.0% (2) | 2026-11-17 |
+| Institut für Arbeitsmarkt- und Berufsforschung | research institute | active | 15 | 15 | 100.0% (15) | 100.0% (15) | 2026-11-20 |
+| Max-Planck-Institut für demografische Forschung | research institute | active | 11 | 11 | 100.0% (11) | 100.0% (11) | 2026-11-19 |
 | Niedersächsische Landesregierung | state government | active | 2 | 2 | 100.0% (2) | 100.0% (2) | 2026-11-05 |
 | PRO ASYL | civil society organization | active | 2 | 2 | 100.0% (2) | 100.0% (2) | 2026-11-17 |
-| Robert Koch-Institut | public agency | active | 10 | 10 | 100.0% (10) | 0.0% (0) | 2026-11-17 |
-| Sachverständigenrat für Integration und Migration | research institute | active | 8 | 8 | 100.0% (8) | 100.0% (8) | 2026-11-12 |
+| Robert Koch-Institut | public agency | active | 13 | 13 | 100.0% (13) | 0.0% (0) | 2026-11-20 |
+| Sachverständigenrat für Integration und Migration | research institute | active | 9 | 9 | 100.0% (9) | 100.0% (9) | 2026-11-19 |
 | Senatskanzlei Berlin | state government | active | 0 | 0 | 0.0% (0) | 0.0% (0) | none |
 | Statistisches Amt für Hamburg und Schleswig-Holstein | statistical office | active | 15 | 15 | 100.0% (15) | 100.0% (15) | 2026-11-15 |
 | Statistisches Amt Mecklenburg-Vorpommern | statistical office | active | 7 | 7 | 100.0% (7) | 100.0% (7) | 2026-11-17 |
-| Statistisches Bundesamt | statistical office | active | 41 | 41 | 100.0% (41) | 0.0% (0) | 2026-11-18 |
-| Statistisches Landesamt Rheinland-Pfalz | statistical office | active | 14 | 14 | 100.0% (14) | 92.9% (13) | 2026-11-16 |
-| Statistisches Landesamt Sachsen-Anhalt | statistical office | active | 28 | 28 | 100.0% (28) | 100.0% (28) | 2026-11-17 |
-| Wissenschaftszentrum Berlin für Sozialforschung | research institute | active | 5 | 5 | 100.0% (5) | 100.0% (5) | 2026-11-09 |
+| Statistisches Bundesamt | statistical office | active | 45 | 45 | 100.0% (45) | 0.0% (0) | 2026-11-20 |
+| Statistisches Landesamt Rheinland-Pfalz | statistical office | active | 18 | 18 | 100.0% (18) | 94.4% (17) | 2026-11-20 |
+| Statistisches Landesamt Sachsen-Anhalt | statistical office | active | 36 | 36 | 100.0% (36) | 100.0% (36) | 2026-11-20 |
+| Wissenschaftszentrum Berlin für Sozialforschung | research institute | active | 7 | 7 | 100.0% (7) | 100.0% (7) | 2026-11-18 |
 
 </details>
 
 **Annotations**
 
-- **Annotated items:** 2,800 of 11,983 (23.4%)
-- **Text seen by the model:** title_only 7,109, title_teaser 3,902, lead_text 972
+- **Annotated items:** 3,200 of 13,771 (23.2%)
+- **Text seen by the model:** title_only 8,159, title_teaser 4,482, lead_text 1,130
 
-**Main topics of sociodemographic items, last 30 days** (1,829 items)
+**Main topics of sociodemographic items, last 30 days** (2,132 items)
 
 | Topic | Items | Share |
 |---|---|---|
-| Children and youth | 256 | 14.0% |
-| Migration and asylum | 189 | 10.3% |
-| Housing and rents | 186 | 10.2% |
-| Education and schools | 169 | 9.2% |
-| Income, poverty and social benefits | 137 | 7.5% |
-| Health and care | 133 | 7.3% |
-| Crime and justice | 116 | 6.3% |
-| Labour market and employment | 95 | 5.2% |
-| Pensions | 89 | 4.9% |
-| Religion and churches | 82 | 4.5% |
+| Children and youth | 316 | 14.8% |
+| Housing and rents | 218 | 10.2% |
+| Migration and asylum | 206 | 9.7% |
+| Education and schools | 203 | 9.5% |
+| Income, poverty and social benefits | 157 | 7.4% |
+| Health and care | 153 | 7.2% |
+| Crime and justice | 132 | 6.2% |
+| Labour market and employment | 122 | 5.7% |
+| Pensions | 97 | 4.5% |
+| Religion and churches | 89 | 4.2% |
 
 **Fields** (Filled: records with a value that is not null and not empty)
 
@@ -474,36 +466,36 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Field | Description | Filled | Distinct values |
 |---|---|---|---|
-| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (11,613) | 11,613 |
-| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (11,613) | 1 |
-| `dataset` | Name of the dataset. | 100.0% (11,613) | 1 |
-| `schema_version` | Version of the record schema. | 100.0% (11,613) | 1 |
-| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (11,613) | 573 |
-| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (11,613) | 45 |
-| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (11,613) | 11,613 |
-| `license` | License or terms of the source. | 100.0% (11,613) | 1 |
-| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (11,613) | 1 |
-| `outlet_id` | Id of the outlet in config/sources.toml. | 100.0% (11,613) | 45 |
-| `outlet_type` | Type of the outlet. | 100.0% (11,613) | 8 |
-| `owner_group` | Publisher group of the outlet, or 'public' for public broadcasters. | 100.0% (11,613) | 25 |
-| `home_state` | State of a regional outlet; null for national outlets. | 61.9% (7,185) | 16 |
-| `outlet_topic` | Topic of a specialist outlet, e.g. 'Migration and asylum'; null for general outlets. | 6.4% (748) | 4 |
-| `channel` | Where the article was found: RSS/Atom feed or news sitemap. | 100.0% (11,613) | 2 |
-| `url` | URL of the article. | 100.0% (11,613) | 11,613 |
-| `canonical_url` | Canonical URL declared by the article page. | 7.3% (848) | 848 |
-| `title` | Title of the article. | 100.0% (11,613) | 10,600 |
-| `published_at` | Publication time (UTC). | 100.0% (11,610) | 10,132 |
-| `updated_at` | Last modification time from the article page (UTC). | 5.5% (640) | 623 |
-| `section` | Section of the outlet, from the page or the feed. | 21.8% (2,528) | 274 |
-| `feed_categories` | Categories of the item in the feed. | 19.6% (2,275) | 1,183 |
-| `keywords` | Keywords from the article page or the news sitemap. | 29.7% (3,452) | 8,118 |
-| `jsonld_type` | schema.org type of the article page, e.g. NewsArticle or OpinionNewsArticle. | 6.3% (731) | 3 |
-| `is_agency_copy` | True if the article is credited to a news agency (dpa, AFP, Reuters, epd, KNA, AP). Null without page data. | 6.3% (731) | 2 |
-| `author_count` | Number of named authors. Author names are not stored. Null without page data. | 6.3% (731) | 4 |
-| `word_count` | Word count from the article page. Null if not given. | 0.4% (48) | 47 |
-| `is_paywalled` | True if the page marks the article as not accessible for free. Null without page data. | 4.0% (466) | 2 |
-| `has_video` | True if the article page embeds a video. Null without page data. | 7.4% (854) | 2 |
-| `content_basis` | Text available for the annotation: title only, title and teaser, or lead text of the page. | 100.0% (11,613) | 3 |
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (13,325) | 13,325 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (13,325) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (13,325) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (13,325) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (13,325) | 651 |
+| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (13,325) | 45 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (13,325) | 13,325 |
+| `license` | License or terms of the source. | 100.0% (13,325) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (13,325) | 1 |
+| `outlet_id` | Id of the outlet in config/sources.toml. | 100.0% (13,325) | 45 |
+| `outlet_type` | Type of the outlet. | 100.0% (13,325) | 8 |
+| `owner_group` | Publisher group of the outlet, or 'public' for public broadcasters. | 100.0% (13,325) | 25 |
+| `home_state` | State of a regional outlet; null for national outlets. | 61.9% (8,252) | 16 |
+| `outlet_topic` | Topic of a specialist outlet, e.g. 'Migration and asylum'; null for general outlets. | 6.5% (868) | 4 |
+| `channel` | Where the article was found: RSS/Atom feed or news sitemap. | 100.0% (13,325) | 2 |
+| `url` | URL of the article. | 100.0% (13,325) | 13,325 |
+| `canonical_url` | Canonical URL declared by the article page. | 7.2% (959) | 959 |
+| `title` | Title of the article. | 100.0% (13,325) | 12,138 |
+| `published_at` | Publication time (UTC). | 100.0% (13,321) | 11,637 |
+| `updated_at` | Last modification time from the article page (UTC). | 5.5% (729) | 711 |
+| `section` | Section of the outlet, from the page or the feed. | 21.7% (2,897) | 294 |
+| `feed_categories` | Categories of the item in the feed. | 19.6% (2,617) | 1,310 |
+| `keywords` | Keywords from the article page or the news sitemap. | 29.6% (3,942) | 8,975 |
+| `jsonld_type` | schema.org type of the article page, e.g. NewsArticle or OpinionNewsArticle. | 6.3% (833) | 3 |
+| `is_agency_copy` | True if the article is credited to a news agency (dpa, AFP, Reuters, epd, KNA, AP). Null without page data. | 6.3% (833) | 2 |
+| `author_count` | Number of named authors. Author names are not stored. Null without page data. | 6.3% (833) | 5 |
+| `word_count` | Word count from the article page. Null if not given. | 0.4% (55) | 54 |
+| `is_paywalled` | True if the page marks the article as not accessible for free. Null without page data. | 4.0% (529) | 2 |
+| `has_video` | True if the article page embeds a video. Null without page data. | 7.2% (966) | 2 |
+| `content_basis` | Text available for the annotation: title only, title and teaser, or lead text of the page. | 100.0% (13,325) | 3 |
 
 </details>
 
@@ -512,24 +504,24 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Field | Description | Filled | Distinct values |
 |---|---|---|---|
-| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (370) | 370 |
-| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (370) | 1 |
-| `dataset` | Name of the dataset. | 100.0% (370) | 1 |
-| `schema_version` | Version of the record schema. | 100.0% (370) | 1 |
-| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (370) | 314 |
-| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (370) | 28 |
-| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (370) | 370 |
-| `license` | License or terms of the source. | 100.0% (370) | 1 |
-| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (370) | 1 |
-| `press_source_id` | Id of the press source in config/sources.toml. | 100.0% (370) | 28 |
-| `actor_type` | Type of the issuing actor. | 100.0% (370) | 11 |
-| `jurisdiction` | Level of the issuer: DE, a state (ISO 3166-2), EU or INT. | 100.0% (370) | 7 |
-| `url` | URL of the press release. | 100.0% (370) | 370 |
-| `canonical_url` | Canonical URL declared by the page. | 44.1% (163) | 163 |
-| `title` | Title of the press release. | 100.0% (370) | 359 |
-| `published_at` | Publication time (UTC). | 100.0% (370) | 252 |
-| `feed_categories` | Categories of the item in the feed. | 31.4% (116) | 77 |
-| `content_basis` | Text available for the annotation. | 100.0% (370) | 3 |
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (446) | 446 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (446) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (446) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (446) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (446) | 376 |
+| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (446) | 29 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (446) | 446 |
+| `license` | License or terms of the source. | 100.0% (446) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (446) | 1 |
+| `press_source_id` | Id of the press source in config/sources.toml. | 100.0% (446) | 29 |
+| `actor_type` | Type of the issuing actor. | 100.0% (446) | 11 |
+| `jurisdiction` | Level of the issuer: DE, a state (ISO 3166-2), EU or INT. | 100.0% (446) | 7 |
+| `url` | URL of the press release. | 100.0% (446) | 446 |
+| `canonical_url` | Canonical URL declared by the page. | 43.7% (195) | 195 |
+| `title` | Title of the press release. | 100.0% (446) | 428 |
+| `published_at` | Publication time (UTC). | 100.0% (446) | 306 |
+| `feed_categories` | Categories of the item in the feed. | 31.4% (140) | 82 |
+| `content_basis` | Text available for the annotation. | 100.0% (446) | 3 |
 
 </details>
 
@@ -538,42 +530,42 @@ The table lists the variables that carry content and the dataset (table) that st
 
 | Field | Description | Filled | Distinct values |
 |---|---|---|---|
-| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (2,800) | 2,800 |
-| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (2,800) | 1 |
-| `dataset` | Name of the dataset. | 100.0% (2,800) | 1 |
-| `schema_version` | Version of the record schema. | 100.0% (2,800) | 1 |
-| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (2,800) | 235 |
-| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (2,800) | 73 |
-| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (2,800) | 2,800 |
-| `license` | License or terms of the source. | 100.0% (2,800) | 1 |
-| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (2,800) | 1 |
-| `item_dataset` | Dataset of the annotated item. | 100.0% (2,800) | 2 |
-| `item_id` | record_id of the annotated item. | 100.0% (2,800) | 2,800 |
-| `model` | Gemini model that produced the labels. | 100.0% (2,800) | 2 |
-| `extraction_hash` | Hash of the prompt, response schema and model settings. Labels with the same hash were produced under the same conditions. | 100.0% (2,800) | 4 |
-| `content_basis` | Text the model saw: title only, title and teaser, or lead text. | 100.0% (2,800) | 3 |
-| `is_sociodemographic` | Whether the item is about the population, its structure or its living conditions. | 100.0% (2,800) | 2 |
-| `topic` | Main topic. | 100.0% (2,800) | 21 |
-| `topics_secondary` | Further topics, at most two. | 35.4% (990) | 21 |
-| `issue_detail` | Specific issue in a few words. | 65.4% (1,831) | 1,624 |
-| `article_type` | Form of the item. | 100.0% (2,800) | 7 |
-| `population_groups` | Groups of the population the item is mainly about. | 51.9% (1,454) | 29 |
-| `group_tone` | How the item presents each of its population groups. | 51.9% (1,454) | 29 |
-| `indicators` | Reported indicators with their reported direction. | 24.8% (695) | 41 |
-| `reports_statistics` | Whether the item reports figures of an official statistic, a register, a census or a survey. | 100.0% (2,800) | 2 |
-| `institutions` | Institutions and organizations that act, decide, publish or comment. | 47.6% (1,334) | 31 |
-| `countries` | Countries the item is mainly about (ISO 3166-1 alpha-2), for migration also the countries of origin. | 76.0% (2,128) | 99 |
-| `states_concerned` | German states the item is mainly about. | 48.7% (1,364) | 16 |
-| `event_types` | Types of events reported. | 54.3% (1,520) | 22 |
-| `event_status` | Stage of the main event. | 100.0% (2,800) | 4 |
-| `overall_tone` | Overall tone of the item. | 100.0% (2,800) | 4 |
-| `mentions_demographic_change` | Whether the item refers to demographic change (ageing, shrinking or growing population, low birth rates). | 100.0% (2,800) | 2 |
-| `mentions_inequality` | Whether the item refers to social inequality or a social divide. | 100.0% (2,800) | 2 |
-| `policy_level` | Main level of policy addressed. | 100.0% (2,800) | 6 |
-| `government_involved` | Whether a government or its members act or are addressed. | 100.0% (2,800) | 2 |
-| `frame` | Dominant news frame (Semetko and Valkenburg). | 100.0% (2,800) | 6 |
-| `upcoming_events` | Future events with event_type and date (YYYY-MM-DD). | 3.7% (104) | 75 |
-| `communication_type` | Purpose of a press release; 'Not applicable' for news. | 100.0% (2,800) | 10 |
+| `record_id` | Stable id of the item. Together with revision it identifies a record. | 100.0% (3,200) | 3,200 |
+| `revision` | 0 for the first observation; incremented each time the source changes the item. | 100.0% (3,200) | 1 |
+| `dataset` | Name of the dataset. | 100.0% (3,200) | 1 |
+| `schema_version` | Version of the record schema. | 100.0% (3,200) | 1 |
+| `observed_at` | UTC time at which the pipeline observed this version of the item. Filtering observed_at <= t gives the state of knowledge at time t. | 100.0% (3,200) | 269 |
+| `source_id` | Id of the source (API, configuration file, outlet or press source). | 100.0% (3,200) | 74 |
+| `source_url` | URL of the item or of the API resource it was read from. | 100.0% (3,200) | 3,200 |
+| `license` | License or terms of the source. | 100.0% (3,200) | 1 |
+| `backfilled` | True if the item is older than the start of collection for its dataset, so that observed_at does not reflect when it became public. | 100.0% (3,200) | 1 |
+| `item_dataset` | Dataset of the annotated item. | 100.0% (3,200) | 2 |
+| `item_id` | record_id of the annotated item. | 100.0% (3,200) | 3,200 |
+| `model` | Gemini model that produced the labels. | 100.0% (3,200) | 2 |
+| `extraction_hash` | Hash of the prompt, response schema and model settings. Labels with the same hash were produced under the same conditions. | 100.0% (3,200) | 4 |
+| `content_basis` | Text the model saw: title only, title and teaser, or lead text. | 100.0% (3,200) | 3 |
+| `is_sociodemographic` | Whether the item is about the population, its structure or its living conditions. | 100.0% (3,200) | 2 |
+| `topic` | Main topic. | 100.0% (3,200) | 21 |
+| `topics_secondary` | Further topics, at most two. | 36.3% (1,161) | 21 |
+| `issue_detail` | Specific issue in a few words. | 66.7% (2,134) | 1,886 |
+| `article_type` | Form of the item. | 100.0% (3,200) | 8 |
+| `population_groups` | Groups of the population the item is mainly about. | 53.0% (1,697) | 29 |
+| `group_tone` | How the item presents each of its population groups. | 53.0% (1,697) | 29 |
+| `indicators` | Reported indicators with their reported direction. | 24.9% (797) | 41 |
+| `reports_statistics` | Whether the item reports figures of an official statistic, a register, a census or a survey. | 100.0% (3,200) | 2 |
+| `institutions` | Institutions and organizations that act, decide, publish or comment. | 48.5% (1,551) | 31 |
+| `countries` | Countries the item is mainly about (ISO 3166-1 alpha-2), for migration also the countries of origin. | 77.6% (2,483) | 105 |
+| `states_concerned` | German states the item is mainly about. | 49.1% (1,571) | 16 |
+| `event_types` | Types of events reported. | 54.6% (1,747) | 22 |
+| `event_status` | Stage of the main event. | 100.0% (3,200) | 4 |
+| `overall_tone` | Overall tone of the item. | 100.0% (3,200) | 4 |
+| `mentions_demographic_change` | Whether the item refers to demographic change (ageing, shrinking or growing population, low birth rates). | 100.0% (3,200) | 2 |
+| `mentions_inequality` | Whether the item refers to social inequality or a social divide. | 100.0% (3,200) | 2 |
+| `policy_level` | Main level of policy addressed. | 100.0% (3,200) | 6 |
+| `government_involved` | Whether a government or its members act or are addressed. | 100.0% (3,200) | 2 |
+| `frame` | Dominant news frame (Semetko and Valkenburg). | 100.0% (3,200) | 6 |
+| `upcoming_events` | Future events with event_type and date (YYYY-MM-DD). | 3.8% (122) | 82 |
+| `communication_type` | Purpose of a press release; 'Not applicable' for news. | 100.0% (3,200) | 10 |
 
 </details>
 
